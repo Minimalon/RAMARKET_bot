@@ -1,6 +1,6 @@
 import re
 from aiogram.types import CallbackQuery
-from aiogram.fsm.context import FSMContext
+from core.utils.callbackdata import Shop
 from loguru import logger
 from core.oneC import utils
 from core.keyboards import inline, reply
@@ -43,6 +43,28 @@ async def choise_currency_price(call: CallbackQuery):
                 current_price = client["ВалютаКурс"]
             await query_db.update_order(chat_id=call.message.chat.id, currencyPrice=current_price,
                                         currency=client['Валюта'])
+            text = f'Фактический курс: <code>{client["ВалютаКурс"]}</code>'
+            await call.message.edit_text(text, reply_markup=inline.getKeyboard_selectPriceCurrency(), parse_mode='HTML')
+            await call.answer()
+        else:
+            await not_reg(call)
+    except Exception as ex:
+        logger.exception(ex)
+
+
+async def choise_currency_price_Shop(call: CallbackQuery, callback_data: Shop):
+    try:
+        client_DB = await query_db.get_client_info(chat_id=call.message.chat.id)
+        if not client_DB:
+            await not_reg(call)
+        client = await oneC.get_client_info(client_DB.phone_number)
+        if client:
+            if re.findall(',', client["ВалютаКурс"]):
+                current_price = client["ВалютаКурс"].replace(",", '.')
+            else:
+                current_price = client["ВалютаКурс"]
+            await query_db.update_order(chat_id=call.message.chat.id, currencyPrice=current_price,
+                                        seller_id=callback_data.id)
             text = f'Фактический курс: <code>{client["ВалютаКурс"]}</code>'
             await call.message.edit_text(text, reply_markup=inline.getKeyboard_selectPriceCurrency(), parse_mode='HTML')
             await call.answer()

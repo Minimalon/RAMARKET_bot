@@ -1,3 +1,6 @@
+#!/usr/bin/env python3.10
+# -*- coding: utf-8 -*-
+
 import os
 from core.handlers.basic import get_start, check_registration
 from core.handlers.callback import *
@@ -57,7 +60,7 @@ async def start():
 
     # STATES CHOISE SHOP
     dp.callback_query.register(choiseShop.check_shops, F.data == 'startOrder')
-    dp.callback_query.register(choiseShop.choise_currency_price, Shop.filter())
+    dp.callback_query.register(choiseShop.choise_currency_price_Shop, Shop.filter())
 
     # ERRORS handlers
     # dp.errors.register(error_notFound_products_and_categories)
