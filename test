@@ -1,8 +1,0 @@
-[18/Mar/2023 14:52:22] INFO [aiogram.dispatcher.start_polling:493] Start polling
-[18/Mar/2023 14:52:22] INFO [aiogram.dispatcher._polling:329] Run polling for bot @RAMARKET_TEST_bot id=6223340464 - 'RAMA_TEST_BOT'
-[18/Mar/2023 14:52:32] INFO [aiogram.dispatcher._polling:345] Polling stopped for bot @RAMARKET_TEST_bot id=6223340464 - 'RAMA_TEST_BOT'
-[18/Mar/2023 14:52:32] INFO [aiogram.dispatcher.start_polling:520] Polling stopped
-[18/Mar/2023 14:52:43] INFO [aiogram.dispatcher.start_polling:493] Start polling
-[18/Mar/2023 14:52:43] INFO [aiogram.dispatcher._polling:329] Run polling for bot @RAMARKET_TEST_bot id=6223340464 - 'RAMA_TEST_BOT'
-[18/Mar/2023 14:52:45] INFO [aiogram.dispatcher._polling:345] Polling stopped for bot @RAMARKET_TEST_bot id=6223340464 - 'RAMA_TEST_BOT'
-[18/Mar/2023 14:52:45] INFO [aiogram.dispatcher.start_polling:520] Polling stopped
