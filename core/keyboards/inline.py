@@ -30,7 +30,6 @@ def getKeyboard_selectShop(shops):
     return keyboard.as_markup()
 
 
-
 def getKeyboard_selectPriceCurrency():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text='Продолжить', callback_data="currencyContinue")
@@ -116,10 +115,26 @@ def getKeyboard_product_info():
 
 def getKeyboard_quantity_product():
     keyboard = InlineKeyboardBuilder()
-    keyboard.button(text="1", callback_data=QuantityProduct(quantity=1))
-    keyboard.button(text="2", callback_data=QuantityProduct(quantity=2))
-    keyboard.button(text="3", callback_data=QuantityProduct(quantity=3))
-    keyboard.adjust(3)
+    keyboard.button(text="1", callback_data='None')
+    keyboard.button(text="+", callback_data=QuantityUpdate(quantity=2))
+    keyboard.button(text="Продолжить", callback_data=QuantityProduct(quantity=1))
+    keyboard.adjust(2, 1)
+    return keyboard.as_markup()
+
+
+def getKeyboard_quantity_update(quantity):
+    keyboard = InlineKeyboardBuilder()
+    if quantity == 1:
+        keyboard.button(text=f"{quantity}", callback_data='None')
+        keyboard.button(text="+", callback_data=QuantityUpdate(quantity=quantity + 1))
+        keyboard.button(text="Продолжить", callback_data=QuantityProduct(quantity=quantity))
+        keyboard.adjust(2, 1)
+    elif quantity > 1:
+        keyboard.button(text="-", callback_data=QuantityUpdate(quantity=quantity - 1))
+        keyboard.button(text=f"{quantity}", callback_data='None')
+        keyboard.button(text="+", callback_data=QuantityUpdate(quantity=quantity + 1))
+        keyboard.button(text="Продолжить", callback_data=QuantityProduct(quantity=quantity))
+        keyboard.adjust(3, 1)
     return keyboard.as_markup()
 
 

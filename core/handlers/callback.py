@@ -111,6 +111,14 @@ async def select_quantity_product(call: CallbackQuery, callback_data: Product):
     await call.answer()
 
 
+async def update_quantity_product(call: CallbackQuery, callback_data: QuantityUpdate):
+    quantity = callback_data.quantity
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, quantity=quantity)
+    log.info(f"Поменяли количество")
+    await call.message.edit_reply_markup(reply_markup=getKeyboard_quantity_update(quantity))
+    await call.answer()
+
+
 async def create_order(call: CallbackQuery, bot: Bot):
     order = await query_db.get_order_info(chat_id=call.message.chat.id)
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)

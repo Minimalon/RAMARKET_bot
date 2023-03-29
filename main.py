@@ -39,6 +39,7 @@ async def start():
     dp.callback_query.register(select_prev_page_catalog, F.data == 'prevPage_catalog')
     dp.callback_query.register(show_childcategories, Category.filter())
     dp.callback_query.register(select_quantity_product, Product.filter())
+    dp.callback_query.register(update_quantity_product, QuantityUpdate.filter())
     dp.callback_query.register(createOrder.get_price, QuantityProduct.filter())
 
     # dp.callback_query.register(createOrder.get_client_name_CALLBACK, F.data == 'currentPrice')

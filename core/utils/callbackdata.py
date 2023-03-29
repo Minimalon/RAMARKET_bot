@@ -27,3 +27,8 @@ class Product(CallbackData, prefix='product'):
 
 class QuantityProduct(CallbackData, prefix='quantityProduct'):
     quantity: int
+
+
+class QuantityUpdate(CallbackData, prefix='quantityInc'):
+    quantity: int
+
