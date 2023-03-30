@@ -99,7 +99,7 @@ def create_excel(**kwargs):
         path_file = os.path.join(config.dir_path, 'files', f"{kwargs['chat_id']}.xlsx")
         if orders is None:
             return False
-        query = text(f"SELECT * FROM insales.historyorders where chat_id = {kwargs['chat_id']}")
+        query = text(f"SELECT * FROM {config.database}.{HistoryOrders.__table__} where chat_id = {kwargs['chat_id']}")
         df = pd.read_sql(query, engine.connect())
         df = df.drop(
             columns=['chat_id', 'first_name', 'seller_id', 'client_mail', 'order_id', 'shop_id', 'paymentGateway',
