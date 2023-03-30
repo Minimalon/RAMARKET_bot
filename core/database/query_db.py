@@ -96,6 +96,8 @@ async def get_client_info(**kwargs):
 def create_excel(**kwargs):
     with Session() as session:
         orders = session.query(HistoryOrders).filter(HistoryOrders.chat_id == str(kwargs["chat_id"])).first()
+        if not os.path.exists(os.path.join(config.dir_path, 'files')):
+            os.makedirs(os.path.join(config.dir_path, 'files'))
         path_file = os.path.join(config.dir_path, 'files', f"{kwargs['chat_id']}.xlsx")
         if orders is None:
             return False
