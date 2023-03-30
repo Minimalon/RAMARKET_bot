@@ -1,8 +1,9 @@
-import re
+import pandas as pd
 from aiogram import Bot
-from aiogram.types import CallbackQuery, InputMediaPhoto
+from aiogram.types import CallbackQuery, InputMediaPhoto, FSInputFile
 from core.keyboards.inline import *
 from core.keyboards.reply import getKeyboard_registration
+from core.utils import texts
 from core.utils.callbackdata import *
 from core.database.query_db import *
 from loguru import logger
@@ -26,10 +27,22 @@ async def menu(call: CallbackQuery):
         await not_reg(call)
     client_info = await oneC.get_client_info(client_db.phone_number)
     if client_info:
-        text = (f'<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
-                f'<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
-                f'<u><b>История заказов</b></u> - Список всех раннее оформленных заказов')
-        await call.message.edit_text(text, reply_markup=getKeyboard_start(), parse_mode='HTML')
+
+        await call.message.edit_text(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+    else:
+        await not_reg(call)
+
+
+async def menu_not_edit_text(call: CallbackQuery):
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    log.info("Меню")
+    client_db = await query_db.get_client_info(chat_id=call.message.chat.id)
+    if not client_db:
+        await not_reg(call)
+    client_info = await oneC.get_client_info(client_db.phone_number)
+    if client_info:
+
+        await call.message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     else:
         await not_reg(call)
 
@@ -43,6 +56,17 @@ async def profile(call: CallbackQuery):
             f"<b>Валюта:</b> <code>{client_by_oneC['Валюта']}</code>\n"
             f"<b>Курс валюты:</b> <code>{client_by_oneC['ВалютаКурс']}</code>")
     await call.message.edit_text(text, reply_markup=getKeyboard_profile(), parse_mode='HTML')
+
+
+async def history_orders(call: CallbackQuery, bot: Bot):
+    path_file = query_db.create_excel(chat_id=call.message.chat.id)
+    if not path_file:
+        await bot.send_message(call.message.chat.id, 'Список заказов пуст')
+        await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+    document = FSInputFile(path_file)
+    await bot.send_document(call.message.chat.id, document=document, caption="История заказов")
+    await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+    os.remove(path_file)
 
 
 async def selectMainPaymentGateway(call: CallbackQuery):
@@ -147,9 +171,6 @@ async def create_order(call: CallbackQuery, bot: Bot):
                                   f"Сервер недоступен, его код ответа '{response.status}'")
         log.info(f"Сервер недоступен, его код ответа '{response.status}'")
 
-    text = (f'<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
-            f'<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
-            f'<u><b>История заказов</b></u> - Список всех раннее оформленных заказов')
-    await bot.send_message(call.message.chat.id, text, reply_markup=getKeyboard_start(), parse_mode='HTML')
+    await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
 # await call.message.delete()
 # await menu(call)

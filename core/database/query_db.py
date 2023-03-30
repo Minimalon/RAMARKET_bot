@@ -1,4 +1,10 @@
+import os.path
+
+import pandas as pd
 import asyncio
+import decimal
+import json
+from datetime import datetime
 
 from sqlalchemy import *
 from sqlalchemy.orm import *
@@ -85,3 +91,27 @@ async def get_client_info(**kwargs):
         if client is None:
             return False
         return client
+
+
+def create_excel(**kwargs):
+    with Session() as session:
+        orders = session.query(HistoryOrders).filter(HistoryOrders.chat_id == str(kwargs["chat_id"])).first()
+        path_file = os.path.join(config.dir_path, 'files', f"{kwargs['chat_id']}.xlsx")
+        if orders is None:
+            return False
+        query = text(f"SELECT * FROM insales.historyorders where chat_id = {kwargs['chat_id']}")
+        df = pd.read_sql(query, engine.connect())
+        df = df.drop(
+            columns=['chat_id', 'first_name', 'seller_id', 'client_mail', 'order_id', 'shop_id', 'paymentGateway',
+                     'product_id'])
+        writer = pd.ExcelWriter(path_file, engine="xlsxwriter")
+        df.to_excel(writer, sheet_name='orders', index=False, na_rep='NaN')
+
+        for column in df:
+            column_length = max(df[column].astype(str).map(len).max(), len(column))
+            col_idx = df.columns.get_loc(column)
+            writer.sheets['orders'].set_column(col_idx, col_idx, column_length)
+
+        writer.close()
+
+        return path_file

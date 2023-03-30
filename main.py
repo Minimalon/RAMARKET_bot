@@ -28,6 +28,7 @@ async def start():
     dp.callback_query.register(menu, F.data == 'menu')
     dp.callback_query.register(profile, F.data == 'profile')
     dp.callback_query.register(create_order, F.data == 'createOrder')
+    dp.callback_query.register(history_orders, F.data == 'historyOrders')
 
     dp.message.register(get_start, F.contact)
     dp.callback_query.register(selectMainPaymentGateway, F.data == 'currencyContinue')

@@ -1,6 +1,6 @@
 import re
 from logging import info
-
+from core.utils import texts
 from aiogram import Bot
 from aiogram.types import Message, ReplyKeyboardRemove
 from loguru import logger
@@ -23,10 +23,7 @@ async def get_start(message: Message, bot: Bot):
         await query_db.update_client_info(chat_id=message.chat.id, phone_number=client_phone,
                                           first_name=message.contact.first_name, last_name=message.contact.last_name,
                                           user_id=message.contact.user_id)
-        text = (f'<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
-                f'<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
-                f'<u><b>История заказов</b></u> - Список всех раннее оформленных заказов')
-        await message.answer(text, reply_markup=getKeyboard_start(), parse_mode='HTML')
+        await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     else:
         log.error("Нету в базе 1С")
         text = f'Ваш сотовый "{client_phone}" не зарегистрирован в системе\n' \
@@ -39,10 +36,8 @@ async def check_registration(message: Message):
     log.info("/start")
     client_info = await query_db.get_client_info(chat_id=message.chat.id)
     if client_info:
-        text = (f'<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
-                f'<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
-                f'<u><b>История заказов</b></u> - Список всех раннее оформленных заказов')
-        await message.answer(text, reply_markup=getKeyboard_start(), parse_mode='HTML')
+
+        await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     else:
         text = f'Вы зашли впервые, нажмите кнопку Регистрация'
         await message.answer(text, reply_markup=getKeyboard_registration(), parse_mode='HTML')

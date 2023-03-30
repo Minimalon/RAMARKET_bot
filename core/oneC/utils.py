@@ -55,6 +55,12 @@ async def get_shops(phone):
     return await api.get_client_info(phone)
 
 
+async def get_shop_name(phone, shop_id):
+    for shop in (await api.get_client_info(phone))['Магазины']:
+        if shop['idМагазин'] == shop_id:
+            return shop['Магазин']
+
+
 async def create_order(**kwargs):
     order = {
         "TypeR": "Doc",
@@ -73,13 +79,21 @@ async def create_order(**kwargs):
     logger.info(order)
     response, text = await api.post_create_order(order)
     logger.info(f"Ответ сервера '{response.status}', order_id: '{text}'")
+
+    client = await query_db.get_client_info(chat_id=kwargs['chat_id'])
+    shop_name = await get_shop_name(client.phone_number, kwargs['shop'])
+    payment_name = (await get_payment_name(kwargs['paymentGateway']))['Наименование']
+    product_name = (await get_tovar_by_ID(kwargs['product_id']))['Наименование']
+    sum = str(kwargs['price'] * kwargs['quantity'])
     await query_db.create_historyOrder(order_id=text, chat_id=kwargs['chat_id'],
                                        first_name=kwargs['first_name'],
-                                       paymentGateway=kwargs['paymentGateway'], product_id=kwargs['product_id'],
-                                       price=kwargs['price'], quantity=kwargs['quantity'], currency=kwargs['currency'],
+                                       paymentGateway=kwargs['paymentGateway'], payment_name=payment_name,
+                                       product_id=kwargs['product_id'], product_name=product_name,
+                                       price=kwargs['price'], quantity=kwargs['quantity'], sum=sum,
+                                       currency=kwargs['currency'],
                                        currencyPrice=kwargs['currencyPrice'], client_name=kwargs['client_name'],
                                        client_phone=kwargs['client_phone'], client_mail=kwargs['client_mail'],
-                                       shop=kwargs['shop'], seller_id=kwargs['seller_id'])
+                                       shop_id=kwargs['shop'], shop_name=shop_name, seller_id=kwargs['seller_id'])
 
     return response, text
 
