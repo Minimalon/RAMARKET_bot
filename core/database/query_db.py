@@ -112,7 +112,7 @@ def create_excel(**kwargs):
         for column in df:
             column_length = max(df[column].astype(str).map(len).max(), len(column))
             col_idx = df.columns.get_loc(column)
-            writer.sheets['orders'].set_column(col_idx, col_idx, column_length)
+            writer.sheets['orders'].set_column(col_idx, col_idx, column_length + 3)
 
         writer.close()
 
