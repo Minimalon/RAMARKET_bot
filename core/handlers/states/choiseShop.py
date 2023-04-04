@@ -1,4 +1,5 @@
 import re
+from core.utils import texts
 from aiogram.types import CallbackQuery
 from core.utils.callbackdata import Shop
 from loguru import logger
@@ -26,6 +27,8 @@ async def check_shops(call: CallbackQuery):
     if len(shop['Магазины']) > 1:
         await query_db.update_order(chat_id=call.message.chat.id, seller_id=shop['id'])
         await call.message.edit_text("Выберите магазин", reply_markup=inline.getKeyboard_selectShop(shop['Магазины']))
+    elif len(shop['Магазины']) == 0:
+        await call.message.answer(texts.zero_shops)
     else:
         await query_db.update_order(chat_id=call.message.chat.id, shop=str(shop['Магазины'][0]['idМагазин']),
                                     seller_id=shop['id'])

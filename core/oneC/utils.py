@@ -98,5 +98,5 @@ async def create_order(**kwargs):
 
 
 if __name__ == '__main__':
-    print(requests.post('http://pr-egais.ddns.net:24142/RAMA/hs/GetUP', data='79934055804').text)
+    print(requests.post('http://pr-egais.ddns.net:24142/RAMA/hs/GetUP', data='905539447374').text)
     # print(requests.post('http://pr-egais.ddns.net:24142/RAMA/hs/GetUP', data='905539447374').json())
