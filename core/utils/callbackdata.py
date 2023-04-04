@@ -4,7 +4,7 @@ from aiogram.filters.callback_data import CallbackData
 
 
 class Shop(CallbackData, prefix='shop'):
-    id: str
+    shop: str
 
 
 class ChildPaymentGateway(CallbackData, prefix='childPaymentGateway'):

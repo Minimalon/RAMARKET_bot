@@ -1,6 +1,6 @@
-import pandas as pd
+import qrcode
 from aiogram import Bot
-from aiogram.types import CallbackQuery, InputMediaPhoto, FSInputFile
+from aiogram.types import CallbackQuery, FSInputFile
 from core.keyboards.inline import *
 from core.keyboards.reply import getKeyboard_registration
 from core.utils import texts
@@ -144,33 +144,43 @@ async def update_quantity_product(call: CallbackQuery, callback_data: QuantityUp
 
 
 async def create_order(call: CallbackQuery, bot: Bot):
-    order = await query_db.get_order_info(chat_id=call.message.chat.id)
-    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
-    client_db = await query_db.get_client_info(chat_id=call.message.chat.id)
+    chat_id = call.message.chat.id
+    order = await query_db.get_order_info(chat_id=chat_id)
+    log = logger.bind(name=call.message.chat.first_name, chat_id=chat_id)
+    client_db = await query_db.get_client_info(chat_id=chat_id)
     if not client_db:
         await not_reg(call)
     client_info = await oneC.get_client_info(client_db.phone_number)
     if not client_info:
         await not_reg(call)
-    response, response_text = await utils.create_order(chat_id=order.chat_id, first_name=order.first_name,
-                                                       paymentGateway=order.paymentGateway, product_id=order.product_id,
-                                                       price=order.price, quantity=order.quantity,
-                                                       currency=order.currency,
-                                                       currencyPrice=order.currencyPrice, client_name=order.client_name,
-                                                       client_phone=order.client_phone, client_mail=order.client_mail,
-                                                       shop=order.shop,
-                                                       seller_id=order.seller_id)
-    await call.message.delete()
+    response, answer = await utils.create_order(chat_id=order.chat_id, first_name=order.first_name,
+                                                paymentGateway=order.paymentGateway, product_id=order.product_id,
+                                                price=order.price, quantity=order.quantity,
+                                                currency=order.currency,
+                                                currencyPrice=order.currencyPrice, client_name=order.client_name,
+                                                client_phone=order.client_phone, client_mail=order.client_mail,
+                                                shop=order.shop,
+                                                seller_id=order.seller_id)
     if response.ok:
-        await call.message.answer(f"Заказ под номером '<u><b>{response_text}</b></u>' успешно создан",
-                                  parse_mode='HTML')
-        log.info(f"Заказ под номером '{response_text}'успешно создан")
-
+        order_info = (await query_db.get_order_info(chat_id=chat_id))
+        s_name, f_name, patronymic = order_info.client_name.split()
+        qr_path = 'files/qr.png'
+        shop_name = await utils.get_shop_name(client_db.phone_number, order_info.shop)
+        img = qrcode.make(f'ST00012|Name={shop_name}'
+                          f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
+                          f'|BIC={answer["BIC"]}|CorrespAcc={answer["KBS"]}|PayeeINN={answer["ORGINN"]}'
+                          f'|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
+                          f'|Purpose=Оплата заказа №{answer["Nomer"]} от {answer["Date"]}'
+                          f'|Sum={str(round((Decimal(order_info.currencyPrice) * (Decimal(order_info.quantity) * Decimal(order_info.price))) * 100))}'
+                          )
+        log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
+        img.save(qr_path)
+        photo = FSInputFile(qr_path)
+        await call.message.delete()
+        await bot.send_photo(chat_id, photo, caption=await texts.qr(answer, chat_id), parse_mode='HTML')
     else:
         await call.message.answer("➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n"
                                   f"Сервер недоступен, его код ответа '{response.status}'")
         log.info(f"Сервер недоступен, его код ответа '{response.status}'")
 
-    await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
-# await call.message.delete()
-# await menu(call)
+    await bot.send_message(chat_id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')

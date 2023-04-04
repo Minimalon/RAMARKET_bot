@@ -24,6 +24,7 @@ async def check_shops(call: CallbackQuery):
     shop = await utils.get_shops(client.phone_number)
     log.info(f'Количество магазинов "{len(shop["Магазины"])}"')
     if len(shop['Магазины']) > 1:
+        await query_db.update_order(chat_id=call.message.chat.id, seller_id=shop['id'])
         await call.message.edit_text("Выберите магазин", reply_markup=inline.getKeyboard_selectShop(shop['Магазины']))
     else:
         await query_db.update_order(chat_id=call.message.chat.id, shop=str(shop['Магазины'][0]['idМагазин']),
@@ -66,7 +67,7 @@ async def choise_currency_price_Shop(call: CallbackQuery, callback_data: Shop):
             else:
                 current_price = client["ВалютаКурс"]
             await query_db.update_order(chat_id=call.message.chat.id, currencyPrice=current_price,
-                                        seller_id=callback_data.id)
+                                        shop=callback_data.shop)
             text = f'Фактический курс: <code>{client["ВалютаКурс"]}</code>'
             await call.message.edit_text(text, reply_markup=inline.getKeyboard_selectPriceCurrency(), parse_mode='HTML')
             await call.answer()

@@ -1,4 +1,3 @@
-import aiohttp
 from core.oneC.api import Api
 import requests
 from loguru import logger
@@ -77,15 +76,15 @@ async def create_order(**kwargs):
         ]
     }
     logger.info(order)
-    response, text = await api.post_create_order(order)
-    logger.info(f"Ответ сервера '{response.status}', order_id: '{text}'")
+    response, answer = await api.post_create_order(order)
+    logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
 
     client = await query_db.get_client_info(chat_id=kwargs['chat_id'])
     shop_name = await get_shop_name(client.phone_number, kwargs['shop'])
     payment_name = (await get_payment_name(kwargs['paymentGateway']))['Наименование']
     product_name = (await get_tovar_by_ID(kwargs['product_id']))['Наименование']
     sum = str(kwargs['price'] * kwargs['quantity'])
-    await query_db.create_historyOrder(order_id=text, chat_id=kwargs['chat_id'],
+    await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=kwargs['chat_id'],
                                        first_name=kwargs['first_name'],
                                        paymentGateway=kwargs['paymentGateway'], payment_name=payment_name,
                                        product_id=kwargs['product_id'], product_name=product_name,
@@ -95,7 +94,7 @@ async def create_order(**kwargs):
                                        client_phone=kwargs['client_phone'], client_mail=kwargs['client_mail'],
                                        shop_id=kwargs['shop'], shop_name=shop_name, seller_id=kwargs['seller_id'])
 
-    return response, text
+    return response, answer
 
 
 if __name__ == '__main__':

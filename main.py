@@ -1,15 +1,18 @@
 #!/usr/bin/env python3.10
 # -*- coding: utf-8 -*-
 
+import asyncio
 import os
 from core.handlers.basic import get_start, check_registration
 from core.handlers.callback import *
 from core.utils.callbackdata import *
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
+from aiogram.types import Message
 from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
 from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
 from core.utils.commands import get_commands
+
 
 
 @logger.catch()

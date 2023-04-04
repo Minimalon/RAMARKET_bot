@@ -1,5 +1,5 @@
 import sqlalchemy.orm
-from sqlalchemy import create_engine, Integer, String, Column, Float, DateTime, Boolean, DECIMAL
+from sqlalchemy import create_engine, Integer, String, Column, DateTime, Boolean, DECIMAL
 import config
 from sqlalchemy.sql import func
 

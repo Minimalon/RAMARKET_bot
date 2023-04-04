@@ -1,4 +1,3 @@
-from core.utils.callbackdata import QuantityProduct
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from core.utils.states import StateEnterArticle

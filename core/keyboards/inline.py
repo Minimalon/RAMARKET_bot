@@ -26,7 +26,7 @@ def getKeyboard_profile():
 def getKeyboard_selectShop(shops):
     keyboard = InlineKeyboardBuilder()
     for shop in shops:
-        keyboard.button(text=shop['Магазин'], callback_data=Shop(id=str(shop['idМагазин'])))
+        keyboard.button(text=shop['Магазин'], callback_data=Shop(shop=str(shop['idМагазин'])))
     return keyboard.as_markup()
 
 

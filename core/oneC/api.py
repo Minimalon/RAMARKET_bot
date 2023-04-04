@@ -37,7 +37,7 @@ class Api:
     async def post_create_order(self, data):
         async with aiohttp.ClientSession() as session:
             async with session.post(f"{self.adress}/CreateDoc", data=json.dumps(data)) as response:
-                return response, await response.text()
+                return response, await response.json(content_type=None)
 
 
 if __name__ == '__main__':
