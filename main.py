@@ -46,6 +46,7 @@ async def start():
     dp.callback_query.register(update_quantity_product, QuantityUpdate.filter())
     dp.callback_query.register(createOrder.get_price, QuantityProduct.filter())
 
+
     # dp.callback_query.register(createOrder.get_client_name_CALLBACK, F.data == 'currentPrice')
     # dp.callback_query.register(createOrder.get_price, F.data == 'newPrice')
 
