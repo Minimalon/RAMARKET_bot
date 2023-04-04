@@ -75,7 +75,7 @@ async def selectMainPaymentGateway(call: CallbackQuery):
                       currencyPrice=order.currencyPrice)
     log.info(f"Переход на способ оплаты")
     await update_order(chat_id=call.message.chat.id, first_name=call.message.chat.first_name)
-    await call.message.edit_text("Выберите способ оплаты", reply_markup=await getKeyboard_select_Main_PaymentGateway())
+    await call.message.edit_text(texts.select_payment_type, reply_markup=await getKeyboard_select_Main_PaymentGateway())
     await call.answer()
 
 

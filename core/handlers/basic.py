@@ -16,7 +16,7 @@ async def get_start(message: Message, bot: Bot):
     client_phone = ''.join(re.findall(r'[0-9]*', message.contact.phone_number))
     log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_phone=client_phone)
     client_info = await oneC.get_client_info(client_phone)
-    log.info("/start")
+    log.info("Регистрация")
     if client_info:
         log.info("Есть в базе 1С")
         await bot.send_message(message.chat.id, 'Регистрация успешна пройдена', reply_markup=ReplyKeyboardRemove())
@@ -36,8 +36,8 @@ async def check_registration(message: Message):
     log.info("/start")
     client_info = await query_db.get_client_info(chat_id=message.chat.id)
     if client_info:
-
         await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     else:
+        log.error("Нету в базе 1С")
         text = f'Вы зашли впервые, нажмите кнопку Регистрация'
         await message.answer(text, reply_markup=getKeyboard_registration(), parse_mode='HTML')

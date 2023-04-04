@@ -2,8 +2,10 @@ import re
 from decimal import Decimal
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
+
+from core.utils import texts
 from core.utils.states import StateCreateOrder, StateCurrency
-from core.keyboards.inline import getKeyboard_ProductStart
+from core.keyboards.inline import getKeyboard_ProductStart, getKeyboard_select_Main_PaymentGateway
 import core.database.query_db as query_db
 from loguru import logger
 
@@ -37,7 +39,7 @@ async def check_CurrencyPrice(message: Message, state: FSMContext):
         log.info("Ввели цену")
         log.info(Decimal(currencyPrice))
         await query_db.update_order(chat_id=message.chat.id, currencyPrice=Decimal(currencyPrice))
-        await message.answer("Выберите способ выбора товара", reply_markup=getKeyboard_ProductStart(),
+        await message.answer(texts.select_payment_type, reply_markup=await getKeyboard_select_Main_PaymentGateway(),
                              parse_mode='HTML')
         await state.clear()
     except Exception as ex:

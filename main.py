@@ -36,6 +36,7 @@ async def start():
     dp.message.register(get_start, F.contact)
     dp.callback_query.register(selectMainPaymentGateway, F.data == 'currencyContinue')
     dp.callback_query.register(CurrencyValue.get_CurrencyPrice, F.data == 'currencyNewValue')
+    dp.callback_query.register(CurrencyValue.get_CurrencyPrice, F.data == 'currencyNewValue')
     dp.callback_query.register(selectChildPaymentGateway, ChildPaymentGateway.filter())
     dp.callback_query.register(select_input_method_Product, PaymentGateway.filter())
     dp.callback_query.register(show_catalog, F.data == 'catalog')
