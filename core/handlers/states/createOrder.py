@@ -19,9 +19,7 @@ async def error_message(message: Message, exception, state: FSMContext):
 
 async def get_price(call: CallbackQuery, state: FSMContext, callback_data: QuantityProduct):
     await query_db.update_order(chat_id=call.message.chat.id, quantity=callback_data.quantity)
-    await call.message.delete()
-    await call.message.answer("Введите цену товара")
-    await call.answer()
+    await call.message.edit_text("Введите цену товара")
     await state.set_state(StateCreateOrder.GET_PRICE)
 
 
