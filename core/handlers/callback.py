@@ -164,7 +164,7 @@ async def create_order(call: CallbackQuery, bot: Bot):
     if response.ok:
         order_info = (await query_db.get_order_info(chat_id=chat_id))
         s_name, f_name, patronymic = order_info.client_name.split()
-        qr_path = 'files/qr.png'
+        qr_path = os.path.join(config.dir_path, 'files', 'qr.png')
         shop_name = await utils.get_shop_name(client_db.phone_number, order_info.shop)
         img = qrcode.make(f'ST00012|Name={shop_name}'
                           f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
