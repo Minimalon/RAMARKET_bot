@@ -1,5 +1,7 @@
 from decimal import Decimal
 import re
+
+from core.utils import texts
 from core.utils.callbackdata import QuantityProduct
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
@@ -66,7 +68,7 @@ async def check_client_name(message: Message, state: FSMContext):
             await state.set_state(StateCreateOrder.GET_CLIENT_PHONE)
         else:
             text = f"➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n" \
-                   f"ФИО состоит из 3 слов, а ваще состоит из {len(name.split())} слов\n" \
+                   f"ФИО состоит из 3 слов, а ваше состоит из {len(name.split())} слов\n" \
                    f"<b>Попробуйте снова.</b>"
             await message.answer(text)
             logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_name=str(name)).info("Ввели ФИО")
@@ -80,16 +82,17 @@ async def check_client_phone(message: Message, state: FSMContext):
     client_phone = ''.join(re.findall(r'[0-9]*', message.text))
     log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_phone=str(client_phone))
     try:
+        if not client_phone.isdigit():
+            await message.answer(texts.error_needOnlyDigits, parse_mode='HTML')
+            return
+
         if re.findall('[0-9]{11}', client_phone):
             log.info("Ввели сотовый")
             await query_db.update_order(chat_id=message.chat.id, client_phone=client_phone)
             await create_order(message, state)
         else:
             log.error("Ввели сотовый")
-            text = ("Нужно ввести только цифры, номер должен состоят из 11 цифр\n"
-                    "Например: <code>79934055805</code>\n"
-                    "<b>Попробуйте снова.</b>")
-            await message.answer(text, parse_mode="HTML")
+            await message.answer(texts.error_needOnlyDigits, parse_mode="HTML")
             await state.set_state(StateCreateOrder.GET_CLIENT_PHONE)
     except Exception as ex:
         log.exception(ex)
