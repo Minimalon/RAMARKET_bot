@@ -97,7 +97,8 @@ def create_excel(**kwargs):
         path_file = os.path.join(config.dir_path, 'files', f"{kwargs['chat_id']}.xlsx")
         if orders is None:
             return False
-        query = text(f"SELECT * FROM {config.database}.{HistoryOrders.__table__} WHERE chat_id = {kwargs['chat_id']}")
+        query = text(f"SELECT * FROM {config.database}.{HistoryOrders.__table__} WHERE chat_id = {kwargs['chat_id']}"
+                     f" order by date DESC")
         df = pd.read_sql(query, engine.connect())
         df = df.drop(
             columns=['chat_id', 'first_name', 'seller_id', 'client_mail', 'order_id', 'shop_id', 'paymentGateway',
@@ -113,6 +114,7 @@ def create_excel(**kwargs):
         writer.close()
 
         return path_file
+
 
 if __name__ == '__main__':
     order = asyncio.run(get_order_info(chat_id=5263751490))
