@@ -158,7 +158,7 @@ async def create_order(call: CallbackQuery, bot: Bot):
     client_info = await oneC.get_client_info(client_db.phone_number)
     if not client_info:
         await not_reg(call)
-    response, answer = await utils.create_order(chat_id=order.chat_id, first_name=order.first_name,
+    response, answer = await utils.create_order(bot, chat_id=order.chat_id, first_name=order.first_name,
                                                 paymentGateway=order.paymentGateway, product_id=order.product_id,
                                                 price=order.price, quantity=order.quantity,
                                                 currency=order.currency,
