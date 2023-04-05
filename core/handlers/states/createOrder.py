@@ -77,22 +77,22 @@ async def check_client_name(message: Message, state: FSMContext):
 
 
 async def check_client_phone(message: Message, state: FSMContext):
+    client_phone = ''.join(re.findall(r'[0-9]*', message.text))
+    log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_phone=str(client_phone))
     try:
-        client_phone = ''.join(re.findall(r'[0-9]*', message.text))
-        logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_phone=str(client_phone))
         if re.findall('[0-9]{11}', client_phone):
-            logger.info("Ввели сотовый")
+            log.info("Ввели сотовый")
             await query_db.update_order(chat_id=message.chat.id, client_phone=client_phone)
             await create_order(message, state)
         else:
-            logger.error("Ввели сотовый")
+            log.error("Ввели сотовый")
             text = ("Нужно ввести только цифры, номер должен состоят из 11 цифр\n"
                     "Например: <code>79934055805</code>\n"
                     "<b>Попробуйте снова.</b>")
             await message.answer(text, parse_mode="HTML")
             await state.set_state(StateCreateOrder.GET_CLIENT_PHONE)
     except Exception as ex:
-        logger.exception(ex)
+        log.exception(ex)
         await error_message(message, ex, state)
 
 

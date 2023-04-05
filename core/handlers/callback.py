@@ -48,10 +48,12 @@ async def menu_not_edit_text(call: CallbackQuery):
 
 
 async def profile(call: CallbackQuery):
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    log.info(f"Личный кабинет")
     client_info = await query_db.get_client_info(chat_id=call.message.chat.id)
     client_by_oneC = await oneC.get_client_info(client_info.phone_number)
-    text = (f"➖➖➖➖➖➖➖➖➖➖➖\n"
-            f"ℹ️ <b>Информация о вас:</b>\n"
+    text = (f"ℹ️ <b>Информация о вас:</b>\n"
+            f"➖➖➖➖➖➖➖➖➖➖➖\n"
             f"<b>💳 ID:</b> <code>{call.message.chat.id}</code>\n"
             f"<b>Валюта:</b> <code>{client_by_oneC['Валюта']}</code>\n"
             f"<b>Курс валюты:</b> <code>{client_by_oneC['ВалютаКурс']}</code>")
@@ -63,8 +65,7 @@ async def history_orders(call: CallbackQuery, bot: Bot):
     if not path_file:
         await bot.send_message(call.message.chat.id, 'Список заказов пуст')
         await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
-    document = FSInputFile(path_file)
-    await bot.send_document(call.message.chat.id, document=document, caption="История заказов")
+    await bot.send_document(call.message.chat.id, document=FSInputFile(path_file), caption="История заказов")
     await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     os.remove(path_file)
 
@@ -89,38 +90,38 @@ async def selectChildPaymentGateway(call: CallbackQuery, callback_data: ChildPay
 
 
 async def select_input_method_Product(call: CallbackQuery, callback_data: PaymentGateway):
-    logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, payment=callback_data.id) \
-        .info(f"Выбрали тип оплаты")
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, payment=callback_data.id)
+    log.info(f"Выбрали тип оплаты")
     await update_order(chat_id=call.message.chat.id, paymentGateway=callback_data.id)
     await call.message.edit_text("Выберите способ выбора товара", reply_markup=getKeyboard_ProductStart())
     await call.answer()
 
 
 async def select_prev_page_catalog(call: CallbackQuery):
-    logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id) \
-        .info(f"Назад на способ выбора товара")
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    log.info(f"Назад на способ выбора товара")
     await call.message.edit_text("Выберите способ выбора товара", reply_markup=getKeyboard_ProductStart())
     await call.answer()
 
 
 async def show_catalog(call: CallbackQuery):
-    logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id) \
-        .info(f"Нажали кнопку 'Каталог'")
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    log.info(f"Нажали кнопку 'Каталог'")
     await call.message.edit_text("Cписок категорий товара", reply_markup=await getKeyboard_catalog())
-    # await call.message.text("Cписок категорий товара", reply_markup=await getKeyboard_catalog())
     await call.answer()
 
 
 async def show_childcategories(call: CallbackQuery, callback_data: Category):
-    logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, group_id=callback_data.id,
-                parent_if=callback_data.parent_id) \
-        .info(f"Выбрали категорию '{callback_data.id}'")
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, group_id=callback_data.id,
+                      parent_id=callback_data.parent_id)
+    log.info(f"Выбрали категорию '{callback_data.id}'")
     markup = await getKeyboard_products_or_categories(callback_data.id, callback_data.parent_id)
-    logger.info(markup.inline_keyboard[0][0].callback_data)
     if markup.inline_keyboard[0][0].callback_data.startswith('product'):
+        log.info('Выбирают товар')
         await call.message.edit_text("Выберите товар", reply_markup=markup)
         await call.answer()
     if markup.inline_keyboard[0][0].callback_data.startswith('category'):
+        log.info('Выбирают подкатегорию')
         await call.message.edit_text("Cписок подкатегорий", reply_markup=markup)
         await call.answer()
 
