@@ -61,6 +61,7 @@ class HistoryOrders(Base):
     price = Column(DECIMAL(15, 5))
     quantity = Column(Integer)
     sum = Column(DECIMAL(15, 5))
+    sum_rub = Column(DECIMAL(15, 5))
     currency = Column(String(10))
     currencyPrice = Column(DECIMAL(15, 5))
     client_name = Column(String(100))

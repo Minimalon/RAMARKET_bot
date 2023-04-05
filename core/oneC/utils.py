@@ -1,7 +1,9 @@
+from aiogram import Bot
 from core.oneC.api import Api
 import requests
 from loguru import logger
 from core.database import query_db
+from core.utils import texts
 
 api = Api()
 
@@ -60,41 +62,47 @@ async def get_shop_name(phone, shop_id):
             return shop['Магазин']
 
 
-async def create_order(**kwargs):
-    order = {
-        "TypeR": "Doc",
-        "Sklad": str(kwargs['shop']),
-        "SO": str(kwargs['paymentGateway']),
-        "Sotr": str(kwargs['seller_id']),
-        "Itemc": [
-            {
-                "Tov": str(kwargs['product_id']),
-                "Cost": str(kwargs['price']),
-                "Sum": str(kwargs['price'] * kwargs['quantity']),
-                "Kol": str(kwargs['quantity'])
-            },
-        ]
-    }
-    logger.info(order)
-    response, answer = await api.post_create_order(order)
-    logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
+async def create_order(bot: Bot, **kwargs):
+    try:
+        client = await query_db.get_client_info(chat_id=kwargs['chat_id'])
+        shop_name = await get_shop_name(client.phone_number, kwargs['shop'])
+        payment_name = (await get_payment_name(kwargs['paymentGateway']))['Наименование']
+        product_name = (await get_tovar_by_ID(kwargs['product_id']))['Наименование']
+        sum = str(kwargs['price'] * kwargs['quantity'])
 
-    client = await query_db.get_client_info(chat_id=kwargs['chat_id'])
-    shop_name = await get_shop_name(client.phone_number, kwargs['shop'])
-    payment_name = (await get_payment_name(kwargs['paymentGateway']))['Наименование']
-    product_name = (await get_tovar_by_ID(kwargs['product_id']))['Наименование']
-    sum = str(kwargs['price'] * kwargs['quantity'])
-    await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=kwargs['chat_id'],
-                                       first_name=kwargs['first_name'],
-                                       paymentGateway=kwargs['paymentGateway'], payment_name=payment_name,
-                                       product_id=kwargs['product_id'], product_name=product_name,
-                                       price=kwargs['price'], quantity=kwargs['quantity'], sum=sum,
-                                       currency=kwargs['currency'],
-                                       currencyPrice=kwargs['currencyPrice'], client_name=kwargs['client_name'],
-                                       client_phone=kwargs['client_phone'], client_mail=kwargs['client_mail'],
-                                       shop_id=kwargs['shop'], shop_name=shop_name, seller_id=kwargs['seller_id'])
+        order = {
+            "TypeR": "Doc",
+            "Sklad": str(kwargs['shop']),
+            "SO": str(kwargs['paymentGateway']),
+            "Sotr": str(kwargs['seller_id']),
+            "Itemc": [
+                {
+                    "Tov": str(kwargs['product_id']),
+                    "Cost": str(kwargs['price']),
+                    "Sum": str(kwargs['price'] * kwargs['quantity']),
+                    "Kol": str(kwargs['quantity'])
+                },
+            ]
+        }
+        logger.info(order)
+        response, answer = await api.post_create_order(order)
+        logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
+        await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=kwargs['chat_id'],
+                                           first_name=kwargs['first_name'],
+                                           paymentGateway=kwargs['paymentGateway'], payment_name=payment_name,
+                                           product_id=kwargs['product_id'], product_name=product_name,
+                                           price=kwargs['price'], quantity=kwargs['quantity'], sum=sum,
+                                           currency=kwargs['currency'],
+                                           currencyPrice=kwargs['currencyPrice'], client_name=kwargs['client_name'],
+                                           client_phone=kwargs['client_phone'], client_mail=kwargs['client_mail'],
+                                           shop_id=kwargs['shop'], shop_name=shop_name, seller_id=kwargs['seller_id'],
+                                           sum_rub=kwargs['sum_rub'])
+        return response, answer
+    except Exception as ex:
+        logger.exception(ex)
+        await bot.send_message(kwargs['chat_id'], f'{texts.error_head}{ex}')
 
-    return response, answer
+
 
 
 if __name__ == '__main__':

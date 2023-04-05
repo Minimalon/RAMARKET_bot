@@ -148,6 +148,11 @@ async def create_order(call: CallbackQuery, bot: Bot):
     order = await query_db.get_order_info(chat_id=chat_id)
     log = logger.bind(name=call.message.chat.first_name, chat_id=chat_id)
     client_db = await query_db.get_client_info(chat_id=chat_id)
+    s_name, f_name, patronymic = order.client_name.split()
+    qr_path = os.path.join(config.dir_path, 'files', 'qr.png')
+    shop_name = await utils.get_shop_name(client_db.phone_number, order.shop)
+    sum_rub = Decimal((order.currencyPrice * order.quantity) * order.price).quantize(Decimal('1.00'))
+
     if not client_db:
         await not_reg(call)
     client_info = await oneC.get_client_info(client_db.phone_number)
@@ -160,24 +165,19 @@ async def create_order(call: CallbackQuery, bot: Bot):
                                                 currencyPrice=order.currencyPrice, client_name=order.client_name,
                                                 client_phone=order.client_phone, client_mail=order.client_mail,
                                                 shop=order.shop,
-                                                seller_id=order.seller_id)
+                                                seller_id=order.seller_id, sum_rub=sum_rub)
     if response.ok:
-        order_info = (await query_db.get_order_info(chat_id=chat_id))
-        s_name, f_name, patronymic = order_info.client_name.split()
-        qr_path = os.path.join(config.dir_path, 'files', 'qr.png')
-        shop_name = await utils.get_shop_name(client_db.phone_number, order_info.shop)
         img = qrcode.make(f'ST00012|Name={shop_name}'
                           f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
                           f'|BIC={answer["BIC"]}|CorrespAcc={answer["KBS"]}|PayeeINN={answer["ORGINN"]}'
                           f'|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
                           f'|Purpose=Оплата заказа №{answer["Nomer"]} от {answer["Date"]}'
-                          f'|Sum={str(round((Decimal(order_info.currencyPrice) * (Decimal(order_info.quantity) * Decimal(order_info.price))) * 100))}'
-                          )
+                          f'|Sum={round(sum_rub * 100)}')
         log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
         img.save(qr_path)
-        photo = FSInputFile(qr_path)
+        text = await texts.qr(answer, chat_id, sum_rub)
         await call.message.delete()
-        await bot.send_photo(chat_id, photo, caption=await texts.qr(answer, chat_id), parse_mode='HTML')
+        await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, parse_mode='HTML')
     else:
         await call.message.answer("➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n"
                                   f"Сервер недоступен, его код ответа '{response.status}'")

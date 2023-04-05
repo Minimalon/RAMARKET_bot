@@ -100,13 +100,14 @@ async def create_order(message: Message, state: FSMContext):
     try:
         chat_id = message.chat.id
         order = await query_db.get_order_info(chat_id=chat_id)
-        price = str(order.price).replace('0', '')
+        price = Decimal(order.price).quantize(Decimal('1.00'))
         currency = await query_db.get_currency_name(chat_id=chat_id)
         product_name = (await utils.get_tovar_by_ID(order.product_id))["Наименование"]
         payment_name = (await utils.get_payment_name(order.paymentGateway))["Наименование"]
         seller_phone = (await query_db.get_client_info(chat_id=chat_id)).phone_number
         shop_names = (await utils.get_shops(seller_phone))['Магазины']
         shop_name = [shop['Магазин'] for shop in shop_names if shop['idМагазин'] == order.shop][0]
+        sum_rub = Decimal((price * order.quantity) * order.currencyPrice).quantize(Decimal('1.00'))
         text = (f'ℹ️ <b>Информация о заказе:</b>\n'
                 f'➖➖➖➖➖➖➖➖➖➖➖\n'
                 f'<b>Имя клиента</b>: <code>{order.client_name}</code>\n'
@@ -117,7 +118,7 @@ async def create_order(message: Message, state: FSMContext):
                 f'<b>Название товара</b>: <code>{product_name}</code>\n'
                 f'<b>Цена товара</b>: <code>{price} {currency}</code>\n'
                 f'<b>Количество</b>: <code>{order.quantity}</code>\n'
-                f'<b>Итого</b>: <code>{Decimal(price) * order.quantity} {currency}</code>')
+                f'<b>Итого</b>: <code>{Decimal(price) * order.quantity} {currency} / {sum_rub} руб</code>')
         await message.answer(text, reply_markup=inline.getKeyboard_createOrder(), parse_mode="HTML")
     except Exception as ex:
         logger.exception(ex)
