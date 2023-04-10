@@ -75,6 +75,9 @@ async def create_order(bot: Bot, **kwargs):
             "Sklad": str(kwargs['shop']),
             "SO": str(kwargs['paymentGateway']),
             "Sotr": str(kwargs['seller_id']),
+            "Klient": kwargs.get('client_name', ''),
+            "Telefon": kwargs.get('client_phone', ''),
+            "Email": kwargs.get('client_mail', ''),
             "Itemc": [
                 {
                     "Tov": str(kwargs['product_id']),
@@ -86,6 +89,9 @@ async def create_order(bot: Bot, **kwargs):
         }
         logger.info(order)
         response, answer = await api.post_create_order(order)
+        logger.info(answer)
+        logger.info(response)
+        logger.info(await response.text())
         logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
         await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=kwargs['chat_id'],
                                            first_name=kwargs['first_name'],
@@ -103,8 +109,7 @@ async def create_order(bot: Bot, **kwargs):
         await bot.send_message(kwargs['chat_id'], f'{texts.error_head}{ex}')
 
 
-
-
 if __name__ == '__main__':
-    print(requests.post('http://pr-egais.ddns.net:24142/RAMA/hs/GetUP', data='79831358491').text)
+    # print(requests.post('http://pr-egais.ddns.net:24142/RAMA/hs/GetUP', data='79831358491').text)
+    print(requests.post('http://pr-egais.ddns.net:24142/RAMA/hs/GetUP', data='79934055804').text)
     # print(requests.post('http://pr-egais.ddns.net:24142/RAMA/hs/GetUP', data='905539447374').json())

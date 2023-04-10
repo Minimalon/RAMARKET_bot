@@ -12,8 +12,7 @@ oneC = Api()
 
 
 async def error_message(message: Message, exception):
-    text = f"➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n" \
-           f"{exception}"
+    text = f"{texts.error_head}{exception}"
     await message.answer(text)
 
 

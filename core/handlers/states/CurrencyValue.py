@@ -11,8 +11,7 @@ from loguru import logger
 
 
 async def error_message(message: Message, exception, state: FSMContext):
-    text = f"➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n" \
-           f"{exception}"
+    text = f"{texts.error_head}{exception}"
     await message.answer(text)
     await state.set_state(StateCreateOrder.ERROR)
 
@@ -27,8 +26,7 @@ async def check_CurrencyPrice(message: Message, state: FSMContext):
     try:
         if re.findall(',', message.text):
             if len(message.text.split(',')) > 2:
-                text = f"➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n" \
-                       f"Вы написали более 1 запятой. Попробуйте снова\nНапример: <b>75.12</b>"
+                text = f"{texts.error_head}Вы написали более 1 запятой. Попробуйте снова\nНапример: <b>75.12</b>"
                 await message.answer(text, parse_mode='HTML')
                 await state.set_state(StateCreateOrder.GET_PRICE)
                 return
@@ -39,7 +37,7 @@ async def check_CurrencyPrice(message: Message, state: FSMContext):
         log.info("Ввели цену")
         log.info(Decimal(currencyPrice))
         await query_db.update_order(chat_id=message.chat.id, currencyPrice=Decimal(currencyPrice))
-        await message.answer(texts.select_payment_type, reply_markup=await getKeyboard_select_Main_PaymentGateway(),
+        await message.answer(texts.select_payment, reply_markup=await getKeyboard_select_Main_PaymentGateway(),
                              parse_mode='HTML')
         await state.clear()
     except Exception as ex:

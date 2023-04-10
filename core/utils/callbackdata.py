@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from aiogram.filters.callback_data import CallbackData
 
 
@@ -10,6 +8,7 @@ class Shop(CallbackData, prefix='shop'):
 class ChildPaymentGateway(CallbackData, prefix='childPaymentGateway'):
     id: str
     idParent: str
+    type: str
 
 
 class PaymentGateway(CallbackData, prefix='paymentGateway'):

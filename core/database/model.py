@@ -35,6 +35,7 @@ class Orders(Base):
     shop = Column(String(50))
     seller_id = Column(String(50))
     paymentGateway = Column(String(50))
+    paymentType = Column(String(50))
     product_id = Column(String(50))
     price = Column(DECIMAL(15, 5))
     quantity = Column(Integer)

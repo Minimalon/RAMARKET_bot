@@ -45,6 +45,13 @@ async def update_order(**kwargs):
         session.commit()
 
 
+async def delete_order(**kwargs):
+    with Session() as session:
+        orders = session.query(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])).one()
+        session.delete(orders)
+        session.commit()
+
+
 async def create_historyOrder(**kwargs):
     with Session() as session:
         session.add(HistoryOrders(**kwargs))
@@ -101,8 +108,8 @@ def create_excel(**kwargs):
                      f" order by date DESC")
         df = pd.read_sql(query, engine.connect())
         df = df.drop(
-            columns=['chat_id', 'first_name', 'seller_id', 'client_mail', 'order_id', 'shop_id', 'paymentGateway',
-                     'product_id'])
+            columns=['chat_id', 'first_name', 'seller_id', 'order_id', 'shop_id', 'paymentGateway',
+                     'product_id', 'paymentType'])
         writer = pd.ExcelWriter(path_file, engine="xlsxwriter")
         df.to_excel(writer, sheet_name='orders', index=False, na_rep='NaN')
 

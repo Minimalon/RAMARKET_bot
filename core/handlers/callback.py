@@ -1,14 +1,13 @@
-import qrcode
 from aiogram import Bot
 from aiogram.types import CallbackQuery, FSInputFile
+from core.database import query_db
+from core.database.query_db import *
 from core.keyboards.inline import *
 from core.keyboards.reply import getKeyboard_registration
+from core.oneC.api import Api
 from core.utils import texts
 from core.utils.callbackdata import *
-from core.database.query_db import *
-from loguru import logger
-from core.oneC.api import Api
-from core.database import query_db
+from core.utils.qr import generateQR
 
 oneC = Api()
 
@@ -76,12 +75,12 @@ async def selectMainPaymentGateway(call: CallbackQuery):
                       currencyPrice=order.currencyPrice)
     log.info(f"Переход на способ оплаты")
     await update_order(chat_id=call.message.chat.id, first_name=call.message.chat.first_name)
-    await call.message.edit_text(texts.select_payment_type, reply_markup=await getKeyboard_select_Main_PaymentGateway())
+    await call.message.edit_text(texts.select_payment, reply_markup=await getKeyboard_select_Main_PaymentGateway())
     await call.answer()
 
 
 async def selectChildPaymentGateway(call: CallbackQuery, callback_data: ChildPaymentGateway):
-    await update_order(chat_id=call.message.chat.id, paymentGateway=callback_data.id)
+    await update_order(chat_id=call.message.chat.id, paymentGateway=callback_data.id, paymentType=callback_data.type)
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, paymentID=callback_data.id)
     log.info(f"Выбор способа оплаты")
     await call.message.edit_reply_markup(
@@ -150,9 +149,9 @@ async def create_order(call: CallbackQuery, bot: Bot):
     log = logger.bind(name=call.message.chat.first_name, chat_id=chat_id)
     client_db = await query_db.get_client_info(chat_id=chat_id)
     s_name, f_name, patronymic = order.client_name.split()
-    qr_path = os.path.join(config.dir_path, 'files', 'qr.png')
     shop_name = await utils.get_shop_name(client_db.phone_number, order.shop)
     sum_rub = Decimal((order.currencyPrice * order.quantity) * order.price).quantize(Decimal('1.00'))
+    sum_main = Decimal(order.quantity * order.price).quantize(Decimal('1.00'))
 
     if not client_db:
         await not_reg(call)
@@ -168,20 +167,36 @@ async def create_order(call: CallbackQuery, bot: Bot):
                                                 shop=order.shop,
                                                 seller_id=order.seller_id, sum_rub=sum_rub)
     if response.ok:
-        img = qrcode.make(f'ST00012|Name={shop_name}'
-                          f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
-                          f'|BIC={answer["BIC"]}|CorrespAcc={answer["KBS"]}|PayeeINN={answer["ORGINN"]}'
-                          f'|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
-                          f'|Purpose=Оплата заказа №{answer["Nomer"]} от {answer["Date"]}'
-                          f'|Sum={round(sum_rub * 100)}')
-        log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
-        img.save(qr_path)
-        text = await texts.qr(answer, chat_id, sum_rub)
-        await call.message.delete()
-        await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, parse_mode='HTML')
+        if order.paymentType == '3':
+            textQR = (f'ST00012|Name={shop_name}'
+                      f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
+                      f'|BIC={answer["BIC"]}|CorrespAcc={answer["KBS"]}|PayeeINN={answer["ORGINN"]}'
+                      f'|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
+                      f'|Purpose=Оплата заказа №{answer["Nomer"]} от {answer["Date"]}'
+                      f'|Sum={round(sum_rub * 100)}')
+            qr_path = await generateQR(textQR, order.paymentType, answer['Nomer'])
+            log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
+            text = await texts.qr(answer['Nomer'], sum_main, chat_id, sum_rub)
+            await call.message.delete()
+            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, parse_mode='HTML')
+            await query_db.delete_order(chat_id=chat_id)
+        elif order.paymentType == '2':
+            textQR = answer['Ref']
+            qr_path = await generateQR(textQR, order.paymentType, answer['Nomer'])
+            log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
+            text = await texts.qr(answer['Nomer'], sum_main, chat_id, sum_rub)
+            await call.message.delete()
+            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, parse_mode='HTML')
+            await query_db.delete_order(chat_id=chat_id)
+        else:
+            log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
+            await call.message.delete()
+            text = await texts.qr(answer['Nomer'], sum_main, chat_id, sum_rub)
+            await bot.send_message(chat_id, f"<b><u>Заказ успешно создан</u></b>\n{text}", parse_mode='HTML')
+            await query_db.delete_order(chat_id=chat_id)
     else:
-        await call.message.answer("➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n"
-                                  f"Сервер недоступен, его код ответа '{response.status}'")
+        await call.message.answer(
+            f"{texts.error_head}Сервер недоступен, его код ответа '{response.status}'\nПопробуйте создать заказ снова.")
         log.info(f"Сервер недоступен, его код ответа '{response.status}'")
 
     await bot.send_message(chat_id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')

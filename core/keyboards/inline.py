@@ -1,6 +1,5 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from core.utils.callbackdata import *
-from core.insales import utils
 from core.oneC.api import Api
 from core.oneC import utils
 
@@ -41,7 +40,8 @@ async def getKeyboard_select_Main_PaymentGateway():
     keyboard = InlineKeyboardBuilder()
     for paytype in await utils.get_main_paymentWay():
         keyboard.button(text=paytype['Наименование'],
-                        callback_data=ChildPaymentGateway(id=paytype['Id'], idParent=paytype['IdParent']))
+                        callback_data=ChildPaymentGateway(id=paytype['Id'], idParent=paytype['IdParent'],
+                                                          type=paytype['Type']))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 
@@ -52,11 +52,12 @@ async def getKeyboard_select_Child_PaymentGateway(Id: str, IdParent: str):
     if groups:
         for paytype in await utils.get_child_paymentWay(Id):
             keyboard.button(text=paytype['Наименование'],
-                            callback_data=ChildPaymentGateway(id=paytype['Id'], idParent=paytype['IdParent']))
+                            callback_data=ChildPaymentGateway(id=paytype['Id'], idParent=paytype['IdParent'],
+                                                              type=paytype['Type']))
     else:
         return getKeyboard_ProductStart()
     if Id != '':
-        keyboard.button(text="<<< Назад", callback_data=ChildPaymentGateway(id=IdParent, idParent=''))
+        keyboard.button(text="<<< Назад", callback_data=ChildPaymentGateway(id=IdParent, idParent='', type=''))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 

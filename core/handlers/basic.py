@@ -16,7 +16,6 @@ async def get_start(message: Message, bot: Bot):
     client_phone = ''.join(re.findall(r'[0-9]*', message.contact.phone_number))
     log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_phone=client_phone)
     client_info = await oneC.get_client_info(client_phone)
-    log.info("Регистрация")
     if client_info:
         log.info("Есть в базе 1С")
         await bot.send_message(message.chat.id, 'Регистрация успешна пройдена', reply_markup=ReplyKeyboardRemove())

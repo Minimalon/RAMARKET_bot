@@ -13,8 +13,7 @@ from core.keyboards import inline
 
 
 async def error_message(message: Message, exception, state: FSMContext):
-    text = f"➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n" \
-           f"{exception}"
+    text = f"{texts.error_head}{exception}"
     await message.answer(text)
     await state.set_state(StateCreateOrder.ERROR)
 
@@ -30,8 +29,7 @@ async def check_price(message: Message, state: FSMContext):
         price = message.text
         if re.findall(',', message.text):
             if len(message.text.split(',')) > 2:
-                text = f"➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n" \
-                       f"Ввод цены разрешен через точку\nПример как надо: <b>10.12</b>"
+                text = f"{texts.error_head}Ввод цены разрешен через точку\nПример как надо: <b>10.12</b>"
                 await message.answer(text, parse_mode='HTML')
                 await state.set_state(StateCreateOrder.GET_PRICE)
                 return
@@ -39,8 +37,7 @@ async def check_price(message: Message, state: FSMContext):
 
         check_price = price.replace('.', '')
         if not check_price.isdecimal():
-            text = f"➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n" \
-                   f"Цена содержит не нужные символы\nПопробуйте снова\nПример как надо: <b>10.12</b>"
+            text = f"{texts.error_head}Цена содержит не нужные символы\nПопробуйте снова\nПример как надо: <b>10.12</b>"
             await message.answer(text, parse_mode='HTML')
             return
 
@@ -64,13 +61,12 @@ async def check_client_name(message: Message, state: FSMContext):
         name = message.text
         if len(name.split()) == 3:
             await query_db.update_order(chat_id=message.chat.id, client_name=name)
-            await message.answer("Введите сотовый клиента\nНапример: <code>79934055805</code>", parse_mode='HTML')
-            await state.set_state(StateCreateOrder.GET_CLIENT_PHONE)
+            await message.answer(texts.enter_phone, parse_mode='HTML')
+            await state.set_state(StateCreateOrder.GET_CLIENT_PHONE_OR_MAIL)
         else:
-            text = f"➖➖➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖➖➖\n" \
-                   f"ФИО состоит из 3 слов, а ваше состоит из {len(name.split())} слов\n" \
+            text = f"{texts.error_head}ФИО состоит из 3 слов, а ваше состоит из {len(name.split())} слов\n" \
                    f"<b>Попробуйте снова.</b>"
-            await message.answer(text)
+            await message.answer(text, parse_mode='HTML')
             logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_name=str(name)).info("Ввели ФИО")
             await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
     except Exception as ex:
@@ -78,22 +74,22 @@ async def check_client_name(message: Message, state: FSMContext):
         await error_message(message, ex, state)
 
 
-async def check_client_phone(message: Message, state: FSMContext):
+async def check_client_phone_or_mail(message: Message, state: FSMContext):
     client_phone = ''.join(re.findall(r'[0-9]*', message.text))
-    log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_phone=str(client_phone))
+    log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id)
     try:
-        if not client_phone.isdigit():
-            await message.answer(texts.error_needOnlyDigits, parse_mode='HTML')
-            return
-
-        if re.findall('[0-9]{11}', client_phone):
-            log.info("Ввели сотовый")
-            await query_db.update_order(chat_id=message.chat.id, client_phone=client_phone)
+        if re.findall('^[0-9]{1,11}$', client_phone):
+            log.info(f"Ввели сотовый '{client_phone}'")
+            await query_db.update_order(chat_id=message.chat.id, client_phone=client_phone, client_mail='')
+            await create_order(message, state)
+        elif '@' in message.text:
+            log.info(f"Ввели почту '{message.text}'")
+            await query_db.update_order(chat_id=message.chat.id, client_mail=message.text, client_phone='')
             await create_order(message, state)
         else:
-            log.error("Ввели сотовый")
+            log.error(f"Ввод сотового или почты '{message.text}'")
             await message.answer(texts.error_needOnlyDigits, parse_mode="HTML")
-            await state.set_state(StateCreateOrder.GET_CLIENT_PHONE)
+            await state.set_state(StateCreateOrder.GET_CLIENT_PHONE_OR_MAIL)
     except Exception as ex:
         log.exception(ex)
         await error_message(message, ex, state)
@@ -111,17 +107,11 @@ async def create_order(message: Message, state: FSMContext):
         shop_names = (await utils.get_shops(seller_phone))['Магазины']
         shop_name = [shop['Магазин'] for shop in shop_names if shop['idМагазин'] == order.shop][0]
         sum_rub = Decimal((price * order.quantity) * order.currencyPrice).quantize(Decimal('1.00'))
-        text = (f'ℹ️ <b>Информация о заказе:</b>\n'
-                f'➖➖➖➖➖➖➖➖➖➖➖\n'
-                f'<b>Имя клиента</b>: <code>{order.client_name}</code>\n'
-                f'<b>Сотовый клиента</b>: <code>+{order.client_phone}</code>\n'
-                f'<b>Название магазина</b>: <code>{shop_name}</code>\n'
-                f'<b>Тип оплаты</b>: <code>{payment_name}</code>\n'
-                f'<b>Курс валюты</b>: <code>{order.currencyPrice}</code>\n'
-                f'<b>Название товара</b>: <code>{product_name}</code>\n'
-                f'<b>Цена товара</b>: <code>{price} {currency}</code>\n'
-                f'<b>Количество</b>: <code>{order.quantity}</code>\n'
-                f'<b>Итого</b>: <code>{Decimal(price) * order.quantity} {currency} / {sum_rub} руб</code>')
+        text = await texts.createOrder(client_name=order.client_name, client_phone=order.client_phone,
+                                       shop_name=shop_name, payment_name=payment_name,
+                                       currencyPrice=order.currencyPrice,
+                                       price=order.price, sum_rub=sum_rub, client_mail=order.client_mail,
+                                       product_name=product_name, currency=currency, quantity=order.quantity)
         await message.answer(text, reply_markup=inline.getKeyboard_createOrder(), parse_mode="HTML")
     except Exception as ex:
         logger.exception(ex)
