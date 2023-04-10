@@ -169,7 +169,7 @@ async def create_order(call: CallbackQuery, bot: Bot):
                                                 seller_id=order.seller_id, sum_rub=sum_rub)
     if response.ok:
         if order.paymentType == '3':
-            textQR = (f'ST00012|Name={shop_name}'
+            textQR = (f'ST00012|Name={answer["ORG"]}'
                       f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
                       f'|BIC={answer["BIC"]}|CorrespAcc={answer["KBS"]}|PayeeINN={answer["ORGINN"]}'
                       f'|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
