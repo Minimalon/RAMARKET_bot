@@ -95,14 +95,15 @@ async def create_order(bot: Bot, **kwargs):
         logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
         await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=kwargs['chat_id'],
                                            first_name=kwargs['first_name'],
-                                           paymentGateway=kwargs['paymentGateway'], payment_name=payment_name,
+                                           paymentGateway=kwargs['paymentGateway'], paymentType=kwargs['paymentType'],
+                                           payment_name=payment_name,
                                            product_id=kwargs['product_id'], product_name=product_name,
                                            price=kwargs['price'], quantity=kwargs['quantity'], sum=sum,
                                            currency=kwargs['currency'],
                                            currencyPrice=kwargs['currencyPrice'], client_name=kwargs['client_name'],
                                            client_phone=kwargs['client_phone'], client_mail=kwargs['client_mail'],
                                            shop_id=kwargs['shop'], shop_name=shop_name, seller_id=kwargs['seller_id'],
-                                           sum_rub=kwargs['sum_rub'])
+                                           sum_rub=kwargs['sum_rub'], )
         return response, answer
     except Exception as ex:
         logger.exception(ex)

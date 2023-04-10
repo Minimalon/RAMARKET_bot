@@ -7,7 +7,7 @@ import config
 
 async def generateQR(text, paymentType, order_id):
     dir_path = os.path.join(config.dir_path, 'files', paymentType)
-    qr_path = os.path.join(dir_path, order_id)
+    qr_path = os.path.join(dir_path, f'{order_id}.png')
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     qr = qrcode.make(text)
