@@ -56,6 +56,7 @@ class HistoryOrders(Base):
     shop_name = Column(String(50))
     seller_id = Column(String(50))
     paymentGateway = Column(String(50))
+    paymentType = Column(String(50))
     payment_name = Column(String(250))
     product_id = Column(String(50))
     product_name = Column(String(250))
