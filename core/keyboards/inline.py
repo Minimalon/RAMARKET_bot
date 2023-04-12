@@ -26,6 +26,7 @@ def getKeyboard_selectShop(shops):
     keyboard = InlineKeyboardBuilder()
     for shop in shops:
         keyboard.button(text=shop['Магазин'], callback_data=Shop(shop=str(shop['idМагазин'])))
+    keyboard.adjust(2, repeat=True)
     return keyboard.as_markup()
 
 

@@ -6,6 +6,7 @@ import os
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message
+from aiogram.fsm.storage.redis import RedisStorage
 
 from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
 from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
@@ -24,9 +25,10 @@ async def start():
                format="{time:MMMM D, YYYY > HH:mm:ss} | {level} | {message} | {extra}", )
 
     bot = Bot(token=config.token)
-    await get_commands(bot)
 
-    dp = Dispatcher()
+    await get_commands(bot)
+    storage = RedisStorage.from_url(config.redisStorage)
+    dp = Dispatcher(storage=storage)
 
     # Команды
     dp.message.register(check_registration, Command(commands=['start']))
