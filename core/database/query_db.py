@@ -14,24 +14,6 @@ engine = create_engine(
 Session = sessionmaker(bind=engine)
 
 
-async def get_currency(chat_id):
-    with Session() as session:
-        return session.query(Currency).filter(Currency.chat_id == str(chat_id)).first().type
-
-
-async def set_currency(**kwargs):
-    with Session() as session:
-        SN = session.query(Currency).filter(Currency.chat_id == str(kwargs["chat_id"])).first()
-        if SN is None:
-            if len(kwargs) == len([v for k, v in kwargs.items() if v]):
-                SN = Currency(**kwargs)
-                session.add(SN)
-        else:
-            session.query(Currency).filter(Currency.chat_id == str(kwargs["chat_id"])) \
-                .update({"type": kwargs["type"]}, synchronize_session='fetch')
-        session.commit()
-
-
 async def update_order(**kwargs):
     with Session() as session:
         SN = session.query(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])).first()

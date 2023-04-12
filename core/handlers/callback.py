@@ -1,3 +1,4 @@
+from decimal import Decimal
 from aiogram import Bot
 from aiogram.types import CallbackQuery, FSInputFile
 from core.database import query_db
@@ -145,14 +146,14 @@ async def update_quantity_product(call: CallbackQuery, callback_data: QuantityUp
 
 async def create_order(call: CallbackQuery, bot: Bot):
     chat_id = call.message.chat.id
-    order = await query_db.get_order_info(chat_id=chat_id)
     log = logger.bind(name=call.message.chat.first_name, chat_id=chat_id)
     client_db = await query_db.get_client_info(chat_id=chat_id)
-    s_name, f_name, patronymic = order.client_name.split()
-    shop_name = await utils.get_shop_name(client_db.phone_number, order.shop)
-    sum_rub = Decimal((order.currencyPrice * order.quantity) * order.price).quantize(Decimal('1.00'))
-    sum_main = Decimal(order.quantity * order.price).quantize(Decimal('1.00'))
+    order = await query_db.get_order_info(chat_id=chat_id)
 
+    if not order:
+        await call.message.delete()
+        await call.message.answer(f'{texts.error_head}Не найдено заказа\nПопробуйте снова создать заказ.')
+        await bot.send_message(chat_id, texts.menu, reply_markup=getKeyboard_start())
     if not client_db:
         await not_reg(call)
     client_info = await oneC.get_client_info(client_db.phone_number)
@@ -166,18 +167,19 @@ async def create_order(call: CallbackQuery, bot: Bot):
                                                 currencyPrice=order.currencyPrice, client_name=order.client_name,
                                                 client_phone=order.client_phone, client_mail=order.client_mail,
                                                 shop=order.shop,
-                                                seller_id=order.seller_id, sum_rub=sum_rub)
+                                                seller_id=order.seller_id, sum_rub=order.sum_rub, sum=order.sum)
     if response.ok:
         if order.paymentType == '3':
+            s_name, f_name, patronymic = order.client_name.split()
             textQR = (f'ST00012|Name={answer["ORG"]}'
                       f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
                       f'|BIC={answer["BIC"]}|CorrespAcc={answer["KBS"]}|PayeeINN={answer["ORGINN"]}'
-                      f'|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
+                      f'|KPP={answer["ORGKPP"]}|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
                       f'|Purpose=Оплата заказа №{answer["Nomer"]} от {answer["Date"]}'
-                      f'|Sum={round(sum_rub * 100)}')
+                      f'|Sum={round(Decimal(order.sum_rub) * 100)}')
             qr_path = await generateQR(textQR, order.paymentType, answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
-            text = await texts.qr(answer['Nomer'], sum_main, chat_id, sum_rub)
+            text = await texts.qr(answer['Nomer'], order.sum, chat_id, order.sum_rub)
             await call.message.delete()
             await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, parse_mode='HTML')
             await query_db.delete_order(chat_id=chat_id)
@@ -185,14 +187,14 @@ async def create_order(call: CallbackQuery, bot: Bot):
             textQR = answer['Ref']
             qr_path = await generateQR(textQR, order.paymentType, answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
-            text = await texts.qr(answer['Nomer'], sum_main, chat_id, sum_rub)
+            text = await texts.qr(answer['Nomer'], order.sum, chat_id, order.sum_rub)
             await call.message.delete()
             await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, parse_mode='HTML')
             await query_db.delete_order(chat_id=chat_id)
         else:
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             await call.message.delete()
-            text = await texts.qr(answer['Nomer'], sum_main, chat_id, sum_rub)
+            text = await texts.qr(answer['Nomer'], order.sum, chat_id, order.sum_rub)
             await bot.send_message(chat_id, f"<b><u>Заказ успешно создан</u></b>\n{text}", parse_mode='HTML')
             await query_db.delete_order(chat_id=chat_id)
     else:

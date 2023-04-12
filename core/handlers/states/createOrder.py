@@ -37,11 +37,13 @@ async def check_price(message: Message, state: FSMContext):
 
         check_price = price.replace('.', '')
         if not check_price.isdecimal():
-            text = f"{texts.error_head}Цена содержит не нужные символы\nПопробуйте снова\nПример как надо: <b>10.12</b>"
+            text = f"{texts.error_head}Цена содержит не нужные символы\nПопробуйте снова\nПример как надо: <u><b>10.12</b></u>"
             await message.answer(text, parse_mode='HTML')
             return
-
-        await query_db.update_order(chat_id=message.chat.id, price=Decimal(price))
+        order = await query_db.get_order_info(chat_id=message.chat.id)
+        sum = Decimal(Decimal(price) * Decimal(order.quantity))
+        sum_rub = Decimal(sum * Decimal(order.currencyPrice)).quantize(Decimal('1.00'))
+        await query_db.update_order(chat_id=message.chat.id, price=price, sum=sum, sum_rub=sum_rub)
         log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, price=str(price))
         log.info("Ввели цену")
         await message.answer("Введите ФИО (полностью)")
@@ -99,18 +101,17 @@ async def create_order(message: Message, state: FSMContext):
     try:
         chat_id = message.chat.id
         order = await query_db.get_order_info(chat_id=chat_id)
-        price = Decimal(order.price).quantize(Decimal('1.00'))
         currency = await query_db.get_currency_name(chat_id=chat_id)
         product_name = (await utils.get_tovar_by_ID(order.product_id))["Наименование"]
         payment_name = (await utils.get_payment_name(order.paymentGateway))["Наименование"]
         seller_phone = (await query_db.get_client_info(chat_id=chat_id)).phone_number
         shop_names = (await utils.get_shops(seller_phone))['Магазины']
         shop_name = [shop['Магазин'] for shop in shop_names if shop['idМагазин'] == order.shop][0]
-        sum_rub = Decimal((price * order.quantity) * order.currencyPrice).quantize(Decimal('1.00'))
         text = await texts.createOrder(client_name=order.client_name, client_phone=order.client_phone,
                                        shop_name=shop_name, payment_name=payment_name,
                                        currencyPrice=order.currencyPrice,
-                                       price=order.price, sum_rub=sum_rub, client_mail=order.client_mail,
+                                       price=order.price, sum_rub=order.sum_rub, sum=order.sum,
+                                       client_mail=order.client_mail,
                                        product_name=product_name, currency=currency, quantity=order.quantity)
         await message.answer(text, reply_markup=inline.getKeyboard_createOrder(), parse_mode="HTML")
     except Exception as ex:

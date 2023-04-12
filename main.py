@@ -10,7 +10,7 @@ from aiogram.types import Message
 from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
 from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
 from core.utils.commands import get_commands
-from core.handlers.basic import get_start, check_registration
+from core.handlers.basic import get_start, check_registration, cancel
 from core.handlers.callback import *
 from core.utils.callbackdata import *
 from core.handlers import contact
@@ -30,6 +30,7 @@ async def start():
 
     # Команды
     dp.message.register(check_registration, Command(commands=['start']))
+    dp.message.register(cancel, Command(commands=['cancel']))
 
     # Главное меню
     dp.callback_query.register(menu, F.data == 'menu')

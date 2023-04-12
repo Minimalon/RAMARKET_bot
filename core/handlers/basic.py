@@ -1,5 +1,6 @@
 import re
-from logging import info
+from aiogram.fsm.context import FSMContext
+
 from core.utils import texts
 from aiogram import Bot
 from aiogram.types import Message, ReplyKeyboardRemove
@@ -40,3 +41,15 @@ async def check_registration(message: Message):
         log.error("Нету в базе 1С")
         text = f'Вы зашли впервые, нажмите кнопку Регистрация'
         await message.answer(text, reply_markup=getKeyboard_registration(), parse_mode='HTML')
+
+
+async def cancel(message: Message, state: FSMContext):
+    chat_id = message.chat.id
+    await state.clear()
+    order = await query_db.get_order_info(chat_id=chat_id)
+    if order:
+        await query_db.delete_order(chat_id=chat_id)
+        await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+    else:
+        await message.answer(f"{texts.error_head}Не найдено текущего заказа", reply_markup=getKeyboard_start(),
+                             parse_mode='HTML')

@@ -23,7 +23,6 @@ async def createOrder(**kwargs):
     else:
         mail_or_phone = kwargs["client_mail"]
         message = "Почта"
-    sum = Decimal(kwargs["price"] * kwargs["quantity"]).quantize(Decimal('1.00'))
     text = (f'ℹ️ <b>Информация о заказе:</b>\n'
             f'➖➖➖➖➖➖➖➖➖➖➖\n'
             f'<b>ФИО клиента</b>: <code>{kwargs["client_name"]}</code>\n'
@@ -34,7 +33,7 @@ async def createOrder(**kwargs):
             f'<b>Название товара</b>: <code>{kwargs["product_name"]}</code>\n'
             f'<b>Цена товара</b>: <code>{kwargs["price"]} {kwargs["currency"]}</code>\n'
             f'<b>Количество</b>: <code>{kwargs["quantity"]}</code>\n'
-            f'<b>Итого</b>: <code>{sum} {kwargs["currency"]}'
+            f'<b>Итого</b>: <code>{kwargs["sum"]} {kwargs["currency"]}'
             f' / {kwargs["sum_rub"]} руб</code>')
     return text
 
