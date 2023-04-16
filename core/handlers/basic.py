@@ -19,10 +19,10 @@ async def get_start(message: Message, bot: Bot):
     client_info = await oneC.get_client_info(client_phone)
     if client_info:
         log.info("Есть в базе 1С")
-        await bot.send_message(message.chat.id, 'Регистрация успешна пройдена', reply_markup=ReplyKeyboardRemove())
-        await query_db.update_client_info(chat_id=message.chat.id, phone_number=client_phone,
+        await query_db.update_client_info(chat_id=str(message.chat.id), phone_number=client_phone,
                                           first_name=message.contact.first_name, last_name=message.contact.last_name,
-                                          user_id=message.contact.user_id)
+                                          user_id=str(message.contact.user_id))
+        await bot.send_message(message.chat.id, 'Регистрация успешна пройдена', reply_markup=ReplyKeyboardRemove())
         await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     else:
         log.error("Нету в базе 1С")

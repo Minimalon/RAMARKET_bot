@@ -25,12 +25,13 @@ async def menu(call: CallbackQuery):
     client_db = await query_db.get_client_info(chat_id=call.message.chat.id)
     if not client_db:
         await not_reg(call)
+        return
     client_info = await oneC.get_client_info(client_db.phone_number)
     if client_info:
-
         await call.message.edit_text(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     else:
         await not_reg(call)
+        return
 
 
 async def menu_not_edit_text(call: CallbackQuery):
@@ -39,12 +40,14 @@ async def menu_not_edit_text(call: CallbackQuery):
     client_db = await query_db.get_client_info(chat_id=call.message.chat.id)
     if not client_db:
         await not_reg(call)
+        return
     client_info = await oneC.get_client_info(client_db.phone_number)
     if client_info:
 
         await call.message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     else:
         await not_reg(call)
+        return
 
 
 async def profile(call: CallbackQuery):
@@ -61,7 +64,7 @@ async def profile(call: CallbackQuery):
 
 
 async def history_orders(call: CallbackQuery, bot: Bot):
-    path_file = query_db.create_excel(chat_id=call.message.chat.id)
+    path_file = await query_db.create_excel(chat_id=call.message.chat.id)
     if not path_file:
         await bot.send_message(call.message.chat.id, 'Список заказов пуст')
         await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
@@ -156,9 +159,11 @@ async def create_order(call: CallbackQuery, bot: Bot):
         await bot.send_message(chat_id, texts.menu, reply_markup=getKeyboard_start())
     if not client_db:
         await not_reg(call)
+        return
     client_info = await oneC.get_client_info(client_db.phone_number)
     if not client_info:
         await not_reg(call)
+        return
     response, answer = await utils.create_order(bot, chat_id=order.chat_id, first_name=order.first_name,
                                                 paymentGateway=order.paymentGateway, paymentType=order.paymentType,
                                                 product_id=order.product_id,

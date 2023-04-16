@@ -16,7 +16,7 @@ from core.handlers.callback import *
 from core.utils.callbackdata import *
 from core.handlers import contact
 from core.filters.iscontact import IsTrueContact
-
+from core.database.model import init_models
 @logger.catch()
 async def start():
     if not os.path.exists(os.path.join(config.dir_path, 'logs')):
@@ -27,6 +27,7 @@ async def start():
     bot = Bot(token=config.token)
 
     await get_commands(bot)
+    await init_models()
     storage = RedisStorage.from_url(config.redisStorage)
     dp = Dispatcher(storage=storage)
 

@@ -3,51 +3,56 @@ import os.path
 from decimal import Decimal
 import pandas as pd
 from sqlalchemy import *
-from sqlalchemy.orm import *
 from core.database.model import *
-import pymysql
+import asyncpg
 import config
 from loguru import logger
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
 
-engine = create_engine(
-    f"mysql+pymysql://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}?charset=utf8mb4")
-Session = sessionmaker(bind=engine)
+engine = create_async_engine(
+    f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def update_order(**kwargs):
-    with Session() as session:
-        SN = session.query(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])).first()
+    async with async_session() as session:
+        for key, value in kwargs.items():
+            kwargs[key] = str(value)
+        q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
+        SN = q.scalars().first()
         if SN is None:
-            if len(kwargs) == len([v for k, v in kwargs.items() if v]):
-                SN = Orders(**kwargs)
-                session.add(SN)
+            SN = Orders(**kwargs)
+            session.add(SN)
         else:
-            session.query(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])).update(kwargs,
-                                                                                          synchronize_session='fetch')
-        session.commit()
+            await session.execute(update(Orders).where(Orders.chat_id == str(kwargs["chat_id"])).values(kwargs))
+        await session.commit()
 
 
 async def delete_order(**kwargs):
-    with Session() as session:
-        orders = session.query(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])).one()
-        session.delete(orders)
-        session.commit()
+    async with async_session() as session:
+        q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
+        await session.delete(q.scalars().one())
+        await session.commit()
 
 
 async def create_historyOrder(**kwargs):
-    with Session() as session:
+    async with async_session() as session:
         session.add(HistoryOrders(**kwargs))
-        session.commit()
+        await session.commit()
 
 
 async def get_order_info(**kwargs):
-    with Session() as session:
-        return session.query(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])).first()
+    async with async_session() as session:
+        q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
+        return q.scalars().first()
 
 
 async def get_currency_name(**kwargs):
-    with Session() as session:
-        order = session.query(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])).first()
+    async with async_session() as session:
+        q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
+        order = q.scalars().first()
         if order.currency == 'RUB':
             currency = 'руб'
         elif order.currency == 'USD':
@@ -58,29 +63,35 @@ async def get_currency_name(**kwargs):
 
 
 async def update_client_info(**kwargs):
-    with Session() as session:
+    async with async_session() as session:
+        for key, value in kwargs.items():
+            kwargs[key] = str(value)
         logger.info(kwargs)
         chat_id = str(kwargs["chat_id"])
-        SN = session.query(Clients).filter(Clients.chat_id == chat_id).first()
+        q = await session.execute(select(Clients).filter(Clients.chat_id == chat_id))
+        SN = q.scalars().first()
         if SN is None:
             SN = Clients(**kwargs)
             session.add(SN)
         else:
-            session.query(Clients).filter(Clients.chat_id == chat_id).update(kwargs, synchronize_session='fetch')
-        session.commit()
+            await session.execute(update(Clients).where(Clients.chat_id == str(kwargs["chat_id"])).values(kwargs))
+        await session.commit()
 
 
 async def get_client_info(**kwargs):
-    with Session() as session:
-        client = session.query(Clients).filter(Clients.chat_id == str(kwargs["chat_id"])).first()
+    async with async_session() as session:
+        q = await session.execute(select(Clients).filter(Clients.chat_id == str(kwargs["chat_id"])))
+        client = q.scalars().first()
+        logger.info(client)
         if client is None:
             return False
         return client
 
 
-def create_excel(**kwargs):
-    with Session() as session:
-        orders = session.query(HistoryOrders).filter(HistoryOrders.chat_id == str(kwargs["chat_id"])).first()
+async def create_excel(**kwargs):
+    async with async_session() as session:
+        q = await session.execute(select(HistoryOrders).filter(HistoryOrders.chat_id == str(kwargs["chat_id"])))
+        orders = q.scalars().first()
         if not os.path.exists(os.path.join(config.dir_path, 'files')):
             os.makedirs(os.path.join(config.dir_path, 'files'))
         path_file = os.path.join(config.dir_path, 'files', f"{kwargs['chat_id']}.xlsx")
@@ -106,5 +117,5 @@ def create_excel(**kwargs):
 
 
 if __name__ == '__main__':
-    order = asyncio.run(get_order_info(chat_id=5263751490))
-    print(round(Decimal(order.currencyPrice) * (Decimal(order.quantity) * Decimal(order.price)) * 100))
+    a = asyncio.run(delete_order(chat_id=5263751490))
+

@@ -2,10 +2,15 @@ import sqlalchemy.orm
 from sqlalchemy import create_engine, Integer, String, Column, DateTime, Boolean
 import config
 from sqlalchemy.sql import func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
 
-engine = create_engine(
-    f"mysql+pymysql://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}?charset=utf8mb4")
-Base = sqlalchemy.orm.declarative_base()
+
+engine = create_async_engine(
+    f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
+Base = declarative_base()
 
 
 class Orders(Base):
@@ -18,7 +23,7 @@ class Orders(Base):
     paymentType = Column(String(50))
     product_id = Column(String(50))
     price = Column(String(50))
-    quantity = Column(Integer)
+    quantity = Column(String(50))
     sum = Column(String(50))
     sum_rub = Column(String(50))
     currency = Column(String(10))
@@ -43,7 +48,7 @@ class HistoryOrders(Base):
     product_id = Column(String(50))
     product_name = Column(String(250))
     price = Column(String(50))
-    quantity = Column(Integer)
+    quantity = Column(String(50))
     sum = Column(String(50))
     sum_rub = Column(String(50))
     currency = Column(String(10))
@@ -64,4 +69,6 @@ class Clients(Base):
     admin = Column(Boolean, default=False)
 
 
-Base.metadata.create_all(engine)
+async def init_models():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

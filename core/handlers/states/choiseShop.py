@@ -1,4 +1,7 @@
 import re
+
+import aiogram.exceptions
+
 from core.utils import texts
 from aiogram.types import CallbackQuery, Message
 from core.utils.callbackdata import Shop
@@ -17,7 +20,12 @@ async def error_message(message: Message, exception):
 
 
 async def not_reg(call: CallbackQuery):
-    await call.message.delete()
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    try:
+        await call.message.delete()
+    except aiogram.exceptions.TelegramBadRequest:
+        log.error('TelegramBadRequest (сообщению больше 24 часов и его нельзя удалить)')
+        pass
     text = f'Вы зашли впервые, нажмите кнопку Регистрация'
     await call.message.answer(text, reply_markup=reply.getKeyboard_registration(), parse_mode='HTML')
 
@@ -26,8 +34,10 @@ async def check_shops(call: CallbackQuery):
     try:
         log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
         client = await query_db.get_client_info(chat_id=call.message.chat.id)
+        log.info(client)
         if not client:
             await not_reg(call)
+            return
         shop = await utils.get_shops(client.phone_number)
         log.info(f'Количество магазинов "{len(shop["Магазины"])}"')
         await query_db.update_order(chat_id=call.message.chat.id, currency=shop['Валюта'])
@@ -53,6 +63,7 @@ async def choise_currency_price(call: CallbackQuery):
         client_DB = await query_db.get_client_info(chat_id=call.message.chat.id)
         if not client_DB:
             await not_reg(call)
+            return
         client = await oneC.get_client_info(client_DB.phone_number)
         if client:
             if re.findall(',', client["ВалютаКурс"]):
@@ -66,6 +77,7 @@ async def choise_currency_price(call: CallbackQuery):
             await call.answer()
         else:
             await not_reg(call)
+            return
     except Exception as ex:
         await error_message(call.message, ex)
         logger.exception(ex)
@@ -76,6 +88,7 @@ async def choise_currency_price_Shop(call: CallbackQuery, callback_data: Shop):
         client_DB = await query_db.get_client_info(chat_id=call.message.chat.id)
         if not client_DB:
             await not_reg(call)
+            return
         client = await oneC.get_client_info(client_DB.phone_number)
         if client:
             if re.findall(',', client["ВалютаКурс"]):
@@ -89,6 +102,7 @@ async def choise_currency_price_Shop(call: CallbackQuery, callback_data: Shop):
             await call.answer()
         else:
             await not_reg(call)
+            return
     except Exception as ex:
         await error_message(call.message, ex)
         logger.exception(ex)
