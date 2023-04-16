@@ -22,7 +22,7 @@ async def get_start(message: Message, bot: Bot):
         await query_db.update_client_info(chat_id=str(message.chat.id), phone_number=client_phone,
                                           first_name=message.contact.first_name, last_name=message.contact.last_name,
                                           user_id=str(message.contact.user_id))
-        await bot.send_message(message.chat.id, 'Регистрация успешна пройдена', reply_markup=ReplyKeyboardRemove())
+        await bot.send_message(message.chat.id, 'Регистрация успешно пройдена', reply_markup=ReplyKeyboardRemove())
         await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
     else:
         log.error("Нету в базе 1С")
