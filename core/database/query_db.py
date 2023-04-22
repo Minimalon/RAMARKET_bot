@@ -66,7 +66,6 @@ async def update_client_info(**kwargs):
     async with async_session() as session:
         for key, value in kwargs.items():
             kwargs[key] = str(value)
-        logger.info(kwargs)
         chat_id = str(kwargs["chat_id"])
         q = await session.execute(select(Clients).filter(Clients.chat_id == chat_id))
         SN = q.scalars().first()
@@ -82,7 +81,6 @@ async def get_client_info(**kwargs):
     async with async_session() as session:
         q = await session.execute(select(Clients).filter(Clients.chat_id == str(kwargs["chat_id"])))
         client = q.scalars().first()
-        logger.info(client)
         if client is None:
             return False
         return client

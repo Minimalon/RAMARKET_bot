@@ -64,6 +64,8 @@ async def profile(call: CallbackQuery):
 
 
 async def history_orders(call: CallbackQuery, bot: Bot):
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    log.info(f"История заказов")
     path_file = await query_db.create_excel(chat_id=call.message.chat.id)
     if not path_file:
         await bot.send_message(call.message.chat.id, 'Список заказов пуст')

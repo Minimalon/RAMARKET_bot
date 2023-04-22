@@ -67,11 +67,12 @@ async def create_order(bot: Bot, **kwargs):
         client = await query_db.get_client_info(chat_id=kwargs['chat_id'])
         shop_name = await get_shop_name(client.phone_number, kwargs['shop'])
         payment_name = (await get_payment_name(kwargs['paymentGateway']))['Наименование']
-        product_name = (await get_tovar_by_ID(kwargs['product_id']))['Наименование']
+        product_name = (await get_tovar_by_ID(kwargs['product_sid']))['Наименование']
 
         order = {
             "TypeR": "Doc",
             "Sklad": str(kwargs['shop']),
+            "KursPrice": str(kwargs['currencyPrice']),
             "SO": str(kwargs['paymentGateway']),
             "Sotr": str(kwargs['seller_id']),
             "Klient": kwargs.get('client_name', ''),
