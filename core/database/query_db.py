@@ -97,9 +97,11 @@ async def create_excel(**kwargs):
         path_file = os.path.join(config.dir_path, 'files', f"{kwargs['chat_id']}.xlsx")
         if orders is None:
             return False
-        query = text(f"SELECT * FROM {config.database}.{HistoryOrders.__table__} WHERE chat_id = {kwargs['chat_id']}"
-                     f" order by date DESC")
+        query = text(f'SELECT * FROM public."{HistoryOrders.__table__}" WHERE chat_id = \'{kwargs["chat_id"]}\''
+                     f' order by date DESC')
+        engine = create_engine(f"postgresql+psycopg2://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
         df = pd.read_sql(query, engine.connect())
+        df['date'] = df['date'].dt.tz_localize(None)
         df = df.drop(
             columns=['chat_id', 'first_name', 'seller_id', 'order_id', 'shop_id', 'paymentGateway',
                      'product_id', 'paymentType'])

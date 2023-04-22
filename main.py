@@ -81,6 +81,8 @@ async def start():
 
     try:
         await dp.start_polling(bot)
+    except Exception as e:
+        logger.info(e)
     finally:
         await bot.session.close()
 
