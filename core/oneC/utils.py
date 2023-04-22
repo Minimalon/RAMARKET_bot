@@ -1,10 +1,12 @@
+import re
+
 from aiogram import Bot
 from core.oneC.api import Api
 import requests
 from loguru import logger
 from core.database import query_db
 from core.utils import texts
-
+from funcy import str_join
 api = Api()
 
 
@@ -76,7 +78,7 @@ async def create_order(bot: Bot, **kwargs):
             "SO": str(kwargs['paymentGateway']),
             "Sotr": str(kwargs['seller_id']),
             "Klient": kwargs.get('client_name', ''),
-            "Telefon": kwargs.get('client_phone', ''),
+            "Telefon": str_join(seq=re.findall(r'[0-9]*', kwargs.get('client_phone', '')), sep=''),
             "Email": kwargs.get('client_mail', ''),
             "Itemc": [
                 {
