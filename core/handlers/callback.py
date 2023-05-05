@@ -1,6 +1,6 @@
-from decimal import Decimal
 from aiogram import Bot
 from aiogram.types import CallbackQuery, FSInputFile
+
 from core.database import query_db
 from core.database.query_db import *
 from core.keyboards.inline import *
@@ -173,8 +173,8 @@ async def create_order(call: CallbackQuery, bot: Bot):
                                                 currency=order.currency,
                                                 currencyPrice=order.currencyPrice, client_name=order.client_name,
                                                 client_phone=order.client_phone, client_mail=order.client_mail,
-                                                shop=order.shop,
-                                                seller_id=order.seller_id, sum_rub=order.sum_rub, sum=order.sum)
+                                                shop=order.shop, shop_currency=order.shop_currency,
+                                                seller_id=order.seller_id, sum_rub=order.sum_rub, sum_usd=order.sum_usd)
     if response.ok:
         if order.paymentType == '3':
             s_name, f_name, patronymic = order.client_name.split()

@@ -1,7 +1,8 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from core.utils.callbackdata import *
-from core.oneC.api import Api
+
 from core.oneC import utils
+from core.oneC.api import Api
+from core.utils.callbackdata import *
 
 oneC = Api()
 
@@ -22,10 +23,19 @@ def getKeyboard_profile():
     return keyboard.as_markup()
 
 
+def getKeyboard_selectCurrency():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text="$", callback_data=Currency(currency='USD'))
+    keyboard.button(text="₽", callback_data=Currency(currency='RUB'))
+    keyboard.adjust(2, repeat=True)
+    return keyboard.as_markup()
+
+
 def getKeyboard_selectShop(shops):
     keyboard = InlineKeyboardBuilder()
     for shop in shops:
-        keyboard.button(text=shop['Магазин'], callback_data=Shop(shop=str(shop['idМагазин'])))
+        keyboard.button(text=shop['Магазин'], callback_data=Shop(shop=str(shop['idМагазин']), currency=shop['Валюта'],
+                                                                 price=str(shop['ВалютаКурс'])))
     keyboard.adjust(2, repeat=True)
     return keyboard.as_markup()
 

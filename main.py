@@ -1,22 +1,23 @@
 #!/usr/bin/env python3.10
 # -*- coding: utf-8 -*-
 
-import asyncio
 import os
-from aiogram import Bot, Dispatcher, F
+
+from aiogram import Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message
 from aiogram.fsm.storage.redis import RedisStorage
 
-from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
-from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
-from core.utils.commands import get_commands
+from core.database.model import init_models
+from core.filters.iscontact import IsTrueContact
+from core.handlers import contact
 from core.handlers.basic import get_start, check_registration, cancel
 from core.handlers.callback import *
+from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
 from core.utils.callbackdata import *
-from core.handlers import contact
-from core.filters.iscontact import IsTrueContact
-from core.database.model import init_models
+from core.utils.commands import get_commands
+from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
+
+
 @logger.catch()
 async def start():
     if not os.path.exists(os.path.join(config.dir_path, 'logs')):
@@ -77,7 +78,8 @@ async def start():
 
     # STATES CHOISE SHOP
     dp.callback_query.register(choiseShop.check_shops, F.data == 'startOrder')
-    dp.callback_query.register(choiseShop.choise_currency_price_Shop, Shop.filter())
+    dp.callback_query.register(choiseShop.choise_currency, Shop.filter())
+    dp.callback_query.register(choiseShop.choise_currency_price, Currency.filter())
 
     try:
         await dp.start_polling(bot)

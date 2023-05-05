@@ -1,12 +1,14 @@
 import re
 
-from aiogram import Bot
-from core.oneC.api import Api
 import requests
-from loguru import logger
-from core.database import query_db
-from core.utils import texts
+from aiogram import Bot
 from funcy import str_join
+from loguru import logger
+
+from core.database import query_db
+from core.oneC.api import Api
+from core.utils import texts
+
 api = Api()
 
 
@@ -70,7 +72,6 @@ async def create_order(bot: Bot, **kwargs):
         shop_name = await get_shop_name(client.phone_number, kwargs['shop'])
         payment_name = (await get_payment_name(kwargs['paymentGateway']))['Наименование']
         product_name = (await get_tovar_by_ID(kwargs['product_id']))['Наименование']
-
         order = {
             "TypeR": "Doc",
             "Sklad": str(kwargs['shop']),
@@ -84,7 +85,7 @@ async def create_order(bot: Bot, **kwargs):
                 {
                     "Tov": str(kwargs['product_id']),
                     "Cost": str(kwargs['price']),
-                    "Sum": str(kwargs['sum']),
+                    "Sum": str(kwargs['sum_usd']),
                     "Kol": str(kwargs['quantity'])
                 },
             ]
@@ -100,12 +101,13 @@ async def create_order(bot: Bot, **kwargs):
                                            paymentGateway=kwargs['paymentGateway'], paymentType=kwargs['paymentType'],
                                            payment_name=payment_name,
                                            product_id=kwargs['product_id'], product_name=product_name,
-                                           price=kwargs['price'], quantity=kwargs['quantity'], sum=kwargs['sum'],
+                                           price=kwargs['price'], quantity=kwargs['quantity'],
+                                           sum_usd=kwargs['sum_usd'],
                                            currency=kwargs['currency'],
                                            currencyPrice=kwargs['currencyPrice'], client_name=kwargs['client_name'],
                                            client_phone=kwargs['client_phone'], client_mail=kwargs['client_mail'],
                                            shop_id=kwargs['shop'], shop_name=shop_name, seller_id=kwargs['seller_id'],
-                                           sum_rub=kwargs['sum_rub'])
+                                           sum_rub=kwargs['sum_rub'], shop_currency=kwargs['shop_currency'])
         return response, answer
     except Exception as ex:
         logger.exception(ex)

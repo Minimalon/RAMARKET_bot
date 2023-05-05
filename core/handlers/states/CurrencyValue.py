@@ -1,13 +1,14 @@
 import re
 from decimal import Decimal
-from aiogram.types import CallbackQuery, Message
-from aiogram.fsm.context import FSMContext
 
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
+from loguru import logger
+
+import core.database.query_db as query_db
+from core.keyboards.inline import getKeyboard_select_Main_PaymentGateway
 from core.utils import texts
 from core.utils.states import StateCreateOrder, StateCurrency
-from core.keyboards.inline import getKeyboard_ProductStart, getKeyboard_select_Main_PaymentGateway
-import core.database.query_db as query_db
-from loguru import logger
 
 
 async def error_message(message: Message, exception, state: FSMContext):
@@ -33,6 +34,7 @@ async def check_CurrencyPrice(message: Message, state: FSMContext):
             currencyPrice = message.text.replace(',', '.')
         else:
             currencyPrice = message.text
+        currencyPrice = Decimal(currencyPrice).quantize(Decimal('1.0000'))
         log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, currencyPrice=str(currencyPrice))
         log.info("Ввели цену")
         log.info(Decimal(currencyPrice))

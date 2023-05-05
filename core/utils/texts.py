@@ -1,4 +1,3 @@
-from decimal import Decimal
 from core.database import query_db
 
 error_head = f"➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖\n"
@@ -23,18 +22,20 @@ async def createOrder(**kwargs):
     else:
         mail_or_phone = kwargs["client_mail"]
         message = "Почта"
-    text = (f'ℹ️ <b>Информация о заказе:</b>\n'
-            f'➖➖➖➖➖➖➖➖➖➖➖\n'
-            f'<b>ФИО клиента</b>: <code>{kwargs["client_name"]}</code>\n'
-            f'<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n'
-            f'<b>Название магазина</b>: <code>{kwargs["shop_name"]}</code>\n'
-            f'<b>Тип оплаты</b>: <code>{kwargs["payment_name"]}</code>\n'
-            f'<b>Курс валюты</b>: <code>{kwargs["currencyPrice"]}</code>\n'
-            f'<b>Название товара</b>: <code>{kwargs["product_name"]}</code>\n'
-            f'<b>Цена товара</b>: <code>{kwargs["price"]} {kwargs["currency"]}</code>\n'
-            f'<b>Количество</b>: <code>{kwargs["quantity"]}</code>\n'
-            f'<b>Итого</b>: <code>{kwargs["sum"]} {kwargs["currency"]}'
-            f' / {kwargs["sum_rub"]} руб</code>')
+    text = f'ℹ️ <b>Информация о заказе:</b>\n' \
+           f'➖➖➖➖➖➖➖➖➖➖➖\n' \
+           f'<b>ФИО клиента</b>: <code>{kwargs["client_name"]}</code>\n' \
+           f'<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n' \
+           f'<b>Название магазина</b>: <code>{kwargs["shop_name"]}</code>\n' \
+           f'<b>Тип оплаты</b>: <code>{kwargs["payment_name"]}</code>\n' \
+           f'<b>Курс валюты</b>: <code>{kwargs["currencyPrice"]}</code>\n' \
+           f'<b>Название товара</b>: <code>{kwargs["product_name"]}</code>\n' \
+           f'<b>Цена товара</b>: <code>{kwargs["price"]} {kwargs["currency_symbol"]}</code>\n' \
+           f'<b>Количество</b>: <code>{kwargs["quantity"]}</code>\n'
+    if kwargs['currency'] == 'USD':
+        text += f'<b>Итого</b>: <code>{kwargs["sum_usd"]} {kwargs["currency_symbol"]} / {kwargs["sum_rub"]} руб</code>'
+    elif kwargs['currency'] == 'RUB':
+        text += f'<b>Итого</b>: <code>{kwargs["sum_rub"]} {kwargs["currency_symbol"]} / {kwargs["sum_usd"]} $</code>'
     return text
 
 

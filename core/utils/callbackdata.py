@@ -1,8 +1,14 @@
 from aiogram.filters.callback_data import CallbackData
 
 
+class Currency(CallbackData, prefix='currency'):
+    currency: str
+
+
 class Shop(CallbackData, prefix='shop'):
     shop: str
+    currency: str
+    price: str
 
 
 class ChildPaymentGateway(CallbackData, prefix='childPaymentGateway'):
