@@ -52,7 +52,8 @@ async def check_shops(call: CallbackQuery):
             await call.message.answer(texts.zero_shops)
         else:
             await query_db.update_order(chat_id=call.message.chat.id, shop=str(shop['Магазины'][0]['idМагазин']),
-                                        seller_id=shop['id'], shop_currency=shop['Магазины'][0]['Валюта'])
+                                        seller_id=shop['id'], shop_currency=shop['Магазины'][0]['Валюта'],
+                                        currencyPrice=shop['Магазины'][0]['ВалютаКурс'])
             await call.message.edit_text('Выберите валюту', reply_markup=getKeyboard_selectCurrency())
     except Exception as ex:
         await error_message(call.message, ex)
