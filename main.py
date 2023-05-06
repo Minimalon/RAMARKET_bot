@@ -62,6 +62,7 @@ async def start():
     # dp.callback_query.register(createOrder.get_client_name_CALLBACK, F.data == 'currentPrice')
     # dp.callback_query.register(createOrder.get_price, F.data == 'newPrice')
 
+
     # STATES CREATE ORDER
     dp.message.register(createOrder.check_price, StateCreateOrder.GET_PRICE)
     dp.message.register(createOrder.check_client_name, StateCreateOrder.GET_CLIENT_NAME)
