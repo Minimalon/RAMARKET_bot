@@ -3,16 +3,18 @@
 
 import os
 
+import aiogram.exceptions
 from aiogram import Dispatcher, F
 from aiogram.filters import Command
 from aiogram.fsm.storage.redis import RedisStorage
+from loguru import logger
 
-from core.database.model import init_models
 from core.filters.iscontact import IsTrueContact
 from core.handlers import contact
 from core.handlers.basic import get_start, check_registration, cancel
 from core.handlers.callback import *
 from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
+from core.middlewares.language_middleware import ACLMiddleware
 from core.utils.callbackdata import *
 from core.utils.commands import get_commands
 from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
@@ -23,14 +25,16 @@ async def start():
     if not os.path.exists(os.path.join(config.dir_path, 'logs')):
         os.makedirs(os.path.join(config.dir_path, 'logs'))
     logger.add(os.path.join(config.dir_path, 'logs', 'debug.log'),
-               format="{time:MMMM D, YYYY > HH:mm:ss} | {level} | {message} | {extra}", )
+               format="{time} | {level} | {name}:{function}:{line} | {message} | {extra}", )
 
-    bot = Bot(token=config.token)
-
+    bot = Bot(token=config.token, parse_mode='HTML')
     await get_commands(bot)
     await init_models()
     storage = RedisStorage.from_url(config.redisStorage)
     dp = Dispatcher(storage=storage)
+
+    # middleware для определения языка
+    dp.update.middleware(ACLMiddleware(config.i18n))
 
     # Команды
     dp.message.register(check_registration, Command(commands=['start']))
@@ -39,6 +43,8 @@ async def start():
     # Главное меню
     dp.callback_query.register(menu, F.data == 'menu')
     dp.callback_query.register(profile, F.data == 'profile')
+    dp.callback_query.register(select_change_language, F.data == 'сhange_language')
+    dp.callback_query.register(change_language, ChangeLanguage.filter())
     dp.callback_query.register(create_order, F.data == 'createOrder')
     dp.callback_query.register(history_orders, F.data == 'historyOrders')
 
@@ -62,7 +68,6 @@ async def start():
     # dp.callback_query.register(createOrder.get_client_name_CALLBACK, F.data == 'currentPrice')
     # dp.callback_query.register(createOrder.get_price, F.data == 'newPrice')
 
-
     # STATES CREATE ORDER
     dp.message.register(createOrder.check_price, StateCreateOrder.GET_PRICE)
     dp.message.register(createOrder.check_client_name, StateCreateOrder.GET_CLIENT_NAME)
@@ -84,8 +89,10 @@ async def start():
 
     try:
         await dp.start_polling(bot)
+    except aiogram.exceptions.TelegramNetworkError:
+        dp.callback_query.register(get_start)
     except Exception as e:
-        logger.info(e)
+        logger.exception(e)
     finally:
         await bot.session.close()
 

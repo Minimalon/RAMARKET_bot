@@ -1,0 +1,324 @@
+# Turkish translations for PROJECT.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-05-11 17:41+0300\n"
+"PO-Revision-Date: 2023-05-11 17:01+0300\n"
+"Last-Translator: \n"
+"Language: tr\n"
+"Language-Team: tr <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: core/handlers/basic.py:27
+msgid "Регистрация успешно пройдена"
+msgstr "Kayıt başarıyla tamamlandı"
+
+#: core/handlers/basic.py:31
+msgid ""
+"Ваш сотовый {client_phone} не зарегистрирован в системе\n"
+"Уточните вопрос и попробуйте снова"
+msgstr ""
+"Cep telefonunuz {client_phone} sisteme kayıtlı değil\n"
+"Soruyu açıklığa kavuşturun ve tekrar deneyin"
+
+#: core/handlers/basic.py:45 core/handlers/callback.py:22
+#: core/handlers/states/choiseShop.py:32
+msgid "Вы зашли впервые, нажмите кнопку Регистрация"
+msgstr "İlk kez girdiniz, Kayıt düğmesine tıklayın"
+
+#: core/handlers/callback.py:60
+msgid ""
+"ℹ️ <b>Информация о вас:</b>\n"
+"➖➖➖➖➖➖➖➖➖➖➖\n"
+"<b>💳 ID:</b> <code>{chat_id}</code>"
+msgstr ""
+"ℹ️ <b>Hakkınızdaki bilgiler:</b>\n"
+"➖➖➖➖➖➖➖➖➖➖➖\n"
+"<b>💳 ID:</b> <code>{chat_id}</code>"
+
+#: core/handlers/callback.py:70
+msgid "Выберите язык"
+msgstr "Dili seçin"
+
+#: core/handlers/callback.py:87
+msgid "Список заказов пуст"
+msgstr "Sipariş listesi boş"
+
+#: core/handlers/callback.py:89 core/keyboards/inline.py:16
+#: core/keyboards/inline.py:20
+msgid "История заказов"
+msgstr "Sipariş geçmişi"
+
+#: core/handlers/callback.py:100 core/handlers/states/CurrencyValue.py:42
+msgid "Выберите способ оплаты"
+msgstr "Ödeme yönteminizi seçin"
+
+#: core/handlers/callback.py:118 core/handlers/callback.py:125
+msgid "Выберите способ выбора товара"
+msgstr "Ürünü seçmek için bir yöntem seçin"
+
+#: core/handlers/callback.py:132
+msgid "Cписок категорий товара"
+msgstr "Ürün kategorileri listesi"
+
+#: core/handlers/callback.py:143
+msgid "Выберите товар"
+msgstr "Ürünü seçin"
+
+#: core/handlers/callback.py:147
+msgid "Cписок подкатегорий"
+msgstr "Alt kategorilerin listesi"
+
+#: core/handlers/callback.py:157 core/handlers/states/enterArticle.py:40
+msgid "Выберите количество товара"
+msgstr "Alt kategorilerin listesiÜrün miktarını seçin"
+
+#: core/handlers/callback.py:225
+msgid ""
+"<b><u>Заказ успешно создан</u></b>\n"
+"{text}"
+msgstr ""
+"<b><u>Sipariş başarıyla oluşturuldu</u></b>\n"
+"{text}"
+
+#: core/handlers/states/CurrencyValue.py:22
+msgid ""
+"Введите новый курс\n"
+"Например: <b>75.127</b>"
+msgstr ""
+"Yeni rotayı girin\n"
+"Örneğin: <b>75.127</b>"
+
+#: core/handlers/states/choiseShop.py:48
+msgid "Выберите магазин"
+msgstr "Bir mağaza seçin"
+
+#: core/handlers/states/choiseShop.py:52
+msgid ""
+"На вас не прикреплено ни одного магазина\n"
+"Уточните вопрос и попробуйте снова"
+msgstr ""
+"Size bağlı hiçbir mağaza yok\n"
+"Soruyu açıklığa kavuşturun ve tekrar deneyin"
+
+#: core/handlers/states/choiseShop.py:57 core/handlers/states/choiseShop.py:66
+msgid "Выберите валюту"
+msgstr "Para birimini seçin"
+
+#: core/handlers/states/choiseShop.py:86
+msgid "Фактический курс: <code>{currency_price}</code>"
+msgstr "Gerçek ders: <code>{currency_price}</code>"
+
+#: core/handlers/states/createOrder.py:25
+msgid "Введите цену товара"
+msgstr "Ürünün fiyatını girin"
+
+#: core/handlers/states/createOrder.py:54
+#: core/handlers/states/createOrder.py:62
+msgid "Введите ФИО (полностью)"
+msgstr "Tam adı girin (tamamen)"
+
+#: core/handlers/states/createOrder.py:71
+msgid "Введите сотовый или почту клиента"
+msgstr "Müşterinin cep telefonunu veya e-postasını girin"
+
+#: core/handlers/states/createOrder.py:96
+msgid ""
+"{error_head}Номер должен состоят максимум из 11 цифр\n"
+"Почта должна содержать знак <u><b>@</b></u>\n"
+"<b>Попробуйте снова.</b>"
+msgstr ""
+"{error_head}Sayı en fazla 11 haneden oluşmalıdır\n"
+"Postada <u><b>@</b></u> işareti bulunmalıdır\n"
+"<b>Tekrar deneyin.</b>"
+
+#: core/handlers/states/enterArticle.py:20
+msgid "Введите ID товара"
+msgstr "Ürün kimliğini girin"
+
+#: core/keyboards/inline.py:14 core/keyboards/inline.py:18
+msgid "Заказ"
+msgstr "Sipariş"
+
+#: core/keyboards/inline.py:15 core/keyboards/inline.py:19
+msgid "Личный кабинет"
+msgstr "Kişisel hesap"
+
+#: core/keyboards/inline.py:27 core/keyboards/inline.py:172
+#: core/utils/commands.py:9
+msgid "Главное меню"
+msgstr "Ana menü"
+
+#: core/keyboards/inline.py:28
+msgid "Изменить язык"
+msgstr "Dili değiştirRotayı değiştir"
+
+#: core/keyboards/inline.py:61 core/keyboards/inline.py:148
+#: core/keyboards/inline.py:158 core/keyboards/inline.py:164
+msgid "Продолжить"
+msgstr "Devam et"
+
+#: core/keyboards/inline.py:62
+msgid "Изменить курс"
+msgstr "Rotayı değiştir"
+
+#: core/keyboards/inline.py:87 core/keyboards/inline.py:105
+#: core/keyboards/inline.py:117 core/keyboards/inline.py:127
+#: core/keyboards/inline.py:129
+msgid "<<< Назад"
+msgstr "<<< Geri"
+
+#: core/keyboards/inline.py:94
+msgid "Ввести ID товара"
+msgstr "Ürün kimliğini girin"
+
+#: core/keyboards/inline.py:95
+msgid "Каталог"
+msgstr "Dizin"
+
+#: core/keyboards/inline.py:139
+msgid "Оставить текущую цену"
+msgstr "Mevcut fiyatı bırakın"
+
+#: core/keyboards/inline.py:140
+msgid "Изменить цену"
+msgstr "Fiyatı değiştir"
+
+#: core/keyboards/inline.py:171
+msgid "Создать заказ"
+msgstr "Sipariş oluştur"
+
+#: core/keyboards/reply.py:7
+msgid "Регистрация"
+msgstr "Kayıt"
+
+#: core/utils/commands.py:13
+msgid "Отменить создание заказа"
+msgstr "Sipariş oluşturmayı iptal et"
+
+#~ msgid "{menu}"
+#~ msgstr ""
+#~ "<u><b>Sipariş</b></u> - Alıcıya sipariş verin\n"
+#~ "\n"
+#~ "<u><b>Kişisel Hesap</b></u> - Kişisel kayıt bilgileri\n"
+#~ "\n"
+#~ "<u><b>Sipariş Geçmişi</b></u> - Sipariş "
+#~ "geçmişleriyle Excel dosyasını alın"
+
+#~ msgid "➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖\n"
+#~ msgstr "➖➖➖➖➖🚨HATA🚨➖➖➖➖➖\n"
+
+#~ msgid "{error_head}Не найдено текущего заказа"
+#~ msgstr "{error_head}Geçerli sipariş bulunamadı"
+
+#~ msgid ""
+#~ "{error_head}Вы написали больше одной запятой\n"
+#~ "Пример как надо: <b>10.12</b>"
+#~ msgstr ""
+#~ "{error_head}Birden fazla virgülle yazdınız mı\n"
+#~ "Aşağıdaki gibi bir örnek: <b>10.12</b>"
+
+#~ msgid ""
+#~ "{error_head}Цена содержит не нужные символы\n"
+#~ "Попробуйте снова\n"
+#~ "Пример как надо: <u><b>10.12</b></u>"
+#~ msgstr ""
+#~ "{error_head}Fiyat gereksiz semboller içeriyor\n"
+#~ "Tekrar dene\n"
+#~ "Aşağıdaki gibi bir örnek: <u><b>10.12</b></u>"
+
+#~ msgid ""
+#~ "{error_head}Разрешено вводить только цифры\n"
+#~ "Попробуйте снова"
+#~ msgstr ""
+#~ "{error_head}Yalnızca rakam girilmesine izin verilir\n"
+#~ "Tekrar dene"
+
+#~ msgid ""
+#~ "{error_head}Не найдено заказа\n"
+#~ "Попробуйте снова создать заказ."
+#~ msgstr ""
+#~ "{error_head}Sipariş bulunamadı\n"
+#~ "Siparişi tekrar oluşturmayı deneyin."
+
+#~ msgid ""
+#~ "{error_head}ФИО состоит из 3 слов, а ваше состоит из {count} слов\n"
+#~ "<b>Попробуйте снова.</b>"
+#~ msgstr ""
+#~ "{error_head}İsmin 3 kelimeden oluşuyor ve "
+#~ "sizinki {count} kelimelerinden oluşuyor\n"
+#~ "<b>Tekrar deneyin.</b>"
+
+#~ msgid ""
+#~ "{error_head}Сервер недоступен, его код ответа '{response}'\n"
+#~ "Попробуйте создать заказ снова."
+#~ msgstr ""
+#~ "{error_head}İsmin 3 kelimeden oluşuyor ve "
+#~ "sizinki {count} kelimelerinden oluşuyor\n"
+#~ "<b>Tekrar deneyin.</b>"
+
+#~ msgid ""
+#~ "<u><b>Заказ</b></u> - Оформить заказ покупателю\n"
+#~ "\n"
+#~ "<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n"
+#~ "\n"
+#~ "<u><b>История заказов</b></u> - Получить Excel файл с историями заказов"
+#~ msgstr ""
+#~ "<u><b>Sipariş</b></u> - Alıcıya sipariş verin\n"
+#~ "\n"
+#~ "<u><b>Kişisel Hesap</b></u> - Kişisel kayıt bilgileri\n"
+#~ "\n"
+#~ "<u><b>Sipariş Geçmişi</b></u> - Sipariş "
+#~ "geçmişleriyle Excel dosyasını alın"
+
+#~ msgid "Сотовый"
+#~ msgstr "Cep telefonu"
+
+#~ msgid "Почта"
+#~ msgstr "Posta"
+
+#~ msgid ""
+#~ "ℹ️ <b>Информация о заказе:</b>\n"
+#~ "➖➖➖➖➖➖➖➖➖➖➖\n"
+#~ "<b>ФИО клиента</b>: <code>{client_name}</code>\n"
+#~ "<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n"
+#~ "<b>Название магазина</b>: <code>{shop_name}</code>\n"
+#~ "<b>Тип оплаты</b>: <code>{payment_name}</code>\n"
+#~ "<b>Курс валюты</b>: <code>{currencyPrice}</code>\n"
+#~ "<b>Название товара</b>: <code>{product_name}</code>\n"
+#~ "<b>Цена товара</b>: <code>{price} {currency_symbol}</code>\n"
+#~ "<b>Количество</b>: <code>{quantity}</code>\n"
+#~ msgstr ""
+#~ "ℹ️ <b>Sipariş bilgileri:</b>\n"
+#~ "➖➖➖➖➖➖➖➖➖➖➖\n"
+#~ "<b>müşterinin adı</b>: <code>{client_name}</code>\n"
+#~ "<b>{message} istemcisinin</b>: <code>{mail_or_phone}</code>\n"
+#~ "<b>Mağaza adı</b>: <code>{shop_name}</code>\n"
+#~ "<b>Ödeme türü</b>: <code>{payment_name}</code>\n"
+#~ "<b>Döviz kuru</b>: <code>{currencyPrice}</code>\n"
+#~ "<b>Ürün adı</b>: <code>{product_name}</code>\n"
+#~ "<b>Ürün fiyatı</b>: <code>{price} {currency_symbol}</code>\n"
+#~ "<b>Miktar</b>: <code>{quantity}</code>\n"
+
+#~ msgid "<b>Итого</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>"
+#~ msgstr "<b>Toplam</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>"
+
+#~ msgid "<b>Итого</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>"
+#~ msgstr "<b>Toplam</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>"
+
+#~ msgid ""
+#~ "<b>Заказ под номером:</b> <code>{order_id}</code>\n"
+#~ "<b>На сумму:</b> <code>{sum} {currency_name} / {sum_rub} ₽</code>"
+#~ msgstr ""
+#~ "<b>Sipariş numarası altında:</b> <code>{order_id}</code>\n"
+#~ "<b>Toplamı için:</b> <code>{sum} {currency_name} / {sum_rub} ₽</code>"
+

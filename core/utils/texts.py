@@ -1,46 +1,87 @@
+from config import __
 from core.database import query_db
 
-error_head = f"➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖\n"
-error_needOnlyDigits = error_head + ("Номер должен состоят максимум из 11 цифр\n"
-                                     "Почта должна содержать знак <u><b>@</b></u>\n"
-                                     "<b>Попробуйте снова.</b>")
-error_fakeContact = f'{error_head}Ты отправил <u><b>не свой</b></u> контакт'
+# region ERRORS
+error_head = __("➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖\n")
+error_fakeContact = __(f'{error_head}Ты отправил <u><b>не свой</b></u> контакт')
+error_cancel = __("{error_head}Не найдено текущего заказа").format(error_head=error_head)
+error_price_double_comma = __("{error_head}Вы написали больше одной запятой\nПример как надо: <b>10.12</b>").format(
+    error_head=error_head)
 
-menu = (f'<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
-        f'<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
-        f'<u><b>История заказов</b></u> - Получить Excel файл с историями заказов')
+error_price_not_decimal = __(
+    "{error_head}Цена содержит не нужные символы\nПопробуйте снова\nПример как надо: <u><b>10.12</b></u>").format(
+    error_head=error_head)
 
-zero_shops = "На вас не прикреплено ни одного магазина\nУточните вопрос и попробуйте снова"
-select_payment = 'Выберите способ оплаты'
-enter_phone = "Введите сотовый или почту клиента"
+error_article_not_decimal = __("{error_head}Разрешено вводить только цифры\nПопробуйте снова").format(
+    error_head=error_head)
+
+error_not_found_order = __("{error_head}Не найдено заказа\nПопробуйте снова создать заказ.").format(
+    error_head=error_head)
+
+
+def error_full_name(name):
+    return __(
+        "{error_head}ФИО состоит из 3 слов, а ваше состоит из {count} слов\n<b>Попробуйте снова.</b>").format(
+        error_head=error_head, count=len(name.split()))
+
+
+def error_article_not_found(article):
+    return __.format(
+        error_head=error_head)
+
+
+def error_server(response):
+    return __("{error_head}Сервер недоступен, его код ответа '{response}'\nПопробуйте создать заказ снова.").format(
+        error_head=error_head, response=response.status)
+
+
+# endregion
+
+menu = __('<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
+          '<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
+          '<u><b>История заказов</b></u> - Получить Excel файл с историями заказов')
+
+
+def menu_new_language(language):
+    return __('<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
+              '<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
+              '<u><b>История заказов</b></u> - Получить Excel файл с историями заказов', locale=language)
 
 
 async def createOrder(**kwargs):
     if kwargs["client_phone"]:
         mail_or_phone = kwargs["client_phone"]
-        message = "Сотовый"
+        message = __("Сотовый")
     else:
         mail_or_phone = kwargs["client_mail"]
-        message = "Почта"
-    text = f'ℹ️ <b>Информация о заказе:</b>\n' \
-           f'➖➖➖➖➖➖➖➖➖➖➖\n' \
-           f'<b>ФИО клиента</b>: <code>{kwargs["client_name"]}</code>\n' \
-           f'<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n' \
-           f'<b>Название магазина</b>: <code>{kwargs["shop_name"]}</code>\n' \
-           f'<b>Тип оплаты</b>: <code>{kwargs["payment_name"]}</code>\n' \
-           f'<b>Курс валюты</b>: <code>{kwargs["currencyPrice"]}</code>\n' \
-           f'<b>Название товара</b>: <code>{kwargs["product_name"]}</code>\n' \
-           f'<b>Цена товара</b>: <code>{kwargs["price"]} {kwargs["currency_symbol"]}</code>\n' \
-           f'<b>Количество</b>: <code>{kwargs["quantity"]}</code>\n'
+        message = __("Почта")
+    text = __('ℹ️ <b>Информация о заказе:</b>\n'
+              '➖➖➖➖➖➖➖➖➖➖➖\n'
+              '<b>ФИО клиента</b>: <code>{client_name}</code>\n'
+              '<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n'
+              '<b>Название магазина</b>: <code>{shop_name}</code>\n'
+              '<b>Тип оплаты</b>: <code>{payment_name}</code>\n'
+              '<b>Курс валюты</b>: <code>{currencyPrice}</code>\n'
+              '<b>Название товара</b>: <code>{product_name}</code>\n'
+              '<b>Цена товара</b>: <code>{price} {currency_symbol}</code>\n'
+              '<b>Количество</b>: <code>{quantity}</code>\n'). \
+        format(client_name=kwargs["client_name"], message=message, mail_or_phone=mail_or_phone,
+               shop_name=kwargs["shop_name"],
+               payment_name=kwargs["payment_name"], currencyPrice=kwargs["currencyPrice"],
+               product_name=kwargs["product_name"], price=kwargs["price"], currency_symbol=kwargs["currency_symbol"],
+               quantity=kwargs["quantity"])
     if kwargs['currency'] == 'USD':
-        text += f'<b>Итого</b>: <code>{kwargs["sum_usd"]} {kwargs["currency_symbol"]} / {kwargs["sum_rub"]} руб</code>'
+        text += __('<b>Итого</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>').format(
+            sum_usd=kwargs["sum_usd"], currency_symbol=kwargs["currency_symbol"], sum_rub=kwargs["sum_rub"])
     elif kwargs['currency'] == 'RUB':
-        text += f'<b>Итого</b>: <code>{kwargs["sum_rub"]} {kwargs["currency_symbol"]} / {kwargs["sum_usd"]} $</code>'
+        text += __('<b>Итого</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>').format(
+            sum_usd=kwargs["sum_usd"], currency_symbol=kwargs["currency_symbol"], sum_rub=kwargs["sum_rub"])
     return text
 
 
 async def qr(order_id, sum, chat_id, sum_rub):
     currency_name = await query_db.get_currency_name(chat_id=chat_id)
-    text = (f"<b>Заказ под номером:</b> <code>{order_id}</code>\n"
-            f"<b>На сумму:</b> <code>{sum} {currency_name} / {sum_rub} руб</code>")
+    text = __("<b>Заказ под номером:</b> <code>{order_id}</code>\n"
+              "<b>На сумму:</b> <code>{sum} {currency_name} / {sum_rub} ₽</code>"). \
+        format(order_id=order_id, sum=sum, currency_name=currency_name, sum_rub=sum_rub)
     return text

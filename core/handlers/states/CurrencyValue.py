@@ -6,6 +6,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
 import core.database.query_db as query_db
+from config import _
 from core.keyboards.inline import getKeyboard_select_Main_PaymentGateway
 from core.utils import texts
 from core.utils.states import StateCreateOrder, StateCurrency
@@ -18,7 +19,7 @@ async def error_message(message: Message, exception, state: FSMContext):
 
 
 async def get_CurrencyPrice(call: CallbackQuery, state: FSMContext):
-    await call.message.answer("Введите новый курс\nНапример: <b>75.127</b>", parse_mode="HTML")
+    await call.message.answer(_("Введите новый курс\nНапример: <b>75.127</b>"))
     await call.answer()
     await state.set_state(StateCurrency.GET_PRICE)
 
@@ -27,8 +28,7 @@ async def check_CurrencyPrice(message: Message, state: FSMContext):
     try:
         if re.findall(',', message.text):
             if len(message.text.split(',')) > 2:
-                text = f"{texts.error_head}Вы написали более 1 запятой. Попробуйте снова\nНапример: <b>75.12</b>"
-                await message.answer(text, parse_mode='HTML')
+                await message.answer(texts.error_price_double_comma)
                 await state.set_state(StateCreateOrder.GET_PRICE)
                 return
             currencyPrice = message.text.replace(',', '.')
@@ -39,8 +39,7 @@ async def check_CurrencyPrice(message: Message, state: FSMContext):
         log.info("Ввели цену")
         log.info(Decimal(currencyPrice))
         await query_db.update_order(chat_id=message.chat.id, currencyPrice=Decimal(currencyPrice))
-        await message.answer(texts.select_payment, reply_markup=await getKeyboard_select_Main_PaymentGateway(),
-                             parse_mode='HTML')
+        await message.answer(_('Выберите способ оплаты'), reply_markup=await getKeyboard_select_Main_PaymentGateway())
         await state.clear()
     except Exception as ex:
         logger.exception(ex)

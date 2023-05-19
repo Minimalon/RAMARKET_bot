@@ -1,16 +1,16 @@
 from aiogram import Bot
 from aiogram.types import BotCommand, BotCommandScopeDefault
-
+from config import _
 
 async def get_commands(bot: Bot):
     commands = [
         BotCommand(
             command='start',
-            description='Главное меню'
+            description=_('Главное меню')
         ),
         BotCommand(
             command='cancel',
-            description='Отменить создание заказа'
+            description=_('Отменить создание заказа')
         ),
 
     ]

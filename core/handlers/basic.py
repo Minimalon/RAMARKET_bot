@@ -1,14 +1,16 @@
 import re
-from aiogram.fsm.context import FSMContext
 
-from core.utils import texts
 from aiogram import Bot
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from loguru import logger
+
+from config import _
+from core.database import query_db
 from core.keyboards.inline import getKeyboard_start
 from core.keyboards.reply import getKeyboard_registration
-from core.database import query_db
 from core.oneC.api import Api
+from core.utils import texts
 
 oneC = Api()
 
@@ -22,13 +24,14 @@ async def get_start(message: Message, bot: Bot):
         await query_db.update_client_info(chat_id=str(message.chat.id), phone_number=client_phone,
                                           first_name=message.contact.first_name, last_name=message.contact.last_name,
                                           user_id=str(message.contact.user_id))
-        await bot.send_message(message.chat.id, 'Регистрация успешно пройдена', reply_markup=ReplyKeyboardRemove())
-        await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+        await bot.send_message(message.chat.id, _('Регистрация успешно пройдена'), reply_markup=ReplyKeyboardRemove())
+        await message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     else:
         log.error("Нету в базе 1С")
-        text = f'Ваш сотовый "{client_phone}" не зарегистрирован в системе\n' \
-               f'Уточните вопрос и попробуйте снова'
-        await message.answer(text, reply_markup=getKeyboard_registration(), parse_mode='HTML')
+        text = _(
+            'Ваш сотовый {client_phone} не зарегистрирован в системе\n'f'Уточните вопрос и попробуйте снова') \
+            .format(client_phone=client_phone)
+        await message.answer(text, reply_markup=getKeyboard_registration())
 
 
 async def check_registration(message: Message):
@@ -36,11 +39,11 @@ async def check_registration(message: Message):
     log.info("/start")
     client_info = await query_db.get_client_info(chat_id=message.chat.id)
     if client_info:
-        await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+        await message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     else:
         log.error("Нету в базе 1С")
-        text = f'Вы зашли впервые, нажмите кнопку Регистрация'
-        await message.answer(text, reply_markup=getKeyboard_registration(), parse_mode='HTML')
+        text = _('Вы зашли впервые, нажмите кнопку Регистрация')
+        await message.answer(text, reply_markup=getKeyboard_registration())
 
 
 async def cancel(message: Message, state: FSMContext):
@@ -49,7 +52,6 @@ async def cancel(message: Message, state: FSMContext):
     order = await query_db.get_order_info(chat_id=chat_id)
     if order:
         await query_db.delete_order(chat_id=chat_id)
-        await message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+        await message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     else:
-        await message.answer(f"{texts.error_head}Не найдено текущего заказа", reply_markup=getKeyboard_start(),
-                             parse_mode='HTML')
+        await message.answer(texts.error_cancel, reply_markup=getKeyboard_start())

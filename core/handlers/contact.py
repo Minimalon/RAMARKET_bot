@@ -9,4 +9,4 @@ async def get_true_contact(message: Message, bot: Bot):
 
 
 async def get_fake_contact(message: Message):
-    await message.answer(texts.error_fakeContact, parse_mode='HTML')
+    await message.answer(texts.error_fakeContact)

@@ -69,6 +69,7 @@ class Clients(Base):
     user_id = Column(String(50), nullable=False, primary_key=True)
     chat_id = Column(String(50), nullable=False)
     admin = Column(Boolean, default=False)
+    language = Column(String(3), default='ru')
 
 
 async def init_models():

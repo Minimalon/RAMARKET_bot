@@ -1,6 +1,10 @@
+from decimal import Decimal
+
 from aiogram import Bot
 from aiogram.types import CallbackQuery, FSInputFile
+from loguru import logger
 
+from config import _
 from core.database import query_db
 from core.database.query_db import *
 from core.keyboards.inline import *
@@ -15,8 +19,8 @@ oneC = Api()
 
 async def not_reg(call: CallbackQuery):
     await call.message.delete()
-    text = f'Вы зашли впервые, нажмите кнопку Регистрация'
-    await call.message.answer(text, reply_markup=getKeyboard_registration(), parse_mode='HTML')
+    text = _('Вы зашли впервые, нажмите кнопку Регистрация')
+    await call.message.answer(text, reply_markup=getKeyboard_registration())
 
 
 async def menu(call: CallbackQuery):
@@ -28,7 +32,7 @@ async def menu(call: CallbackQuery):
         return
     client_info = await oneC.get_client_info(client_db.phone_number)
     if client_info:
-        await call.message.edit_text(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+        await call.message.edit_text("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     else:
         await not_reg(call)
         return
@@ -44,7 +48,7 @@ async def menu_not_edit_text(call: CallbackQuery):
     client_info = await oneC.get_client_info(client_db.phone_number)
     if client_info:
 
-        await call.message.answer(texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+        await call.message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     else:
         await not_reg(call)
         return
@@ -53,14 +57,26 @@ async def menu_not_edit_text(call: CallbackQuery):
 async def profile(call: CallbackQuery):
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
     log.info(f"Личный кабинет")
-    client_info = await query_db.get_client_info(chat_id=call.message.chat.id)
-    client_by_oneC = await oneC.get_client_info(client_info.phone_number)
-    text = (f"ℹ️ <b>Информация о вас:</b>\n"
-            f"➖➖➖➖➖➖➖➖➖➖➖\n"
-            f"<b>💳 ID:</b> <code>{call.message.chat.id}</code>\n"
-            f"<b>Валюта:</b> <code>{client_by_oneC['Валюта']}</code>\n"
-            f"<b>Курс валюты:</b> <code>{client_by_oneC['ВалютаКурс']}</code>")
-    await call.message.edit_text(text, reply_markup=getKeyboard_profile(), parse_mode='HTML')
+    text = _("ℹ️ <b>Информация о вас:</b>\n"
+             "➖➖➖➖➖➖➖➖➖➖➖\n"
+             "<b>💳 ID:</b> <code>{chat_id}</code>").format(
+        chat_id=call.message.chat.id)
+    await call.message.edit_text(text, reply_markup=getKeyboard_profile())
+
+
+async def select_change_language(call: CallbackQuery):
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    log.info(f"Изменить язык")
+    await call.message.edit_text(_('Выберите язык'), reply_markup=getKeyboard_change_language())
+
+
+async def change_language(call: CallbackQuery, callback_data: ChangeLanguage):
+    language = callback_data.language
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    log.info(f"Изменили язык интерфейса на '{language}'")
+    await update_client_language(str(call.message.chat.id), language)
+    await call.message.edit_text("{menu}".format(menu=texts.menu_new_language(language)),
+                                 reply_markup=getKeyboard_start(language))
 
 
 async def history_orders(call: CallbackQuery, bot: Bot):
@@ -68,10 +84,10 @@ async def history_orders(call: CallbackQuery, bot: Bot):
     log.info(f"История заказов")
     path_file = await query_db.create_excel(chat_id=call.message.chat.id)
     if not path_file:
-        await bot.send_message(call.message.chat.id, 'Список заказов пуст')
-        await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
-    await bot.send_document(call.message.chat.id, document=FSInputFile(path_file), caption="История заказов")
-    await bot.send_message(call.message.chat.id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+        await bot.send_message(call.message.chat.id, _('Список заказов пуст'))
+        await bot.send_message(call.message.chat.id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
+    await bot.send_document(call.message.chat.id, document=FSInputFile(path_file), caption=_("История заказов"))
+    await bot.send_message(call.message.chat.id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     os.remove(path_file)
 
 
@@ -81,7 +97,8 @@ async def selectMainPaymentGateway(call: CallbackQuery):
                       currencyPrice=order.currencyPrice)
     log.info(f"Переход на способ оплаты")
     await update_order(chat_id=call.message.chat.id, first_name=call.message.chat.first_name)
-    await call.message.edit_text(texts.select_payment, reply_markup=await getKeyboard_select_Main_PaymentGateway())
+    await call.message.edit_text(_('Выберите способ оплаты'),
+                                 reply_markup=await getKeyboard_select_Main_PaymentGateway())
     await call.answer()
 
 
@@ -98,21 +115,21 @@ async def select_input_method_Product(call: CallbackQuery, callback_data: Paymen
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, payment=callback_data.id)
     log.info(f"Выбрали тип оплаты")
     await update_order(chat_id=call.message.chat.id, paymentGateway=callback_data.id)
-    await call.message.edit_text("Выберите способ выбора товара", reply_markup=getKeyboard_ProductStart())
+    await call.message.edit_text(_('Выберите способ выбора товара'), reply_markup=getKeyboard_ProductStart())
     await call.answer()
 
 
 async def select_prev_page_catalog(call: CallbackQuery):
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
     log.info(f"Назад на способ выбора товара")
-    await call.message.edit_text("Выберите способ выбора товара", reply_markup=getKeyboard_ProductStart())
+    await call.message.edit_text(_('Выберите способ выбора товара'), reply_markup=getKeyboard_ProductStart())
     await call.answer()
 
 
 async def show_catalog(call: CallbackQuery):
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
     log.info(f"Нажали кнопку 'Каталог'")
-    await call.message.edit_text("Cписок категорий товара", reply_markup=await getKeyboard_catalog())
+    await call.message.edit_text(_("Cписок категорий товара"), reply_markup=await getKeyboard_catalog())
     await call.answer()
 
 
@@ -123,11 +140,11 @@ async def show_childcategories(call: CallbackQuery, callback_data: Category):
     markup = await getKeyboard_products_or_categories(callback_data.id, callback_data.parent_id)
     if markup.inline_keyboard[0][0].callback_data.startswith('product'):
         log.info('Выбирают товар')
-        await call.message.edit_text("Выберите товар", reply_markup=markup)
+        await call.message.edit_text(_("Выберите товар"), reply_markup=markup)
         await call.answer()
     if markup.inline_keyboard[0][0].callback_data.startswith('category'):
         log.info('Выбирают подкатегорию')
-        await call.message.edit_text("Cписок подкатегорий", reply_markup=markup)
+        await call.message.edit_text(_("Cписок подкатегорий"), reply_markup=markup)
         await call.answer()
 
 
@@ -137,7 +154,7 @@ async def select_quantity_product(call: CallbackQuery, callback_data: Product):
     log.info(f"Выбрали товар")
     await query_db.update_order(chat_id=call.message.chat.id, product_id=callback_data.product_id)
     log.info("Выбирает количество товара")
-    await call.message.edit_text("Выберите количество товара", reply_markup=getKeyboard_quantity_product())
+    await call.message.edit_text(_("Выберите количество товара"), reply_markup=getKeyboard_quantity_product())
     await call.answer()
 
 
@@ -157,8 +174,8 @@ async def create_order(call: CallbackQuery, bot: Bot):
 
     if not order:
         await call.message.delete()
-        await call.message.answer(f'{texts.error_head}Не найдено заказа\nПопробуйте снова создать заказ.')
-        await bot.send_message(chat_id, texts.menu, reply_markup=getKeyboard_start())
+        await call.message.answer(texts.error_not_found_order)
+        await bot.send_message(chat_id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     if not client_db:
         await not_reg(call)
         return
@@ -187,26 +204,28 @@ async def create_order(call: CallbackQuery, bot: Bot):
             qr_path = await generateQR(textQR, order.paymentType, answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             text = await texts.qr(answer['Nomer'], order.sum_usd, chat_id, order.sum_rub)
+            text = '{text}'.format(text=text)
             await call.message.delete()
-            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, parse_mode='HTML')
+            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text)
             await query_db.delete_order(chat_id=chat_id)
         elif order.paymentType == '2':
             textQR = answer['Ref']
             qr_path = await generateQR(textQR, order.paymentType, answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             text = await texts.qr(answer['Nomer'], order.sum_usd, chat_id, order.sum_rub)
+            text = '{text}'.format(text=text)
             await call.message.delete()
-            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, parse_mode='HTML')
+            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text)
             await query_db.delete_order(chat_id=chat_id)
         else:
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             await call.message.delete()
             text = await texts.qr(answer['Nomer'], order.sum_usd, chat_id, order.sum_rub)
-            await bot.send_message(chat_id, f"<b><u>Заказ успешно создан</u></b>\n{text}", parse_mode='HTML')
+            text = '{text}'.format(text=text)
+            await bot.send_message(chat_id, _("<b><u>Заказ успешно создан</u></b>\n{text}").format(text=text))
             await query_db.delete_order(chat_id=chat_id)
     else:
-        await call.message.answer(
-            f"{texts.error_head}Сервер недоступен, его код ответа '{response.status}'\nПопробуйте создать заказ снова.")
+        await call.message.answer('{text}'.format(text=texts.error_server(response)))
         log.info(f"Сервер недоступен, его код ответа '{response.status}'")
 
-    await bot.send_message(chat_id, texts.menu, reply_markup=getKeyboard_start(), parse_mode='HTML')
+    await bot.send_message(chat_id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())

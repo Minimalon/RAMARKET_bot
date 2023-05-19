@@ -1,0 +1,319 @@
+# English translations for PROJECT.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-05-11 17:41+0300\n"
+"PO-Revision-Date: 2023-05-11 17:02+0300\n"
+"Last-Translator: \n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: core/handlers/basic.py:27
+msgid "Регистрация успешно пройдена"
+msgstr "Registration successfully completed"
+
+#: core/handlers/basic.py:31
+msgid ""
+"Ваш сотовый {client_phone} не зарегистрирован в системе\n"
+"Уточните вопрос и попробуйте снова"
+msgstr ""
+"Your cell {client_phone} is not registered in the system\n"
+"Clarify your question and try again"
+
+#: core/handlers/basic.py:45 core/handlers/callback.py:22
+#: core/handlers/states/choiseShop.py:32
+msgid "Вы зашли впервые, нажмите кнопку Регистрация"
+msgstr "You are logged in for the first time, click Register"
+
+#: core/handlers/callback.py:60
+msgid ""
+"ℹ️ <b>Информация о вас:</b>\n"
+"➖➖➖➖➖➖➖➖➖➖➖\n"
+"<b>💳 ID:</b> <code>{chat_id}</code>"
+msgstr ""
+"ℹ️ <b>Information about you:</b>\n"
+"➖➖➖➖➖➖➖➖➖➖➖\n"
+"<b>💳 ID:</b> <code>{chat_id}</code>"
+
+#: core/handlers/callback.py:70
+msgid "Выберите язык"
+msgstr "Select a language"
+
+#: core/handlers/callback.py:87
+msgid "Список заказов пуст"
+msgstr "The order list is empty"
+
+#: core/handlers/callback.py:89 core/keyboards/inline.py:16
+#: core/keyboards/inline.py:20
+msgid "История заказов"
+msgstr "Order history"
+
+#: core/handlers/callback.py:100 core/handlers/states/CurrencyValue.py:42
+msgid "Выберите способ оплаты"
+msgstr "Choose a payment method"
+
+#: core/handlers/callback.py:118 core/handlers/callback.py:125
+msgid "Выберите способ выбора товара"
+msgstr "Choose the product selection method"
+
+#: core/handlers/callback.py:132
+msgid "Cписок категорий товара"
+msgstr "List of product categories"
+
+#: core/handlers/callback.py:143
+msgid "Выберите товар"
+msgstr "Select a product"
+
+#: core/handlers/callback.py:147
+msgid "Cписок подкатегорий"
+msgstr "List of subcategories"
+
+#: core/handlers/callback.py:157 core/handlers/states/enterArticle.py:40
+msgid "Выберите количество товара"
+msgstr "Select a product quantity"
+
+#: core/handlers/callback.py:225
+msgid ""
+"<b><u>Заказ успешно создан</u></b>\n"
+"{text}"
+msgstr ""
+"<b><u>Order successfully created</u></b>\n"
+"{text}"
+
+#: core/handlers/states/CurrencyValue.py:22
+msgid ""
+"Введите новый курс\n"
+"Например: <b>75.127</b>"
+msgstr ""
+"Enter a new course\n"
+"For example: <b>75.127</b>"
+
+#: core/handlers/states/choiseShop.py:48
+msgid "Выберите магазин"
+msgstr "Choose a store"
+
+#: core/handlers/states/choiseShop.py:52
+msgid ""
+"На вас не прикреплено ни одного магазина\n"
+"Уточните вопрос и попробуйте снова"
+msgstr ""
+"You don't have a single store attached to you\n"
+"Clarify the question and try again"
+
+#: core/handlers/states/choiseShop.py:57 core/handlers/states/choiseShop.py:66
+msgid "Выберите валюту"
+msgstr "Choose a currency"
+
+#: core/handlers/states/choiseShop.py:86
+msgid "Фактический курс: <code>{currency_price}</code>"
+msgstr "Actual rate: <code>{currency_price}</code>"
+
+#: core/handlers/states/createOrder.py:25
+msgid "Введите цену товара"
+msgstr "Enter the product price"
+
+#: core/handlers/states/createOrder.py:54
+#: core/handlers/states/createOrder.py:62
+msgid "Введите ФИО (полностью)"
+msgstr "Enter your full name (in full)"
+
+#: core/handlers/states/createOrder.py:71
+msgid "Введите сотовый или почту клиента"
+msgstr "Enter the client's cell phone or email"
+
+#: core/handlers/states/createOrder.py:96
+msgid ""
+"{error_head}Номер должен состоят максимум из 11 цифр\n"
+"Почта должна содержать знак <u><b>@</b></u>\n"
+"<b>Попробуйте снова.</b>"
+msgstr ""
+"{error_head}The number must consist of a maximum of 11 digits\n"
+"The mail must contain the sign <u><b>@</b></u>\n"
+"<b>Try again.</b>"
+
+#: core/handlers/states/enterArticle.py:20
+msgid "Введите ID товара"
+msgstr "Enter the product ID"
+
+#: core/keyboards/inline.py:14 core/keyboards/inline.py:18
+msgid "Заказ"
+msgstr "Ordering"
+
+#: core/keyboards/inline.py:15 core/keyboards/inline.py:19
+msgid "Личный кабинет"
+msgstr "My Account"
+
+#: core/keyboards/inline.py:27 core/keyboards/inline.py:172
+#: core/utils/commands.py:9
+msgid "Главное меню"
+msgstr "Main menu"
+
+#: core/keyboards/inline.py:28
+msgid "Изменить язык"
+msgstr "Select a language"
+
+#: core/keyboards/inline.py:61 core/keyboards/inline.py:148
+#: core/keyboards/inline.py:158 core/keyboards/inline.py:164
+msgid "Продолжить"
+msgstr "Continue"
+
+#: core/keyboards/inline.py:62
+msgid "Изменить курс"
+msgstr "Change course"
+
+#: core/keyboards/inline.py:87 core/keyboards/inline.py:105
+#: core/keyboards/inline.py:117 core/keyboards/inline.py:127
+#: core/keyboards/inline.py:129
+msgid "<<< Назад"
+msgstr "<<< Back"
+
+#: core/keyboards/inline.py:94
+msgid "Ввести ID товара"
+msgstr "Enter the product ID"
+
+#: core/keyboards/inline.py:95
+msgid "Каталог"
+msgstr "Catalog"
+
+#: core/keyboards/inline.py:139
+msgid "Оставить текущую цену"
+msgstr "Leave the current price"
+
+#: core/keyboards/inline.py:140
+msgid "Изменить цену"
+msgstr "Change the price"
+
+#: core/keyboards/inline.py:171
+msgid "Создать заказ"
+msgstr "Create an order"
+
+#: core/keyboards/reply.py:7
+msgid "Регистрация"
+msgstr "Registration"
+
+#: core/utils/commands.py:13
+msgid "Отменить создание заказа"
+msgstr "Cancel order creation"
+
+#~ msgid "{menu}"
+#~ msgstr "{menu}"
+
+#~ msgid "➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖\n"
+#~ msgstr "➖ ➖ ➖ ➖ ➖ 🚨 ERROR 🚨➖ ➖ ➖ ➖ ➖\n"
+
+#~ msgid "{error_head}Не найдено текущего заказа"
+#~ msgstr "{error_head}No current order found"
+
+#~ msgid ""
+#~ "{error_head}Вы написали больше одной запятой\n"
+#~ "Пример как надо: <b>10.12</b>"
+#~ msgstr ""
+#~ "{error_head}You have written more than one comma\n"
+#~ "An example of how it should be: <b>10.12</b>"
+
+#~ msgid ""
+#~ "{error_head}Цена содержит не нужные символы\n"
+#~ "Попробуйте снова\n"
+#~ "Пример как надо: <u><b>10.12</b></u>"
+#~ msgstr ""
+#~ "{error_head}The price contains unnecessary symbols\n"
+#~ "Try again\n"
+#~ "An example of how it should be: <u><b>10.12</b></u>"
+
+#~ msgid ""
+#~ "{error_head}Разрешено вводить только цифры\n"
+#~ "Попробуйте снова"
+#~ msgstr ""
+#~ "{error_head}It is allowed to enter only numbers\n"
+#~ "Try again"
+
+#~ msgid ""
+#~ "{error_head}Не найдено заказа\n"
+#~ "Попробуйте снова создать заказ."
+#~ msgstr ""
+#~ "{error_head}No order found\n"
+#~ "Try to create an order again."
+
+#~ msgid ""
+#~ "{error_head}ФИО состоит из 3 слов, а ваше состоит из {count} слов\n"
+#~ "<b>Попробуйте снова.</b>"
+#~ msgstr ""
+#~ "{error_head}FULL name consists of 3 "
+#~ "words, and yours consists of {count} "
+#~ "words\n"
+#~ "<b>Try again.</b>"
+
+#~ msgid ""
+#~ "{error_head}Сервер недоступен, его код ответа '{response}'\n"
+#~ "Попробуйте создать заказ снова."
+#~ msgstr ""
+#~ "{error_head}The server is unavailable, its "
+#~ "response code is '{response}'\n"
+#~ "Try to create an order again."
+
+#~ msgid ""
+#~ "<u><b>Заказ</b></u> - Оформить заказ покупателю\n"
+#~ "\n"
+#~ "<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n"
+#~ "\n"
+#~ "<u><b>История заказов</b></u> - Получить Excel файл с историями заказов"
+#~ msgstr ""
+#~ "<u><b>Order</b></u> - Place an order to the buyer\n"
+#~ "\n"
+#~ "<u><b>Personal account</b></u> - Personal registration data\n"
+#~ "\n"
+#~ "<u><b>Order History</b></u> - Get an Excel file with order histories"
+
+#~ msgid "Сотовый"
+#~ msgstr "Cell phone"
+
+#~ msgid "Почта"
+#~ msgstr "Mail"
+
+#~ msgid ""
+#~ "ℹ️ <b>Информация о заказе:</b>\n"
+#~ "➖➖➖➖➖➖➖➖➖➖➖\n"
+#~ "<b>ФИО клиента</b>: <code>{client_name}</code>\n"
+#~ "<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n"
+#~ "<b>Название магазина</b>: <code>{shop_name}</code>\n"
+#~ "<b>Тип оплаты</b>: <code>{payment_name}</code>\n"
+#~ "<b>Курс валюты</b>: <code>{currencyPrice}</code>\n"
+#~ "<b>Название товара</b>: <code>{product_name}</code>\n"
+#~ "<b>Цена товара</b>: <code>{price} {currency_symbol}</code>\n"
+#~ "<b>Количество</b>: <code>{quantity}</code>\n"
+#~ msgstr ""
+#~ "ℹ️ <b>Order Information:</b>\n"
+#~ "➖➖➖➖➖➖➖➖➖➖➖\n"
+#~ "<b>Client's full name</b>: <code>{client_name}</code>\n"
+#~ "<b>client's{message}</b>: <code>{mail_or_phone}</code>\n"
+#~ "<b>Store name</b>: <code>{shop_name}</code>\n"
+#~ "<b>Payment type</b>: <code>{payment_name}</code>\n"
+#~ "<b>Currency exchange rate</b>: <code>{currencyPrice}</code>\n"
+#~ "<b>Product name</b>: <code>{product_name}</code>\n"
+#~ "<b>Product price</b>: <code>{price} {currency_symbol}</code>\n"
+#~ "<b>Quantity</b>: <code>{quantity}</code>\n"
+
+#~ msgid "<b>Итого</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>"
+#~ msgstr "<b>Total</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} r₽</code>"
+
+#~ msgid "<b>Итого</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>"
+#~ msgstr "<b>Total</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} r$</code>"
+
+#~ msgid ""
+#~ "<b>Заказ под номером:</b> <code>{order_id}</code>\n"
+#~ "<b>На сумму:</b> <code>{sum} {currency_name} / {sum_rub} ₽</code>"
+#~ msgstr ""
+#~ "<b>Order number:</b> <code>{order_id}</code>\n"
+#~ "<b>For the amount of:</b> <code>{sum} "
+#~ "{currency_name} / {sum_rub} ₽</code>"
+

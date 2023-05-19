@@ -1,15 +1,10 @@
 import asyncio
 import os.path
-from decimal import Decimal
+
 import pandas as pd
-from sqlalchemy import *
+from sqlalchemy import select, update, text
+
 from core.database.model import *
-import asyncpg
-import config
-from loguru import logger
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import sessionmaker
 
 engine = create_async_engine(
     f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
@@ -54,7 +49,7 @@ async def get_currency_name(**kwargs):
         q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
         order = q.scalars().first()
         if order.currency == 'RUB':
-            currency = 'руб'
+            currency = '₽'
         elif order.currency == 'USD':
             currency = '$'
         else:
@@ -74,6 +69,12 @@ async def update_client_info(**kwargs):
             session.add(SN)
         else:
             await session.execute(update(Clients).where(Clients.chat_id == str(kwargs["chat_id"])).values(kwargs))
+        await session.commit()
+
+
+async def update_client_language(chat_id: str, language: str):
+    async with async_session() as session:
+        await session.execute(update(Clients).where(Clients.chat_id == chat_id).values(language=language))
         await session.commit()
 
 
@@ -97,7 +98,8 @@ async def create_excel(**kwargs):
             return False
         query = text(f'SELECT * FROM public."{HistoryOrders.__table__}" WHERE chat_id = \'{kwargs["chat_id"]}\''
                      f' order by date DESC')
-        engine = create_engine(f"postgresql+psycopg2://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
+        engine = create_engine(
+            f"postgresql+psycopg2://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
         df = pd.read_sql(query, engine.connect())
         df['date'] = df['date'].dt.tz_localize(None)
         df = df.drop(
@@ -118,4 +120,3 @@ async def create_excel(**kwargs):
 
 if __name__ == '__main__':
     a = asyncio.run(delete_order(chat_id=5263751490))
-

@@ -1,5 +1,4 @@
 import re
-
 import requests
 from aiogram import Bot
 from funcy import str_join

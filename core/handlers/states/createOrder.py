@@ -6,6 +6,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
 import core.database.query_db as query_db
+from config import _
 from core.keyboards import inline
 from core.oneC import utils
 from core.utils import texts
@@ -21,7 +22,7 @@ async def error_message(message: Message, exception, state: FSMContext):
 
 async def get_price(call: CallbackQuery, state: FSMContext, callback_data: QuantityProduct):
     await query_db.update_order(chat_id=call.message.chat.id, quantity=callback_data.quantity)
-    await call.message.edit_text("Введите цену товара")
+    await call.message.edit_text(_("Введите цену товара"))
     await state.set_state(StateCreateOrder.GET_PRICE)
 
 
@@ -31,28 +32,26 @@ async def check_price(message: Message, state: FSMContext):
         log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id)
         if re.findall(',', message.text):
             if len(message.text.split(',')) > 2:
-                text = f"{texts.error_head}Ввод цены разрешен через точку\nПример как надо: <b>10.12</b>"
-                await message.answer(text, parse_mode='HTML')
+                await message.answer(texts.error_price_double_comma)
                 await state.set_state(StateCreateOrder.GET_PRICE)
                 return
             price = price.replace(',', '.')
 
         check_price = price.replace('.', '')
         if not check_price.isdecimal():
-            text = f"{texts.error_head}Цена содержит не нужные символы\nПопробуйте снова\nПример как надо: <u><b>10.12</b></u>"
-            await message.answer(text, parse_mode='HTML')
+            await message.answer(texts.error_price_not_decimal)
             return
         order = await query_db.get_order_info(chat_id=message.chat.id)
         if order.currency == 'USD':
-            sum_usd = Decimal(Decimal(price) * Decimal(order.quantity)).quantize(Decimal('1.00'))
-            sum_rub = Decimal(sum_usd * Decimal(order.currencyPrice)).quantize(Decimal('1.00'))
+            sum_usd = Decimal(Decimal(price) * Decimal(order.quantity)).quantize(Decimal('1'))
+            sum_rub = Decimal(sum_usd * Decimal(order.currencyPrice)).quantize(Decimal('1'))
         elif order.currency == 'RUB':
             sum = Decimal(price) * Decimal(order.quantity)
-            sum_usd = Decimal(Decimal(sum) / Decimal(order.currencyPrice)).quantize(Decimal('1.00'))
-            sum_rub = Decimal(sum).quantize(Decimal('1.00'))
+            sum_usd = Decimal(Decimal(sum) / Decimal(order.currencyPrice)).quantize(Decimal('1'))
+            sum_rub = Decimal(sum).quantize(Decimal('1'))
         await query_db.update_order(chat_id=message.chat.id, price=price, sum_usd=sum_usd, sum_rub=sum_rub)
         log.info(f"Ввели цену '{str(price)}'")
-        await message.answer("Введите ФИО (полностью)")
+        await message.answer(_("Введите ФИО (полностью)"))
         await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
     except Exception as ex:
         logger.exception(ex)
@@ -60,7 +59,7 @@ async def check_price(message: Message, state: FSMContext):
 
 
 async def get_client_name_CALLBACK(call: CallbackQuery, state: FSMContext):
-    await call.message.answer("Введите ФИО (полностью)")
+    await call.message.answer(_("Введите ФИО (полностью)"))
     await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
 
 
@@ -69,12 +68,10 @@ async def check_client_name(message: Message, state: FSMContext):
         name = message.text
         if len(name.split()) == 3:
             await query_db.update_order(chat_id=message.chat.id, client_name=name)
-            await message.answer(texts.enter_phone, parse_mode='HTML')
+            await message.answer(_("Введите сотовый или почту клиента"))
             await state.set_state(StateCreateOrder.GET_CLIENT_PHONE_OR_MAIL)
         else:
-            text = f"{texts.error_head}ФИО состоит из 3 слов, а ваше состоит из {len(name.split())} слов\n" \
-                   f"<b>Попробуйте снова.</b>"
-            await message.answer(text, parse_mode='HTML')
+            await message.answer('{text}'.format(text=texts.error_full_name(name)))
             logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_name=str(name)).info("Ввели ФИО")
             await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
     except Exception as ex:
@@ -96,7 +93,9 @@ async def check_client_phone_or_mail(message: Message, state: FSMContext):
             await create_order(message, state)
         else:
             log.error(f"Ввод сотового или почты '{message.text}'")
-            await message.answer(texts.error_needOnlyDigits, parse_mode="HTML")
+            await message.answer(_("{error_head}Номер должен состоят максимум из 11 цифр\n"
+                                   "Почта должна содержать знак <u><b>@</b></u>\n"
+                                   "<b>Попробуйте снова.</b>").format(error_head=texts.error_head))
             await state.set_state(StateCreateOrder.GET_CLIENT_PHONE_OR_MAIL)
     except Exception as ex:
         log.exception(ex)
@@ -120,7 +119,7 @@ async def create_order(message: Message, state: FSMContext):
                                        client_mail=order.client_mail, currency=order.currency,
                                        product_name=product_name, currency_symbol=currency_symbol,
                                        quantity=order.quantity)
-        await message.answer(text, reply_markup=inline.getKeyboard_createOrder(), parse_mode="HTML")
+        await message.answer('{text}'.format(text=text), reply_markup=inline.getKeyboard_createOrder())
     except Exception as ex:
         logger.exception(ex)
         await error_message(message, ex, state)

@@ -5,6 +5,7 @@ import aiogram.exceptions
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
+from config import _
 from core.database import query_db
 from core.keyboards import inline, reply
 from core.keyboards.inline import getKeyboard_selectCurrency
@@ -28,15 +29,14 @@ async def not_reg(call: CallbackQuery):
     except aiogram.exceptions.TelegramBadRequest:
         log.error('TelegramBadRequest (сообщению больше 24 часов и его нельзя удалить)')
         pass
-    text = f'Вы зашли впервые, нажмите кнопку Регистрация'
-    await call.message.answer(text, reply_markup=reply.getKeyboard_registration(), parse_mode='HTML')
+    text = _('Вы зашли впервые, нажмите кнопку Регистрация')
+    await call.message.answer(text, reply_markup=reply.getKeyboard_registration())
 
 
 async def check_shops(call: CallbackQuery):
     try:
         log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
         client = await query_db.get_client_info(chat_id=call.message.chat.id)
-        log.info(client)
         if not client:
             await not_reg(call)
             return
@@ -45,16 +45,16 @@ async def check_shops(call: CallbackQuery):
         await query_db.update_order(chat_id=call.message.chat.id)
         if len(shop['Магазины']) > 1:
             await query_db.update_order(chat_id=call.message.chat.id, seller_id=shop['id'])
-            await call.message.edit_text("Выберите магазин",
+            await call.message.edit_text(_("Выберите магазин"),
                                          reply_markup=inline.getKeyboard_selectShop(shop['Магазины']))
         elif len(shop['Магазины']) == 0:
             log.error('Зарегано 0 магазинов')
-            await call.message.answer(texts.zero_shops)
+            await call.message.answer(_("На вас не прикреплено ни одного магазина\nУточните вопрос и попробуйте снова"))
         else:
             await query_db.update_order(chat_id=call.message.chat.id, shop=str(shop['Магазины'][0]['idМагазин']),
                                         seller_id=shop['id'], shop_currency=shop['Магазины'][0]['Валюта'],
                                         currencyPrice=shop['Магазины'][0]['ВалютаКурс'])
-            await call.message.edit_text('Выберите валюту', reply_markup=getKeyboard_selectCurrency())
+            await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
     except Exception as ex:
         await error_message(call.message, ex)
         logger.exception(ex)
@@ -63,7 +63,7 @@ async def check_shops(call: CallbackQuery):
 async def choise_currency(call: CallbackQuery, callback_data: Shop):
     await query_db.update_order(chat_id=call.message.chat.id, shop=callback_data.shop,
                                 shop_currency=callback_data.currency, currencyPrice=callback_data.price)
-    await call.message.edit_text('Выберите валюту', reply_markup=getKeyboard_selectCurrency())
+    await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
 
 
 async def choise_currency_price(call: CallbackQuery, callback_data: Currency):
@@ -83,8 +83,8 @@ async def choise_currency_price(call: CallbackQuery, callback_data: Currency):
             currency_price = Decimal(currency_price).quantize(Decimal('1.0000'))
             await query_db.update_order(chat_id=call.message.chat.id, currencyPrice=currency_price,
                                         currency=callback_data.currency)
-            text = f'Фактический курс: <code>{currency_price}</code>'
-            await call.message.edit_text(text, reply_markup=inline.getKeyboard_selectPriceCurrency(), parse_mode='HTML')
+            text = _('Фактический курс: <code>{currency_price}</code>').format(currency_price=currency_price)
+            await call.message.edit_text(text, reply_markup=inline.getKeyboard_selectPriceCurrency())
             await call.answer()
         else:
             await not_reg(call)

@@ -37,3 +37,6 @@ class QuantityProduct(CallbackData, prefix='quantityProduct'):
 class QuantityUpdate(CallbackData, prefix='quantityInc'):
     quantity: int
 
+
+class ChangeLanguage(CallbackData, prefix='select_language'):
+    language: str
