@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-11 17:41+0300\n"
+"POT-Creation-Date: 2023-05-19 18:37+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -141,10 +141,6 @@ msgstr ""
 #: core/keyboards/inline.py:27 core/keyboards/inline.py:172
 #: core/utils/commands.py:9
 msgid "Главное меню"
-msgstr ""
-
-#: core/keyboards/inline.py:28
-msgid "Изменить язык"
 msgstr ""
 
 #: core/keyboards/inline.py:61 core/keyboards/inline.py:148

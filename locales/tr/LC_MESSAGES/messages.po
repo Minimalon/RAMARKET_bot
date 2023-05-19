@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-11 17:41+0300\n"
+"POT-Creation-Date: 2023-05-19 18:37+0300\n"
 "PO-Revision-Date: 2023-05-11 17:01+0300\n"
 "Last-Translator: \n"
 "Language: tr\n"
@@ -157,10 +157,6 @@ msgstr "Kişisel hesap"
 #: core/utils/commands.py:9
 msgid "Главное меню"
 msgstr "Ana menü"
-
-#: core/keyboards/inline.py:28
-msgid "Изменить язык"
-msgstr "Dili değiştirRotayı değiştir"
 
 #: core/keyboards/inline.py:61 core/keyboards/inline.py:148
 #: core/keyboards/inline.py:158 core/keyboards/inline.py:164
@@ -321,4 +317,7 @@ msgstr "Sipariş oluşturmayı iptal et"
 #~ msgstr ""
 #~ "<b>Sipariş numarası altında:</b> <code>{order_id}</code>\n"
 #~ "<b>Toplamı için:</b> <code>{sum} {currency_name} / {sum_rub} ₽</code>"
+
+#~ msgid "Изменить язык"
+#~ msgstr "Dili değiştirRotayı değiştir"
 
