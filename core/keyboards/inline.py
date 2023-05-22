@@ -25,7 +25,7 @@ def getKeyboard_start(language=None):
 def getKeyboard_profile():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text=_('Главное меню'), callback_data='menu')
-    keyboard.button(text=_('Изменить язык'), callback_data='сhange_language')
+    # keyboard.button(text=_('Изменить язык'), callback_data='сhange_language')
     keyboard.adjust(1)
     return keyboard.as_markup()
 
