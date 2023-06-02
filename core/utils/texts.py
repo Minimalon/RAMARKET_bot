@@ -48,12 +48,12 @@ def menu_new_language(language):
               '<u><b>История заказов</b></u> - Получить Excel файл с историями заказов', locale=language)
 
 
-async def createOrder(**kwargs):
-    if kwargs["client_phone"]:
-        mail_or_phone = kwargs["client_phone"]
+async def createOrder(order):
+    if order["client_phone"]:
+        mail_or_phone = order["client_phone"]
         message = __("Сотовый")
     else:
-        mail_or_phone = kwargs["client_mail"]
+        mail_or_phone = order["client_mail"]
         message = __("Почта")
     text = __('ℹ️ <b>Информация о заказе:</b>\n'
               '➖➖➖➖➖➖➖➖➖➖➖\n'
@@ -65,23 +65,22 @@ async def createOrder(**kwargs):
               '<b>Название товара</b>: <code>{product_name}</code>\n'
               '<b>Цена товара</b>: <code>{price} {currency_symbol}</code>\n'
               '<b>Количество</b>: <code>{quantity}</code>\n'). \
-        format(client_name=kwargs["client_name"], message=message, mail_or_phone=mail_or_phone,
-               shop_name=kwargs["shop_name"],
-               payment_name=kwargs["payment_name"], currencyPrice=kwargs["currencyPrice"],
-               product_name=kwargs["product_name"], price=kwargs["price"], currency_symbol=kwargs["currency_symbol"],
-               quantity=kwargs["quantity"])
-    if kwargs['currency'] == 'USD':
+        format(client_name=order["client_name"], message=message, mail_or_phone=mail_or_phone,
+               shop_name=order["shop_name"],
+               payment_name=order["payment_name"], currencyPrice=order["currencyPrice"],
+               product_name=order["product_name"], price=order["price"], currency_symbol=order["currency_symbol"],
+               quantity=order["quantity"])
+    if order['currency'] == 'USD':
         text += __('<b>Итого</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>').format(
-            sum_usd=kwargs["sum_usd"], currency_symbol=kwargs["currency_symbol"], sum_rub=kwargs["sum_rub"])
-    elif kwargs['currency'] == 'RUB':
+            sum_usd=order["sum_usd"], currency_symbol=order["currency_symbol"], sum_rub=order["sum_rub"])
+    elif order['currency'] == 'RUB':
         text += __('<b>Итого</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>').format(
-            sum_usd=kwargs["sum_usd"], currency_symbol=kwargs["currency_symbol"], sum_rub=kwargs["sum_rub"])
+            sum_usd=order["sum_usd"], currency_symbol=order["currency_symbol"], sum_rub=order["sum_rub"])
     return text
 
 
-async def qr(order_id, sum, chat_id, sum_rub):
-    currency_name = await query_db.get_currency_name(chat_id=chat_id)
+async def qr(order_id, sum_usd, sum_rub):
     text = __("<b>Заказ под номером:</b> <code>{order_id}</code>\n"
-              "<b>На сумму:</b> <code>{sum} {currency_name} / {sum_rub} ₽</code>"). \
-        format(order_id=order_id, sum=sum, currency_name=currency_name, sum_rub=sum_rub)
+              "<b>На сумму:</b> <code>{sum_usd} $ / {sum_rub} ₽</code>"). \
+        format(order_id=order_id, sum_usd=sum_usd, sum_rub=sum_rub)
     return text

@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from aiogram import Bot
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
 from loguru import logger
 
@@ -23,8 +24,9 @@ async def not_reg(call: CallbackQuery):
     await call.message.answer(text, reply_markup=getKeyboard_registration())
 
 
-async def menu(call: CallbackQuery):
+async def menu(call: CallbackQuery, state: FSMContext):
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    await state.clear()
     log.info("Меню")
     client_db = await query_db.get_client_info(chat_id=call.message.chat.id)
     if not client_db:
@@ -38,8 +40,9 @@ async def menu(call: CallbackQuery):
         return
 
 
-async def menu_not_edit_text(call: CallbackQuery):
+async def menu_not_edit_text(call: CallbackQuery, state: FSMContext):
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    await state.clear()
     log.info("Меню")
     client_db = await query_db.get_client_info(chat_id=call.message.chat.id)
     if not client_db:
@@ -91,19 +94,18 @@ async def history_orders(call: CallbackQuery, bot: Bot):
     os.remove(path_file)
 
 
-async def selectMainPaymentGateway(call: CallbackQuery):
-    order = await query_db.get_order_info(chat_id=call.message.chat.id)
-    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id,
-                      currencyPrice=order.currencyPrice)
+async def selectMainPaymentGateway(call: CallbackQuery, state: FSMContext):
+    order = await state.get_data()
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id,currencyPrice=order['currencyPrice'])
     log.info(f"Переход на способ оплаты")
-    await update_order(chat_id=call.message.chat.id, first_name=call.message.chat.first_name)
+    await state.update_data(first_name=call.message.chat.first_name)
     await call.message.edit_text(_('Выберите способ оплаты'),
                                  reply_markup=await getKeyboard_select_Main_PaymentGateway())
     await call.answer()
 
 
-async def selectChildPaymentGateway(call: CallbackQuery, callback_data: ChildPaymentGateway):
-    await update_order(chat_id=call.message.chat.id, paymentGateway=callback_data.id, paymentType=callback_data.type)
+async def selectChildPaymentGateway(call: CallbackQuery, callback_data: ChildPaymentGateway, state: FSMContext):
+    await state.update_data(paymentGateway=callback_data.id, paymentType=callback_data.type)
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, paymentID=callback_data.id)
     log.info(f"Выбор способа оплаты")
     await call.message.edit_reply_markup(
@@ -111,10 +113,10 @@ async def selectChildPaymentGateway(call: CallbackQuery, callback_data: ChildPay
     await call.answer()
 
 
-async def select_input_method_Product(call: CallbackQuery, callback_data: PaymentGateway):
+async def select_input_method_Product(call: CallbackQuery, callback_data: PaymentGateway, state: FSMContext):
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, payment=callback_data.id)
     log.info(f"Выбрали тип оплаты")
-    await update_order(chat_id=call.message.chat.id, paymentGateway=callback_data.id)
+    await state.update_data(paymentGateway=callback_data.id)
     await call.message.edit_text(_('Выберите способ выбора товара'), reply_markup=getKeyboard_ProductStart())
     await call.answer()
 
@@ -148,11 +150,11 @@ async def show_childcategories(call: CallbackQuery, callback_data: Category):
         await call.answer()
 
 
-async def select_quantity_product(call: CallbackQuery, callback_data: Product):
+async def select_quantity_product(call: CallbackQuery, callback_data: Product, state: FSMContext):
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id,
                       product_id=callback_data.product_id)
     log.info(f"Выбрали товар")
-    await query_db.update_order(chat_id=call.message.chat.id, product_id=callback_data.product_id)
+    await state.update_data(product_id=callback_data.product_id)
     log.info("Выбирает количество товара")
     await call.message.edit_text(_("Выберите количество товара"), reply_markup=getKeyboard_quantity_product())
     await call.answer()
@@ -166,11 +168,11 @@ async def update_quantity_product(call: CallbackQuery, callback_data: QuantityUp
     await call.answer()
 
 
-async def create_order(call: CallbackQuery, bot: Bot):
+async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
     chat_id = call.message.chat.id
     log = logger.bind(name=call.message.chat.first_name, chat_id=chat_id)
     client_db = await query_db.get_client_info(chat_id=chat_id)
-    order = await query_db.get_order_info(chat_id=chat_id)
+    order = await state.get_data()
 
     if not order:
         await call.message.delete()
@@ -183,47 +185,36 @@ async def create_order(call: CallbackQuery, bot: Bot):
     if not client_info:
         await not_reg(call)
         return
-    response, answer = await utils.create_order(bot, chat_id=order.chat_id, first_name=order.first_name,
-                                                paymentGateway=order.paymentGateway, paymentType=order.paymentType,
-                                                product_id=order.product_id,
-                                                price=order.price, quantity=order.quantity,
-                                                currency=order.currency,
-                                                currencyPrice=order.currencyPrice, client_name=order.client_name,
-                                                client_phone=order.client_phone, client_mail=order.client_mail,
-                                                shop=order.shop, shop_currency=order.shop_currency,
-                                                seller_id=order.seller_id, sum_rub=order.sum_rub, sum_usd=order.sum_usd)
+    response, answer = await utils.create_order(bot, order)
     if response.ok:
-        if order.paymentType == '3':
-            s_name, f_name, patronymic = order.client_name.split()
+        if order['paymentType'] == '3':
+            s_name, f_name, patronymic = order['client_name'].split()
             textQR = (f'ST00012|Name={answer["ORG"]}'
                       f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
                       f'|BIC={answer["BIC"]}|CorrespAcc={answer["KBS"]}|PayeeINN={answer["ORGINN"]}'
                       f'|KPP={answer["ORGKPP"]}|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
                       f'|Purpose=Оплата заказа №{answer["Nomer"]} от {answer["Date"]}'
-                      f'|Sum={round(Decimal(order.sum_rub) * 100)}')
-            qr_path = await generateQR(textQR, order.paymentType, answer['Nomer'])
+                      f'|Sum={round(Decimal(order["sum_rub"]) * 100)}')
+            qr_path = await generateQR(textQR, order['paymentType'], answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
-            text = await texts.qr(answer['Nomer'], order.sum_usd, chat_id, order.sum_rub)
+            text = await texts.qr(answer['Nomer'], order['sum_usd'], chat_id)
             text = '{text}'.format(text=text)
             await call.message.delete()
             await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text)
-            await query_db.delete_order(chat_id=chat_id)
-        elif order.paymentType == '2':
+        elif order['paymentType'] == '2':
             textQR = answer['Ref']
-            qr_path = await generateQR(textQR, order.paymentType, answer['Nomer'])
+            qr_path = await generateQR(textQR, order['paymentType'], answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
-            text = await texts.qr(answer['Nomer'], order.sum_usd, chat_id, order.sum_rub)
+            text = await texts.qr(answer['Nomer'], order['sum_usd'], chat_id)
             text = '{text}'.format(text=text)
             await call.message.delete()
             await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text)
-            await query_db.delete_order(chat_id=chat_id)
         else:
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             await call.message.delete()
-            text = await texts.qr(answer['Nomer'], order.sum_usd, chat_id, order.sum_rub)
+            text = await texts.qr(answer['Nomer'], order['sum_usd'], chat_id)
             text = '{text}'.format(text=text)
             await bot.send_message(chat_id, _("<b><u>Заказ успешно создан</u></b>\n{text}").format(text=text))
-            await query_db.delete_order(chat_id=chat_id)
     else:
         await call.message.answer('{text}'.format(text=texts.error_server(response)))
         log.info(f"Сервер недоступен, его код ответа '{response.status}'")

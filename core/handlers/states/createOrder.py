@@ -21,7 +21,7 @@ async def error_message(message: Message, exception, state: FSMContext):
 
 
 async def get_price(call: CallbackQuery, state: FSMContext, callback_data: QuantityProduct):
-    await query_db.update_order(chat_id=call.message.chat.id, quantity=callback_data.quantity)
+    await state.update_data(chat_id=call.message.chat.id, quantity=callback_data.quantity)
     await call.message.edit_text(_("Введите цену товара"))
     await state.set_state(StateCreateOrder.GET_PRICE)
 
@@ -41,15 +41,15 @@ async def check_price(message: Message, state: FSMContext):
         if not check_price.isdecimal():
             await message.answer(texts.error_price_not_decimal)
             return
-        order = await query_db.get_order_info(chat_id=message.chat.id)
-        if order.currency == 'USD':
-            sum_usd = Decimal(Decimal(price) * Decimal(order.quantity)).quantize(Decimal('1'))
-            sum_rub = Decimal(sum_usd * Decimal(order.currencyPrice)).quantize(Decimal('1'))
-        elif order.currency == 'RUB':
-            sum = Decimal(price) * Decimal(order.quantity)
-            sum_usd = Decimal(Decimal(sum) / Decimal(order.currencyPrice)).quantize(Decimal('1'))
+        order = await state.get_data()
+        if order['currency'] == 'USD':
+            sum_usd = Decimal(Decimal(price) * Decimal(order['quantity'])).quantize(Decimal('1'))
+            sum_rub = Decimal(sum_usd * Decimal(order['currencyPrice'])).quantize(Decimal('1'))
+        elif order['currency'] == 'RUB':
+            sum = Decimal(price) * Decimal(order['quantity'])
+            sum_usd = Decimal(Decimal(sum) / Decimal(order['currencyPrice'])).quantize(Decimal('1'))
             sum_rub = Decimal(sum).quantize(Decimal('1'))
-        await query_db.update_order(chat_id=message.chat.id, price=price, sum_usd=sum_usd, sum_rub=sum_rub)
+        await state.update_data(price=price, sum_usd=str(sum_usd), sum_rub=str(sum_rub))
         log.info(f"Ввели цену '{str(price)}'")
         await message.answer(_("Введите ФИО (полностью)"))
         await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
@@ -67,7 +67,7 @@ async def check_client_name(message: Message, state: FSMContext):
     try:
         name = message.text
         if len(name.split()) == 3:
-            await query_db.update_order(chat_id=message.chat.id, client_name=name)
+            await state.update_data(client_name=name)
             await message.answer(_("Введите сотовый или почту клиента"))
             await state.set_state(StateCreateOrder.GET_CLIENT_PHONE_OR_MAIL)
         else:
@@ -85,11 +85,11 @@ async def check_client_phone_or_mail(message: Message, state: FSMContext):
     try:
         if re.findall('^[0-9]{1,11}$', client_phone):
             log.info(f"Ввели сотовый '{client_phone}'")
-            await query_db.update_order(chat_id=message.chat.id, client_phone=client_phone, client_mail='')
+            await state.update_data(client_phone=client_phone, client_mail='')
             await create_order(message, state)
         elif '@' in message.text:
             log.info(f"Ввели почту '{message.text}'")
-            await query_db.update_order(chat_id=message.chat.id, client_mail=message.text, client_phone='')
+            await state.update_data(client_mail=message.text, client_phone='')
             await create_order(message, state)
         else:
             log.error(f"Ввод сотового или почты '{message.text}'")
@@ -105,20 +105,21 @@ async def check_client_phone_or_mail(message: Message, state: FSMContext):
 async def create_order(message: Message, state: FSMContext):
     try:
         chat_id = message.chat.id
-        order = await query_db.get_order_info(chat_id=chat_id)
-        currency_symbol = await query_db.get_currency_name(chat_id=chat_id)
-        product_name = (await utils.get_tovar_by_ID(order.product_id))["Наименование"]
-        payment_name = (await utils.get_payment_name(order.paymentGateway))["Наименование"]
+        order = await state.get_data()
+        if order['currency'] == 'RUB':
+            currency_symbol = '₽'
+        elif order['currency'] == 'USD':
+            currency_symbol = '$'
+        else:
+            currency_symbol = ''
+        product_name = (await utils.get_tovar_by_ID(order['product_id']))["Наименование"]
+        payment_name = (await utils.get_payment_name(order['paymentGateway']))["Наименование"]
         seller_phone = (await query_db.get_client_info(chat_id=chat_id)).phone_number
         shop_names = (await utils.get_shops(seller_phone))['Магазины']
-        shop_name = [shop['Магазин'] for shop in shop_names if shop['idМагазин'] == order.shop][0]
-        text = await texts.createOrder(client_name=order.client_name, client_phone=order.client_phone,
-                                       shop_name=shop_name, payment_name=payment_name,
-                                       currencyPrice=order.currencyPrice,
-                                       price=order.price, sum_rub=order.sum_rub, sum_usd=order.sum_usd,
-                                       client_mail=order.client_mail, currency=order.currency,
-                                       product_name=product_name, currency_symbol=currency_symbol,
-                                       quantity=order.quantity)
+        shop_name = [shop['Магазин'] for shop in shop_names if shop['idМагазин'] == order['shop']][0]
+        await state.update_data(currency_symbol=currency_symbol, product_name=product_name, payment_name=payment_name, shop_name=shop_name)
+        order = await state.get_data()
+        text = await texts.createOrder(order)
         await message.answer('{text}'.format(text=text), reply_markup=inline.getKeyboard_createOrder())
     except Exception as ex:
         logger.exception(ex)

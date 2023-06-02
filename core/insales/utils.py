@@ -23,7 +23,7 @@ def create_order(chat_id):
         "currency-code": order_info.currency,
         'payment-gateway-id': order_info.paymentGateway,
         'delivery-variant-id': 5563162,
-    })
+    }, )
     query_db.create_historyOrder(order_id=order['id'], chat_id=order_info.chat_id, first_name=order_info.first_name,
                                  paymentGateway=order_info.paymentGateway, product_id=order_info.product_id,
                                  price=order_info.price, quantity=order_info.quantity, currency=order_info.currency,

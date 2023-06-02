@@ -1,4 +1,3 @@
-import asyncio
 import os.path
 
 import pandas as pd
@@ -11,40 +10,13 @@ engine = create_async_engine(
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-async def update_order(**kwargs):
-    async with async_session() as session:
-        for key, value in kwargs.items():
-            kwargs[key] = str(value)
-        q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
-        SN = q.scalars().first()
-        if SN is None:
-            SN = Orders(**kwargs)
-            session.add(SN)
-        else:
-            await session.execute(update(Orders).where(Orders.chat_id == str(kwargs["chat_id"])).values(kwargs))
-        await session.commit()
-
-
-async def delete_order(**kwargs):
-    async with async_session() as session:
-        q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
-        await session.delete(q.scalars().one())
-        await session.commit()
-
-
 async def create_historyOrder(**kwargs):
     async with async_session() as session:
         session.add(HistoryOrders(**kwargs))
         await session.commit()
 
 
-async def get_order_info(**kwargs):
-    async with async_session() as session:
-        q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
-        return q.scalars().first()
-
-
-async def get_currency_name(**kwargs):
+async def get_currency_name(data):
     async with async_session() as session:
         q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
         order = q.scalars().first()
@@ -116,7 +88,3 @@ async def create_excel(**kwargs):
         writer.close()
 
         return path_file
-
-
-if __name__ == '__main__':
-    a = asyncio.run(delete_order(chat_id=5263751490))

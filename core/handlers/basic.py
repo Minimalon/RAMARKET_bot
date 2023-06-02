@@ -47,11 +47,5 @@ async def check_registration(message: Message):
 
 
 async def cancel(message: Message, state: FSMContext):
-    chat_id = message.chat.id
     await state.clear()
-    order = await query_db.get_order_info(chat_id=chat_id)
-    if order:
-        await query_db.delete_order(chat_id=chat_id)
-        await message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
-    else:
-        await message.answer(texts.error_cancel, reply_markup=getKeyboard_start())
+    await message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())

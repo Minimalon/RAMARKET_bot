@@ -2,6 +2,7 @@ import re
 from decimal import Decimal
 
 import aiogram.exceptions
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
@@ -33,7 +34,7 @@ async def not_reg(call: CallbackQuery):
     await call.message.answer(text, reply_markup=reply.getKeyboard_registration())
 
 
-async def check_shops(call: CallbackQuery):
+async def check_shops(call: CallbackQuery, state: FSMContext):
     try:
         log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
         client = await query_db.get_client_info(chat_id=call.message.chat.id)
@@ -42,31 +43,30 @@ async def check_shops(call: CallbackQuery):
             return
         shop = await utils.get_shops(client.phone_number)
         log.info(f'Количество магазинов "{len(shop["Магазины"])}"')
-        await query_db.update_order(chat_id=call.message.chat.id)
+        await state.update_data(chat_id=str(call.message.chat.id))
         if len(shop['Магазины']) > 1:
-            await query_db.update_order(chat_id=call.message.chat.id, seller_id=shop['id'])
+            await state.update_data(seller_id=shop['id'])
             await call.message.edit_text(_("Выберите магазин"),
                                          reply_markup=inline.getKeyboard_selectShop(shop['Магазины']))
         elif len(shop['Магазины']) == 0:
             log.error('Зарегано 0 магазинов')
             await call.message.answer(_("На вас не прикреплено ни одного магазина\nУточните вопрос и попробуйте снова"))
         else:
-            await query_db.update_order(chat_id=call.message.chat.id, shop=str(shop['Магазины'][0]['idМагазин']),
-                                        seller_id=shop['id'], shop_currency=shop['Магазины'][0]['Валюта'],
-                                        currencyPrice=shop['Магазины'][0]['ВалютаКурс'])
+            await state.update_data(shop=str(shop['Магазины'][0]['idМагазин']),
+                                    seller_id=shop['id'], shop_currency=shop['Магазины'][0]['Валюта'],
+                                    currencyPrice=''.join(shop['Магазины'][0]['ВалютаКурс'].split()))
             await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
     except Exception as ex:
         await error_message(call.message, ex)
         logger.exception(ex)
 
 
-async def choise_currency(call: CallbackQuery, callback_data: Shop):
-    await query_db.update_order(chat_id=call.message.chat.id, shop=callback_data.shop,
-                                shop_currency=callback_data.currency, currencyPrice=callback_data.price)
+async def choise_currency(call: CallbackQuery, callback_data: Shop, state: FSMContext):
+    await state.update_data(shop=callback_data.shop, shop_currency=callback_data.currency, currencyPrice=callback_data.price)
     await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
 
 
-async def choise_currency_price(call: CallbackQuery, callback_data: Currency):
+async def choise_currency_price(call: CallbackQuery, callback_data: Currency, state: FSMContext):
     try:
         client_DB = await query_db.get_client_info(chat_id=call.message.chat.id)
         if not client_DB:
@@ -74,15 +74,14 @@ async def choise_currency_price(call: CallbackQuery, callback_data: Currency):
             return
         client = await oneC.get_client_info(client_DB.phone_number)
         if client:
-            order = await query_db.get_order_info(chat_id=call.message.chat.id)
-            currency_price = order.currencyPrice
+            order = await state.get_data()
+            currency_price = order['currencyPrice']
             if re.findall(',', currency_price):
                 currency_price = currency_price.replace(",", '.')
             else:
                 currency_price = currency_price
             currency_price = Decimal(currency_price).quantize(Decimal('1.0000'))
-            await query_db.update_order(chat_id=call.message.chat.id, currencyPrice=currency_price,
-                                        currency=callback_data.currency)
+            await state.update_data(currencyPrice=str(currency_price), currency=callback_data.currency)
             text = _('Фактический курс: <code>{currency_price}</code>').format(currency_price=currency_price)
             await call.message.edit_text(text, reply_markup=inline.getKeyboard_selectPriceCurrency())
             await call.answer()
