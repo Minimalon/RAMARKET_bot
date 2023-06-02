@@ -38,9 +38,8 @@ async def check_CurrencyPrice(message: Message, state: FSMContext):
         log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, currencyPrice=str(currencyPrice))
         log.info("Ввели цену")
         log.info(Decimal(currencyPrice))
-        await state.update_data(currencyPrice=str(currencyPrice))
+        print(await state.get_data())
         await message.answer(_('Выберите способ оплаты'), reply_markup=await getKeyboard_select_Main_PaymentGateway())
-        await state.clear()
     except Exception as ex:
         logger.exception(ex)
         await error_message(message, ex, state)
