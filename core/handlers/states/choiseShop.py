@@ -62,7 +62,7 @@ async def check_shops(call: CallbackQuery, state: FSMContext):
 
 
 async def choise_currency(call: CallbackQuery, callback_data: Shop, state: FSMContext):
-    await state.update_data(shop=callback_data.shop, shop_currency=callback_data.currency, currencyPrice=callback_data.price)
+    await state.update_data(shop=callback_data.shop, shop_currency=callback_data.currency, currencyPrice=callback_data.price, first_name=call.message.chat.first_name)
     await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
 
 
