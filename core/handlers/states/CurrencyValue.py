@@ -25,6 +25,7 @@ async def get_CurrencyPrice(call: CallbackQuery, state: FSMContext):
 
 
 async def check_CurrencyPrice(message: Message, state: FSMContext):
+    log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id)
     try:
         if re.findall(',', message.text):
             if len(message.text.split(',')) > 2:
@@ -34,11 +35,10 @@ async def check_CurrencyPrice(message: Message, state: FSMContext):
             currencyPrice = message.text.replace(',', '.')
         else:
             currencyPrice = message.text
+        log.info(f"Ввели новую стоимость курса {currencyPrice}")
         currencyPrice = Decimal(currencyPrice).quantize(Decimal('1.0000'))
-        log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, currencyPrice=str(currencyPrice))
-        log.info("Ввели цену")
+        await state.update_data(currencyPrice=str(currencyPrice))
         log.info(Decimal(currencyPrice))
-        print(await state.get_data())
         await message.answer(_('Выберите способ оплаты'), reply_markup=await getKeyboard_select_Main_PaymentGateway())
     except Exception as ex:
         logger.exception(ex)
