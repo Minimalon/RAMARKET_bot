@@ -96,11 +96,9 @@ async def history_orders(call: CallbackQuery, bot: Bot):
 
 async def selectMainPaymentGateway(call: CallbackQuery, state: FSMContext):
     order = await state.get_data()
-    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id,currencyPrice=order['currencyPrice'])
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, currencyPrice=order['currencyPrice'])
     log.info(f"Переход на способ оплаты")
-    await state.update_data(first_name=call.message.chat.first_name)
-    await call.message.edit_text(_('Выберите способ оплаты'),
-                                 reply_markup=await getKeyboard_select_Main_PaymentGateway())
+    await call.message.edit_text(_('Выберите способ оплаты'), reply_markup=await getKeyboard_select_Main_PaymentGateway())
     await call.answer()
 
 
