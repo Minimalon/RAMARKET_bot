@@ -11,8 +11,7 @@ Base = declarative_base()
 
 class HistoryOrders(Base):
     __tablename__ = 'historyOrders'
-    seq = Sequence('historyOrders_id_seq', start=157)
-    id = Column('id', BigInteger, seq, server_default=seq.next_value(), nullable=False, primary_key=True)
+    id = Column(BigInteger, Sequence('historyOrders_id_seq', start=157, increment=1), nullable=False, primary_key=True)
     date = Column(DateTime(timezone=True), server_default=func.now())
     order_id = Column(String(250), nullable=False)
     chat_id = Column(String(50))
