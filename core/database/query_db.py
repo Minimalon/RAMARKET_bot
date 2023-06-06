@@ -18,19 +18,6 @@ async def create_historyOrder(**kwargs):
         await session.commit()
 
 
-async def get_currency_name(data):
-    async with async_session() as session:
-        q = await session.execute(select(Orders).filter(Orders.chat_id == str(data["chat_id"])))
-        order = q.scalars().first()
-        if order.currency == 'RUB':
-            currency = '₽'
-        elif order.currency == 'USD':
-            currency = '$'
-        else:
-            currency = ''
-        return currency
-
-
 async def update_client_info(**kwargs):
     async with async_session() as session:
         for key, value in kwargs.items():
@@ -76,8 +63,8 @@ async def create_excel(**kwargs):
         df = pd.read_sql(query, engine.connect())
         df['date'] = df['date'].dt.tz_localize(None)
         df = df.drop(
-            columns=['chat_id', 'first_name', 'agent_id', 'order_id', 'shop_id', 'paymentGateway',
-                     'product_id', 'paymentType'])
+            columns=['chat_id', 'agent_id', 'order_id', 'shop_id', 'paymentGateway',
+                     'product_id', 'paymentType', 'country_code', 'city_code'])
         writer = pd.ExcelWriter(path_file, engine="xlsxwriter")
         df.to_excel(writer, sheet_name='orders', index=False, na_rep='NaN')
 

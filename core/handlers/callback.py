@@ -192,7 +192,7 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
                       f'|Sum={round(Decimal(order["sum_rub"]) * 100)}')
             qr_path = await generateQR(textQR, order['paymentType'], answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
-            text = await texts.qr(answer['Nomer'], order['sum_usd'], chat_id)
+            text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
             await call.message.delete()
             await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text)
@@ -200,14 +200,14 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
             textQR = answer['Ref']
             qr_path = await generateQR(textQR, order['paymentType'], answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
-            text = await texts.qr(answer['Nomer'], order['sum_usd'], chat_id)
+            text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
             await call.message.delete()
             await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text)
         else:
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             await call.message.delete()
-            text = await texts.qr(answer['Nomer'], order['sum_usd'], chat_id)
+            text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
             await bot.send_message(chat_id, _("<b><u>Заказ успешно создан</u></b>\n{text}").format(text=text))
     else:

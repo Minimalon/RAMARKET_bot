@@ -53,7 +53,7 @@ async def check_shops(call: CallbackQuery, state: FSMContext):
             await call.message.answer(_("На вас не прикреплено ни одного магазина\nУточните вопрос и попробуйте снова"))
         else:
             shop = shop['Магазины'][0]
-            await state.update_data(shop=str(shop['idМагазин']), shop_currency=shop['Валюта'],
+            await state.update_data(shop_id=str(shop['idМагазин']), shop_currency=shop['Валюта'], shop_name=shop['Наименование'],
                                     currencyPrice=''.join(shop['ВалютаКурс'].split()), country_code=shop['КодСтраны'],
                                     country_name=shop['Страна'], city_code=shop['КодГород'], city_name=shop['Город'])
             await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
@@ -64,8 +64,8 @@ async def check_shops(call: CallbackQuery, state: FSMContext):
 
 async def choise_currency(call: CallbackQuery, callback_data: Shop, state: FSMContext):
     shop = await get_shop_by_id(callback_data.id)
-    await state.update_data(shop=shop.name, shop_currency=shop.currency, currencyPrice=shop.currency_price, country_name=shop.country, country_code=shop.country_code,
-                            city_name=shop.city, city_code=shop.city_code)
+    await state.update_data(shop_name=shop.name, shop_id=shop.id, shop_currency=shop.currency, currencyPrice=shop.currency_price, country_name=shop.country,
+                            country_code=shop.country_code, city_name=shop.city, city_code=shop.city_code)
     await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
 
 

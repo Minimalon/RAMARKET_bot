@@ -5,7 +5,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
-import core.database.query_db as query_db
 from config import _
 from core.keyboards import inline
 from core.oneC import utils
@@ -104,7 +103,6 @@ async def check_client_phone_or_mail(message: Message, state: FSMContext):
 
 async def create_order(message: Message, state: FSMContext):
     try:
-        chat_id = message.chat.id
         order = await state.get_data()
         if order['currency'] == 'RUB':
             currency_symbol = '₽'
@@ -114,12 +112,9 @@ async def create_order(message: Message, state: FSMContext):
             currency_symbol = ''
         product_name = (await utils.get_tovar_by_ID(order['product_id']))["Наименование"]
         payment_name = (await utils.get_payment_name(order['paymentGateway']))["Наименование"]
-        seller_phone = (await query_db.get_client_info(chat_id=chat_id)).phone_number
-        shop_names = (await utils.get_shops(seller_phone))['Магазины']
-        shop_name = [shop['Магазин'] for shop in shop_names if shop['idМагазин'] == order['shop']]
-        await state.update_data(currency_symbol=currency_symbol, product_name=product_name, payment_name=payment_name, shop_name=shop_name)
+        await state.update_data(currency_symbol=currency_symbol, product_name=product_name, payment_name=payment_name)
         order = await state.get_data()
-        logger.info(await state.get_data())
+        logger.info(order)
         text = await texts.createOrder(order)
         await message.answer('{text}'.format(text=text), reply_markup=inline.getKeyboard_createOrder())
     except Exception as ex:

@@ -82,13 +82,11 @@ async def get_shop_by_id(shop_id: str):
 
 async def create_order(bot: Bot, data):
     try:
-        client = await query_db.get_client_info(chat_id=data['chat_id'])
-        shop_name = await get_shop_name(client.phone_number, data['shop'])
         payment_name = (await get_payment_name(data['paymentGateway']))['Наименование']
         product_name = (await get_tovar_by_ID(data['product_id']))['Наименование']
         order = {
             "TypeR": "Doc",
-            "Sklad": str(data['shop']),
+            "Sklad": str(data['shop_id']),
             "KursPrice": str(data['currencyPrice']),
             "SO": str(data['paymentGateway']),
             "Sotr": str(data['agent_id']),
@@ -111,7 +109,7 @@ async def create_order(bot: Bot, data):
         logger.info(await response.text())
         logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
         await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=str(data['chat_id']),
-                                           first_name=data['first_name'], city_name=data['city_name'], country_code=data['country_code'], country_name=data['country_name'],
+                                           city_name=data['city_name'], country_code=data['country_code'], country_name=data['country_name'],
                                            city_code=data['city_code'],
                                            paymentGateway=data['paymentGateway'], paymentType=data['paymentType'],
                                            payment_name=payment_name,
@@ -121,7 +119,7 @@ async def create_order(bot: Bot, data):
                                            currency=data['currency'],
                                            currencyPrice=data['currencyPrice'], client_name=data['client_name'],
                                            client_phone=data['client_phone'], client_mail=data['client_mail'],
-                                           shop_id=data['shop'], shop_name=shop_name, agent_id=data['agent_id'], agent_name=data['agent_name'],
+                                           shop_id=data['shop_id'], shop_name=data['shop_name'], agent_id=data['agent_id'], agent_name=data['agent_name'],
                                            sum_rub=data['sum_rub'], shop_currency=data['shop_currency'], )
         return response, answer
     except Exception as ex:
