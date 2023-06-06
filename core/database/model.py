@@ -1,4 +1,4 @@
-from sqlalchemy import String, Column, DateTime, Boolean, BigInteger, Sequence
+from sqlalchemy import String, Column, DateTime, Boolean, BigInteger
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
