@@ -1,5 +1,4 @@
-from sqlalchemy import String, Column, DateTime, Boolean, BigInteger, Identity
-import config
+from sqlalchemy import String, Column, DateTime, Boolean, BigInteger, Sequence
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
@@ -12,7 +11,8 @@ Base = declarative_base()
 
 class HistoryOrders(Base):
     __tablename__ = 'historyOrders'
-    id = Column(BigInteger,Identity(start=157, cycle=True), nullable=False, primary_key=True)
+    seq = Sequence('historyOrders_id_seq', start=157)
+    id = Column('id', BigInteger, seq, server_default=seq.next_value(), nullable=False, primary_key=True)
     date = Column(DateTime(timezone=True), server_default=func.now())
     order_id = Column(String(250), nullable=False)
     chat_id = Column(String(50))
