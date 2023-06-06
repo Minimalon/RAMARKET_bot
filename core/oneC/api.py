@@ -1,8 +1,9 @@
+import asyncio
 import json
 
-import config
 import aiohttp
-import asyncio
+
+import config
 
 
 class Api:
@@ -38,6 +39,15 @@ class Api:
         async with aiohttp.ClientSession() as session:
             async with session.post(f"{self.adress}/CreateDoc", data=json.dumps(data)) as response:
                 return response, await response.json(content_type=None)
+
+    async def get_all_shops(self):
+        """
+        Список всех магазинов в 1С
+        :return: JSON
+        """
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{self.adress}/GetTTAll") as response:
+                return response, await response.json()
 
 
 if __name__ == '__main__':

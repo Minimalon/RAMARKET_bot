@@ -116,9 +116,10 @@ async def create_order(message: Message, state: FSMContext):
         payment_name = (await utils.get_payment_name(order['paymentGateway']))["Наименование"]
         seller_phone = (await query_db.get_client_info(chat_id=chat_id)).phone_number
         shop_names = (await utils.get_shops(seller_phone))['Магазины']
-        shop_name = [shop['Магазин'] for shop in shop_names if shop['idМагазин'] == order['shop']][0]
+        shop_name = [shop['Магазин'] for shop in shop_names if shop['idМагазин'] == order['shop']]
         await state.update_data(currency_symbol=currency_symbol, product_name=product_name, payment_name=payment_name, shop_name=shop_name)
         order = await state.get_data()
+        logger.info(await state.get_data())
         text = await texts.createOrder(order)
         await message.answer('{text}'.format(text=text), reply_markup=inline.getKeyboard_createOrder())
     except Exception as ex:

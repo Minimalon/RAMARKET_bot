@@ -1,4 +1,6 @@
 import re
+from collections import namedtuple
+
 import requests
 from aiogram import Bot
 from funcy import str_join
@@ -65,6 +67,19 @@ async def get_shop_name(phone, shop_id):
             return shop['Магазин']
 
 
+async def get_shop_by_id(shop_id: str):
+    """
+    Возвращает магазин по его id
+    :param shop_id: id магазина
+    :return: Возвращает namedtuple('Shop', 'name id currency currency_price country country_code city city_code')
+    """
+    response, all_shops = await api.get_all_shops()
+    turple = namedtuple('Shop', 'name id currency currency_price country country_code city city_code')
+    for shop in all_shops:
+        if shop['id'] == shop_id:
+            return turple(shop["Наименование"], shop['id'], shop['Валюта'], shop['ВалютаКурс'], shop['Страна'], shop['КодСтраны'], shop['Город'], shop['КодГород'])
+
+
 async def create_order(bot: Bot, data):
     try:
         client = await query_db.get_client_info(chat_id=data['chat_id'])
@@ -76,7 +91,7 @@ async def create_order(bot: Bot, data):
             "Sklad": str(data['shop']),
             "KursPrice": str(data['currencyPrice']),
             "SO": str(data['paymentGateway']),
-            "Sotr": str(data['seller_id']),
+            "Sotr": str(data['agent_id']),
             "Klient": data.get('client_name', ''),
             "Telefon": str_join(seq=re.findall(r'[0-9]*', data.get('client_phone', '')), sep=''),
             "Email": data.get('client_mail', ''),
@@ -96,7 +111,8 @@ async def create_order(bot: Bot, data):
         logger.info(await response.text())
         logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
         await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=str(data['chat_id']),
-                                           first_name=data['first_name'],
+                                           first_name=data['first_name'], city_name=data['city_name'], country_code=data['country_code'], country_name=data['country_name'],
+                                           city_code=data['city_code'],
                                            paymentGateway=data['paymentGateway'], paymentType=data['paymentType'],
                                            payment_name=payment_name,
                                            product_id=data['product_id'], product_name=product_name,
@@ -105,8 +121,8 @@ async def create_order(bot: Bot, data):
                                            currency=data['currency'],
                                            currencyPrice=data['currencyPrice'], client_name=data['client_name'],
                                            client_phone=data['client_phone'], client_mail=data['client_mail'],
-                                           shop_id=data['shop'], shop_name=shop_name, seller_id=data['seller_id'],
-                                           sum_rub=data['sum_rub'], shop_currency=data['shop_currency'])
+                                           shop_id=data['shop'], shop_name=shop_name, agent_id=data['agent_id'], agent_name=data['agent_name'],
+                                           sum_rub=data['sum_rub'], shop_currency=data['shop_currency'], )
         return response, answer
     except Exception as ex:
         logger.exception(ex)

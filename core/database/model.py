@@ -1,49 +1,30 @@
-import sqlalchemy.orm
-from sqlalchemy import create_engine, Integer, String, Column, DateTime, Boolean
+from sqlalchemy import String, Column, DateTime, Boolean, BigInteger
 import config
-from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import func
 
+import config
 
-engine = create_async_engine(
-    f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
+engine = create_async_engine(f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
 Base = declarative_base()
-
-
-class Orders(Base):
-    __tablename__ = 'orders'
-    chat_id = Column(String(50), nullable=False, primary_key=True)
-    first_name = Column(String(50))
-    shop = Column(String(50))
-    shop_currency = Column(String(50))
-    seller_id = Column(String(50))
-    paymentGateway = Column(String(50))
-    paymentType = Column(String(50))
-    product_id = Column(String(50))
-    price = Column(String(50))
-    quantity = Column(String(50))
-    sum_usd = Column(String(50))
-    sum_rub = Column(String(50))
-    currency = Column(String(10))
-    currencyPrice = Column(String(50))
-    client_name = Column(String(100))
-    client_phone = Column(String(20))
-    client_mail = Column(String(100))
 
 
 class HistoryOrders(Base):
     __tablename__ = 'historyOrders'
+    id = Column(BigInteger, nullable=False, primary_key=True)
     date = Column(DateTime(timezone=True), server_default=func.now())
-    order_id = Column(String(250), nullable=False, primary_key=True)
+    order_id = Column(String(250), nullable=False)
     chat_id = Column(String(50))
-    first_name = Column(String(50))
+    agent_id = Column(String(50))
+    agent_name = Column(String(250))
+    country_code = Column(String(50))
+    country_name = Column(String(250))
+    city_code = Column(String(50))
+    city_name = Column(String(250))
     shop_id = Column(String(50))
     shop_name = Column(String(50))
     shop_currency = Column(String(50))
-    seller_id = Column(String(50))
     paymentGateway = Column(String(50))
     paymentType = Column(String(50))
     payment_name = Column(String(250))

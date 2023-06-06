@@ -106,8 +106,7 @@ async def selectChildPaymentGateway(call: CallbackQuery, callback_data: ChildPay
     await state.update_data(paymentGateway=callback_data.id, paymentType=callback_data.type)
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, paymentID=callback_data.id)
     log.info(f"Выбор способа оплаты")
-    await call.message.edit_reply_markup(
-        reply_markup=await getKeyboard_select_Child_PaymentGateway(callback_data.id, callback_data.idParent))
+    await call.message.edit_reply_markup(reply_markup=await getKeyboard_select_Child_PaymentGateway(callback_data.id, callback_data.idParent))
     await call.answer()
 
 
@@ -134,8 +133,7 @@ async def show_catalog(call: CallbackQuery):
 
 
 async def show_childcategories(call: CallbackQuery, callback_data: Category):
-    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, group_id=callback_data.id,
-                      parent_id=callback_data.parent_id)
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, group_id=callback_data.id, parent_id=callback_data.parent_id)
     log.info(f"Выбрали категорию '{callback_data.id}'")
     markup = await getKeyboard_products_or_categories(callback_data.id, callback_data.parent_id)
     if markup.inline_keyboard[0][0].callback_data.startswith('product'):
@@ -149,8 +147,7 @@ async def show_childcategories(call: CallbackQuery, callback_data: Category):
 
 
 async def select_quantity_product(call: CallbackQuery, callback_data: Product, state: FSMContext):
-    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id,
-                      product_id=callback_data.product_id)
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, product_id=callback_data.product_id)
     log.info(f"Выбрали товар")
     await state.update_data(product_id=callback_data.product_id)
     log.info("Выбирает количество товара")

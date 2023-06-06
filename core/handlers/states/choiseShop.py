@@ -12,6 +12,7 @@ from core.keyboards import inline, reply
 from core.keyboards.inline import getKeyboard_selectCurrency
 from core.oneC import utils
 from core.oneC.api import Api
+from core.oneC.utils import get_shop_by_id
 from core.utils import texts
 from core.utils.callbackdata import Shop, Currency
 
@@ -42,19 +43,19 @@ async def check_shops(call: CallbackQuery, state: FSMContext):
             await not_reg(call)
             return
         shop = await utils.get_shops(client.phone_number)
+        await state.update_data(agent_name=shop['Наименование'], agent_id=shop['id'])
         log.info(f'Количество магазинов "{len(shop["Магазины"])}"')
         await state.update_data(chat_id=str(call.message.chat.id))
         if len(shop['Магазины']) > 1:
-            await state.update_data(seller_id=shop['id'])
-            await call.message.edit_text(_("Выберите магазин"),
-                                         reply_markup=inline.getKeyboard_selectShop(shop['Магазины']))
+            await call.message.edit_text(_("Выберите магазин"), reply_markup=inline.getKeyboard_selectShop(shop['Магазины']))
         elif len(shop['Магазины']) == 0:
             log.error('Зарегано 0 магазинов')
             await call.message.answer(_("На вас не прикреплено ни одного магазина\nУточните вопрос и попробуйте снова"))
         else:
-            await state.update_data(shop=str(shop['Магазины'][0]['idМагазин']),
-                                    seller_id=shop['id'], shop_currency=shop['Магазины'][0]['Валюта'],
-                                    currencyPrice=''.join(shop['Магазины'][0]['ВалютаКурс'].split()))
+            shop = shop['Магазины'][0]
+            await state.update_data(shop=str(shop['idМагазин']), shop_currency=shop['Валюта'],
+                                    currencyPrice=''.join(shop['ВалютаКурс'].split()), country_code=shop['КодСтраны'],
+                                    country_name=shop['Страна'], city_code=shop['КодГород'], city_name=shop['Город'])
             await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
     except Exception as ex:
         await error_message(call.message, ex)
@@ -62,7 +63,9 @@ async def check_shops(call: CallbackQuery, state: FSMContext):
 
 
 async def choise_currency(call: CallbackQuery, callback_data: Shop, state: FSMContext):
-    await state.update_data(shop=callback_data.shop, shop_currency=callback_data.currency, currencyPrice=callback_data.price, first_name=call.message.chat.first_name)
+    shop = await get_shop_by_id(callback_data.id)
+    await state.update_data(shop=shop.name, shop_currency=shop.currency, currencyPrice=shop.currency_price, country_name=shop.country, country_code=shop.country_code,
+                            city_name=shop.city, city_code=shop.city_code)
     await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
 
 

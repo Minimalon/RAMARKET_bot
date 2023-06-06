@@ -1,7 +1,9 @@
 import os.path
 
 import pandas as pd
-from sqlalchemy import select, update, text
+from sqlalchemy import select, update, text, create_engine
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
 
 from core.database.model import *
 
@@ -18,7 +20,7 @@ async def create_historyOrder(**kwargs):
 
 async def get_currency_name(data):
     async with async_session() as session:
-        q = await session.execute(select(Orders).filter(Orders.chat_id == str(kwargs["chat_id"])))
+        q = await session.execute(select(Orders).filter(Orders.chat_id == str(data["chat_id"])))
         order = q.scalars().first()
         if order.currency == 'RUB':
             currency = '₽'
@@ -70,12 +72,11 @@ async def create_excel(**kwargs):
             return False
         query = text(f'SELECT * FROM public."{HistoryOrders.__table__}" WHERE chat_id = \'{kwargs["chat_id"]}\''
                      f' order by date DESC')
-        engine = create_engine(
-            f"postgresql+psycopg2://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
+        engine = create_engine(f"postgresql+psycopg2://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
         df = pd.read_sql(query, engine.connect())
         df['date'] = df['date'].dt.tz_localize(None)
         df = df.drop(
-            columns=['chat_id', 'first_name', 'seller_id', 'order_id', 'shop_id', 'paymentGateway',
+            columns=['chat_id', 'first_name', 'agent_id', 'order_id', 'shop_id', 'paymentGateway',
                      'product_id', 'paymentType'])
         writer = pd.ExcelWriter(path_file, engine="xlsxwriter")
         df.to_excel(writer, sheet_name='orders', index=False, na_rep='NaN')

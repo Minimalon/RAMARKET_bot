@@ -6,9 +6,7 @@ class Currency(CallbackData, prefix='currency'):
 
 
 class Shop(CallbackData, prefix='shop'):
-    shop: str
-    currency: str
-    price: str
+    id: str
 
 
 class ChildPaymentGateway(CallbackData, prefix='childPaymentGateway'):
