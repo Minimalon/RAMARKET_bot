@@ -53,7 +53,7 @@ async def check_shops(call: CallbackQuery, state: FSMContext):
             await call.message.answer(_("На вас не прикреплено ни одного магазина\nУточните вопрос и попробуйте снова"))
         else:
             shop = shop['Магазины'][0]
-            await state.update_data(shop_id=str(shop['idМагазин']), shop_currency=shop['Валюта'], shop_name=shop['Наименование'],
+            await state.update_data(shop_id=str(shop['idМагазин']), shop_currency=shop['Валюта'], shop_name=shop['Магазин'],
                                     currencyPrice=''.join(shop['ВалютаКурс'].split()), country_code=shop['КодСтраны'],
                                     country_name=shop['Страна'], city_code=shop['КодГород'], city_name=shop['Город'])
             await call.message.edit_text(_('Выберите валюту'), reply_markup=getKeyboard_selectCurrency())
