@@ -8,10 +8,5 @@ async def get_commands(bot: Bot):
             command='start',
             description=_('Главное меню')
         ),
-        BotCommand(
-            command='cancel',
-            description=_('Отменить создание заказа')
-        ),
-
     ]
     await bot.set_my_commands(commands, BotCommandScopeDefault())

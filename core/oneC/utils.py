@@ -83,7 +83,6 @@ async def get_shop_by_id(shop_id: str):
 async def create_order(bot: Bot, data):
     try:
         payment_name = (await get_payment_name(data['paymentGateway']))['Наименование']
-        product_name = (await get_tovar_by_ID(data['product_id']))['Наименование']
         order = {
             "TypeR": "Doc",
             "Sklad": str(data['shop_id']),
@@ -93,14 +92,7 @@ async def create_order(bot: Bot, data):
             "Klient": data.get('client_name', ''),
             "Telefon": str_join(seq=re.findall(r'[0-9]*', data.get('client_phone', '')), sep=''),
             "Email": data.get('client_mail', ''),
-            "Itemc": [
-                {
-                    "Tov": str(data['product_id']),
-                    "Cost": str(data['price']),
-                    "Sum": str(data['sum_usd']),
-                    "Kol": str(data['quantity'])
-                },
-            ]
+            "Itemc": data['cart_oneC']
         }
         logger.info(order)
         response, answer = await api.post_create_order(order)
@@ -108,19 +100,18 @@ async def create_order(bot: Bot, data):
         logger.info(response)
         logger.info(await response.text())
         logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
-        await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=str(data['chat_id']),
-                                           city_name=data['city_name'], country_code=data['country_code'], country_name=data['country_name'],
-                                           city_code=data['city_code'],
-                                           paymentGateway=data['paymentGateway'], paymentType=data['paymentType'],
-                                           payment_name=payment_name,
-                                           product_id=data['product_id'], product_name=product_name,
-                                           price=data['price'], quantity=str(data['quantity']),
-                                           sum_usd=data['sum_usd'],
-                                           currency=data['currency'],
-                                           currencyPrice=data['currencyPrice'], client_name=data['client_name'],
-                                           client_phone=data['client_phone'], client_mail=data['client_mail'],
-                                           shop_id=data['shop_id'], shop_name=data['shop_name'], agent_id=data['agent_id'], agent_name=data['agent_name'],
-                                           sum_rub=data['sum_rub'], shop_currency=data['shop_currency'], )
+        if response.ok:
+            for cart in data['cart_bot']:
+                await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=str(data['chat_id']),
+                                                   city_name=data['city_name'], country_code=data['country_code'], country_name=data['country_name'], city_code=data['city_code'],
+                                                   paymentGateway=data['paymentGateway'], paymentType=data['paymentType'],payment_name=payment_name,
+                                                   product_id=cart['product_id'], product_name=cart['product_name'],
+                                                   price=cart['price'], quantity=str(cart['quantity']),
+                                                   sum_usd=data['sum_usd'], sum_rub=data['sum_rub'],
+                                                   currency=data['currency'],currencyPrice=data['currencyPrice'], client_name=data['client_name'],
+                                                   client_phone=data['client_phone'], client_mail=data['client_mail'],
+                                                   shop_id=data['shop_id'], shop_name=data['shop_name'], agent_id=data['agent_id'], agent_name=data['agent_name'],
+                                                   shop_currency=data['shop_currency'])
         return response, answer
     except Exception as ex:
         logger.exception(ex)

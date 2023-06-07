@@ -7,6 +7,7 @@ from loguru import logger
 
 from config import _
 from core.keyboards import inline
+from core.keyboards.inline import getKeyboard_cart
 from core.oneC import utils
 from core.utils import texts
 from core.utils.callbackdata import QuantityProduct
@@ -42,22 +43,40 @@ async def check_price(message: Message, state: FSMContext):
             return
         order = await state.get_data()
         if order['currency'] == 'USD':
-            sum_usd = Decimal(Decimal(price) * Decimal(order['quantity'])).quantize(Decimal('1'))
+            sum_usd = Decimal(Decimal(price) * Decimal(order['quantity'])).quantize(Decimal('1.00'))
             sum_rub = Decimal(sum_usd * Decimal(order['currencyPrice'])).quantize(Decimal('1'))
-        elif order['currency'] == 'RUB':
+        else:
             sum = Decimal(price) * Decimal(order['quantity'])
-            sum_usd = Decimal(Decimal(sum) / Decimal(order['currencyPrice'])).quantize(Decimal('1'))
+            sum_usd = Decimal(Decimal(sum) / Decimal(order['currencyPrice'])).quantize(Decimal('1.00'))
             sum_rub = Decimal(sum).quantize(Decimal('1'))
-        await state.update_data(price=price, sum_usd=str(sum_usd), sum_rub=str(sum_rub))
+
         log.info(f"Ввели цену '{str(price)}'")
-        await message.answer(_("Введите ФИО (полностью)"))
-        await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
+        cart_oneC = order.get('cart_oneC')
+        cart_bot = order.get('cart_bot')
+        if not cart_oneC:
+            cart_oneC = [{"Tov": order['product_id'], "Cost": price, "Kol": order['quantity'], 'Sum': str(sum_usd)}]
+            cart_bot = [{"product_id": order['product_id'], "product_name": order['product_name'], "price": price,
+                         "quantity": order['quantity'], 'sum_usd': str(sum_usd), 'sum_rub': str(sum_rub)}]
+            await state.update_data(price=price, sum_usd=str(sum_usd), sum_rub=str(sum_rub), cart_oneC=cart_oneC, cart_bot=cart_bot)
+        else:
+            cart_oneC.append({"Tov": order['product_id'], "Cost": price, "Kol": order['quantity'], 'Sum': str(sum_usd)})
+            cart_bot.append(
+                {"product_id": order['product_id'], "product_name": order['product_name'], "price": price,
+                 "quantity": order['quantity'], 'sum_usd': str(sum_usd), 'sum_rub': str(sum_rub)})
+            sum_usd += Decimal(order['sum_usd'])
+            sum_rub += Decimal(order['sum_rub'])
+            await state.update_data(sum_usd=str(sum_usd), sum_rub=str(sum_rub), cart_oneC=cart_oneC, cart_bot=cart_bot)
+
+        await message.answer(texts.cart(cart_bot), reply_markup=getKeyboard_cart())
+
     except Exception as ex:
         logger.exception(ex)
         await error_message(message, ex, state)
 
 
-async def get_client_name_CALLBACK(call: CallbackQuery, state: FSMContext):
+async def enter_client_name(call: CallbackQuery, state: FSMContext):
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    log.info('Продолжили создание заказа')
     await call.message.answer(_("Введите ФИО (полностью)"))
     await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
 
@@ -110,9 +129,8 @@ async def create_order(message: Message, state: FSMContext):
             currency_symbol = '$'
         else:
             currency_symbol = ''
-        product_name = (await utils.get_tovar_by_ID(order['product_id']))["Наименование"]
         payment_name = (await utils.get_payment_name(order['paymentGateway']))["Наименование"]
-        await state.update_data(currency_symbol=currency_symbol, product_name=product_name, payment_name=payment_name)
+        await state.update_data(currency_symbol=currency_symbol, payment_name=payment_name)
         order = await state.get_data()
         logger.info(order)
         text = await texts.createOrder(order)

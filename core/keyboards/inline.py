@@ -165,6 +165,14 @@ def getKeyboard_quantity_update(quantity):
     return keyboard.as_markup()
 
 
+def getKeyboard_cart():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text=_("Продолжить"), callback_data='continue_order')
+    keyboard.button(text=_("Добавить товар"), callback_data='add_product')
+    keyboard.adjust(2)
+    return keyboard.as_markup()
+
+
 def getKeyboard_createOrder():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text=_("Создать заказ"), callback_data='createOrder')

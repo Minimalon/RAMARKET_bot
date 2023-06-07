@@ -11,7 +11,7 @@ from loguru import logger
 
 from core.filters.iscontact import IsTrueContact
 from core.handlers import contact
-from core.handlers.basic import get_start, check_registration, cancel
+from core.handlers.basic import get_start, check_registration
 from core.handlers.callback import *
 from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
 from core.middlewares.language_middleware import ACLMiddleware
@@ -38,7 +38,6 @@ async def start():
 
     # Команды
     dp.message.register(check_registration, Command(commands=['start']))
-    dp.message.register(cancel, Command(commands=['cancel']))
 
     # Главное меню
     dp.callback_query.register(menu, F.data == 'menu')
@@ -64,6 +63,8 @@ async def start():
     dp.callback_query.register(select_quantity_product, Product.filter())
     dp.callback_query.register(update_quantity_product, QuantityUpdate.filter())
     dp.callback_query.register(createOrder.get_price, QuantityProduct.filter())
+    dp.callback_query.register(show_catalog, F.data == 'add_product')
+    dp.callback_query.register(createOrder.enter_client_name, F.data == 'continue_order')
 
     # dp.callback_query.register(createOrder.get_client_name_CALLBACK, F.data == 'currentPrice')
     # dp.callback_query.register(createOrder.get_price, F.data == 'newPrice')

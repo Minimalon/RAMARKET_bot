@@ -11,6 +11,7 @@ from core.database.query_db import *
 from core.keyboards.inline import *
 from core.keyboards.reply import getKeyboard_registration
 from core.oneC.api import Api
+from core.oneC.utils import get_tovar_by_ID
 from core.utils import texts
 from core.utils.callbackdata import *
 from core.utils.qr import generateQR
@@ -150,6 +151,8 @@ async def select_quantity_product(call: CallbackQuery, callback_data: Product, s
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id, product_id=callback_data.product_id)
     log.info(f"Выбрали товар")
     await state.update_data(product_id=callback_data.product_id)
+    product_name = (await get_tovar_by_ID(callback_data.product_id))['Наименование']
+    await state.update_data(product_id=callback_data.product_id, product_name=product_name)
     log.info("Выбирает количество товара")
     await call.message.edit_text(_("Выберите количество товара"), reply_markup=getKeyboard_quantity_product())
     await call.answer()

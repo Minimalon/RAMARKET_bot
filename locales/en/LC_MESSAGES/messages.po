@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-19 18:37+0300\n"
-"PO-Revision-Date: 2023-05-11 17:02+0300\n"
+"POT-Creation-Date: 2023-06-07 17:30+0300\n"
+"PO-Revision-Date: 2023-06-07 17:19+0300\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
@@ -30,12 +30,12 @@ msgstr ""
 "Your cell {client_phone} is not registered in the system\n"
 "Clarify your question and try again"
 
-#: core/handlers/basic.py:45 core/handlers/callback.py:22
-#: core/handlers/states/choiseShop.py:32
+#: core/handlers/basic.py:46 core/handlers/callback.py:24
+#: core/handlers/states/choiseShop.py:34
 msgid "Вы зашли впервые, нажмите кнопку Регистрация"
 msgstr "You are logged in for the first time, click Register"
 
-#: core/handlers/callback.py:60
+#: core/handlers/callback.py:64
 msgid ""
 "ℹ️ <b>Информация о вас:</b>\n"
 "➖➖➖➖➖➖➖➖➖➖➖\n"
@@ -45,20 +45,20 @@ msgstr ""
 "➖➖➖➖➖➖➖➖➖➖➖\n"
 "<b>💳 ID:</b> <code>{chat_id}</code>"
 
-#: core/handlers/callback.py:70
+#: core/handlers/callback.py:74
 msgid "Выберите язык"
 msgstr "Select a language"
 
-#: core/handlers/callback.py:87
+#: core/handlers/callback.py:91
 msgid "Список заказов пуст"
 msgstr "The order list is empty"
 
-#: core/handlers/callback.py:89 core/keyboards/inline.py:16
+#: core/handlers/callback.py:93 core/keyboards/inline.py:16
 #: core/keyboards/inline.py:20
 msgid "История заказов"
 msgstr "Order history"
 
-#: core/handlers/callback.py:100 core/handlers/states/CurrencyValue.py:42
+#: core/handlers/callback.py:102 core/handlers/states/CurrencyValue.py:42
 msgid "Выберите способ оплаты"
 msgstr "Choose a payment method"
 
@@ -70,11 +70,11 @@ msgstr "Choose the product selection method"
 msgid "Cписок категорий товара"
 msgstr "List of product categories"
 
-#: core/handlers/callback.py:143
+#: core/handlers/callback.py:142
 msgid "Выберите товар"
 msgstr "Select a product"
 
-#: core/handlers/callback.py:147
+#: core/handlers/callback.py:146
 msgid "Cписок подкатегорий"
 msgstr "List of subcategories"
 
@@ -82,7 +82,7 @@ msgstr "List of subcategories"
 msgid "Выберите количество товара"
 msgstr "Select a product quantity"
 
-#: core/handlers/callback.py:225
+#: core/handlers/callback.py:215
 msgid ""
 "<b><u>Заказ успешно создан</u></b>\n"
 "{text}"
@@ -98,11 +98,11 @@ msgstr ""
 "Enter a new course\n"
 "For example: <b>75.127</b>"
 
-#: core/handlers/states/choiseShop.py:48
+#: core/handlers/states/choiseShop.py:50
 msgid "Выберите магазин"
 msgstr "Choose a store"
 
-#: core/handlers/states/choiseShop.py:52
+#: core/handlers/states/choiseShop.py:53
 msgid ""
 "На вас не прикреплено ни одного магазина\n"
 "Уточните вопрос и попробуйте снова"
@@ -110,11 +110,11 @@ msgstr ""
 "You don't have a single store attached to you\n"
 "Clarify the question and try again"
 
-#: core/handlers/states/choiseShop.py:57 core/handlers/states/choiseShop.py:66
+#: core/handlers/states/choiseShop.py:59 core/handlers/states/choiseShop.py:69
 msgid "Выберите валюту"
 msgstr "Choose a currency"
 
-#: core/handlers/states/choiseShop.py:86
+#: core/handlers/states/choiseShop.py:88
 msgid "Фактический курс: <code>{currency_price}</code>"
 msgstr "Actual rate: <code>{currency_price}</code>"
 
@@ -122,16 +122,15 @@ msgstr "Actual rate: <code>{currency_price}</code>"
 msgid "Введите цену товара"
 msgstr "Enter the product price"
 
-#: core/handlers/states/createOrder.py:54
-#: core/handlers/states/createOrder.py:62
+#: core/handlers/states/createOrder.py:80
 msgid "Введите ФИО (полностью)"
 msgstr "Enter your full name (in full)"
 
-#: core/handlers/states/createOrder.py:71
+#: core/handlers/states/createOrder.py:89
 msgid "Введите сотовый или почту клиента"
 msgstr "Enter the client's cell phone or email"
 
-#: core/handlers/states/createOrder.py:96
+#: core/handlers/states/createOrder.py:114
 msgid ""
 "{error_head}Номер должен состоят максимум из 11 цифр\n"
 "Почта должна содержать знак <u><b>@</b></u>\n"
@@ -153,43 +152,52 @@ msgstr "Ordering"
 msgid "Личный кабинет"
 msgstr "My Account"
 
-#: core/keyboards/inline.py:27 core/keyboards/inline.py:172
+#: core/keyboards/inline.py:27 core/keyboards/inline.py:179
 #: core/utils/commands.py:9
 msgid "Главное меню"
 msgstr "Main menu"
 
-#: core/keyboards/inline.py:61 core/keyboards/inline.py:148
-#: core/keyboards/inline.py:158 core/keyboards/inline.py:164
+#: core/keyboards/inline.py:28
+msgid "Изменить язык"
+msgstr "Change the language"
+
+#: core/keyboards/inline.py:60 core/keyboards/inline.py:147
+#: core/keyboards/inline.py:157 core/keyboards/inline.py:163
+#: core/keyboards/inline.py:170
 msgid "Продолжить"
 msgstr "Continue"
 
-#: core/keyboards/inline.py:62
+#: core/keyboards/inline.py:61
 msgid "Изменить курс"
 msgstr "Change course"
 
-#: core/keyboards/inline.py:87 core/keyboards/inline.py:105
-#: core/keyboards/inline.py:117 core/keyboards/inline.py:127
-#: core/keyboards/inline.py:129
+#: core/keyboards/inline.py:86 core/keyboards/inline.py:104
+#: core/keyboards/inline.py:116 core/keyboards/inline.py:126
+#: core/keyboards/inline.py:128
 msgid "<<< Назад"
 msgstr "<<< Back"
 
-#: core/keyboards/inline.py:94
+#: core/keyboards/inline.py:93
 msgid "Ввести ID товара"
 msgstr "Enter the product ID"
 
-#: core/keyboards/inline.py:95
+#: core/keyboards/inline.py:94
 msgid "Каталог"
 msgstr "Catalog"
 
-#: core/keyboards/inline.py:139
+#: core/keyboards/inline.py:138
 msgid "Оставить текущую цену"
 msgstr "Leave the current price"
 
-#: core/keyboards/inline.py:140
+#: core/keyboards/inline.py:139
 msgid "Изменить цену"
 msgstr "Change the price"
 
 #: core/keyboards/inline.py:171
+msgid "Добавить товар"
+msgstr "Add a product"
+
+#: core/keyboards/inline.py:178
 msgid "Создать заказ"
 msgstr "Create an order"
 
@@ -197,9 +205,21 @@ msgstr "Create an order"
 msgid "Регистрация"
 msgstr "Registration"
 
-#: core/utils/commands.py:13
-msgid "Отменить создание заказа"
-msgstr "Cancel order creation"
+#: core/utils/texts.py:57
+msgid ""
+"ℹ️<b>Товар №{index}:</b>\n"
+"      <b>Название товара</b>: <code>{product_name}</code>\n"
+"      <b>Цена товара</b>: <code>{sum_usd} $ / {sum_rub} ₽</code>\n"
+"      <b>Количество</b>: <code>{quantity}</code>\n"
+msgstr ""
+"ℹ️<b>Product No.{index}:</b>\n"
+"      <b>Product Name</b>: <code>{product_name}</code>\n"
+"      <b>Product Price</b>: <code>{sum_usd} $ / {sum_rub} ₽</code>\n"
+"      <b>Quantity</b>: <code>{quantity}</code>\n"
+
+#: core/utils/texts.py:64
+msgid "<b>Общая сумма</b>: <code>{sum_usd} $ / {sum_rub} ₽</code>"
+msgstr "<b>Total amount</b>: <code>{sum_usd} $ / {sum_rub} ₽</code>"
 
 #~ msgid "{menu}"
 #~ msgstr "{menu}"
@@ -313,6 +333,15 @@ msgstr "Cancel order creation"
 #~ "<b>For the amount of:</b> <code>{sum} "
 #~ "{currency_name} / {sum_rub} ₽</code>"
 
-#~ msgid "Изменить язык"
-#~ msgstr "Select a language"
+#~ msgid "Отменить создание заказа"
+#~ msgstr "Cancel order creation"
+
+#~ msgid ""
+#~ "<u><b>Заказ</b></u> - Оформить заказ покупателю\n"
+#~ "<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n"
+#~ "<u><b>История заказов</b></u> - Получить Excel файл с историями заказов"
+#~ msgstr ""
+#~ "<u><b>Order</b></u> - Place an order to the buyer\n"
+#~ "<u><b>Personal account</b></u> - Personal registration data\n"
+#~ "<u><b>Order History</b></u> - Get an Excel file with order histories"
 

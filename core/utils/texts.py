@@ -1,5 +1,6 @@
-from config import __
-from core.database import query_db
+from decimal import Decimal
+
+from config import __, _
 
 # region ERRORS
 error_head = __("➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖\n")
@@ -37,15 +38,32 @@ def error_server(response):
 
 # endregion
 
-menu = __('<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
-          '<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
+menu = __('<u><b>Заказ</b></u> - Оформить заказ покупателю\n'
+          '<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n'
           '<u><b>История заказов</b></u> - Получить Excel файл с историями заказов')
 
 
-def menu_new_language(language):
-    return __('<u><b>Заказ</b></u> - Оформить заказ покупателю\n\n'
-              '<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n\n'
+def menu_new_language(language='ru'):
+    return __('<u><b>Заказ</b></u> - Оформить заказ покупателю\n'
+              '<u><b>Личный кабинет</b></u> - Личные регистрационные данные\n'
               '<u><b>История заказов</b></u> - Получить Excel файл с историями заказов', locale=language)
+
+
+def cart(cart_bot):
+    text = ''
+    total_sum_usd = 0
+    total_sum_rub = 0
+    for index, product in enumerate(cart_bot, 1):
+        text += _('ℹ️<b>Товар №{index}:</b>\n'
+                  '      <b>Название товара</b>: <code>{product_name}</code>\n'
+                  '      <b>Цена товара</b>: <code>{sum_usd} $ / {sum_rub} ₽</code>\n'
+                  '      <b>Количество</b>: <code>{quantity}</code>\n'). \
+            format(index=index, product_name=product['product_name'], sum_usd=product['sum_usd'], sum_rub=product['sum_rub'], quantity=product['quantity'])
+        total_sum_rub += Decimal(product['sum_rub'])
+        total_sum_usd += Decimal(product['sum_usd'])
+    text += _('<b>Общая сумма</b>: <code>{sum_usd} $ / {sum_rub} ₽</code>'). \
+        format(sum_usd=Decimal(total_sum_usd).quantize(Decimal('1')), sum_rub=Decimal(total_sum_rub).quantize(Decimal('1')))
+    return text
 
 
 async def createOrder(order):
@@ -55,27 +73,18 @@ async def createOrder(order):
     else:
         mail_or_phone = order["client_mail"]
         message = __("Почта")
+    cart_bot = order['cart_bot']
     text = __('ℹ️ <b>Информация о заказе:</b>\n'
               '➖➖➖➖➖➖➖➖➖➖➖\n'
               '<b>ФИО клиента</b>: <code>{client_name}</code>\n'
               '<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n'
               '<b>Название магазина</b>: <code>{shop_name}</code>\n'
               '<b>Тип оплаты</b>: <code>{payment_name}</code>\n'
-              '<b>Курс валюты</b>: <code>{currencyPrice}</code>\n'
-              '<b>Название товара</b>: <code>{product_name}</code>\n'
-              '<b>Цена товара</b>: <code>{price} {currency_symbol}</code>\n'
-              '<b>Количество</b>: <code>{quantity}</code>\n'). \
+              '<b>Курс валюты</b>: <code>{currencyPrice}</code>\n'). \
         format(client_name=order["client_name"], message=message, mail_or_phone=mail_or_phone,
-               shop_name=order["shop_name"],
-               payment_name=order["payment_name"], currencyPrice=order["currencyPrice"],
-               product_name=order["product_name"], price=order["price"], currency_symbol=order["currency_symbol"],
-               quantity=order["quantity"])
-    if order['currency'] == 'USD':
-        text += __('<b>Итого</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>').format(
-            sum_usd=order["sum_usd"], currency_symbol=order["currency_symbol"], sum_rub=order["sum_rub"])
-    elif order['currency'] == 'RUB':
-        text += __('<b>Итого</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>').format(
-            sum_usd=order["sum_usd"], currency_symbol=order["currency_symbol"], sum_rub=order["sum_rub"])
+               shop_name=order["shop_name"], payment_name=order["payment_name"], currencyPrice=order["currencyPrice"])
+
+    text += cart(cart_bot)
     return text
 
 
