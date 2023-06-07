@@ -56,9 +56,9 @@ def cart(cart_bot):
     for index, product in enumerate(cart_bot, 1):
         text += _('ℹ️<b>Товар №{index}:</b>\n'
                   '      <b>Название товара</b>: <code>{product_name}</code>\n'
-                  '      <b>Цена товара</b>: <code>{sum_usd} $ / {sum_rub} ₽</code>\n'
+                  '      <b>Цена товара</b>: <code>{price} {currency_symbol}</code>\n'
                   '      <b>Количество</b>: <code>{quantity}</code>\n'). \
-            format(index=index, product_name=product['product_name'], sum_usd=product['sum_usd'], sum_rub=product['sum_rub'], quantity=product['quantity'])
+            format(index=index, product_name=product['product_name'], quantity=product['quantity'], price=product['price'], currency_symbol=product['currency_symbol'])
         total_sum_rub += Decimal(product['sum_rub'])
         total_sum_usd += Decimal(product['sum_usd'])
     text += _('<b>Общая сумма</b>: <code>{sum_usd} $ / {sum_rub} ₽</code>'). \

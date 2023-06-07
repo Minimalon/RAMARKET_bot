@@ -84,7 +84,8 @@ async def choise_currency_price(call: CallbackQuery, callback_data: Currency, st
             else:
                 currency_price = currency_price
             currency_price = Decimal(currency_price).quantize(Decimal('1.0000'))
-            await state.update_data(currencyPrice=str(currency_price), currency=callback_data.currency)
+            currency_symbol = '$' if callback_data.currency == 'USD' else '₽'
+            await state.update_data(currencyPrice=str(currency_price), currency=callback_data.currency, currency_symbol=currency_symbol)
             text = _('Фактический курс: <code>{currency_price}</code>').format(currency_price=currency_price)
             await call.message.edit_text(text, reply_markup=inline.getKeyboard_selectPriceCurrency())
             await call.answer()

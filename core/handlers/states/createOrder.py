@@ -56,13 +56,13 @@ async def check_price(message: Message, state: FSMContext):
         if not cart_oneC:
             cart_oneC = [{"Tov": order['product_id'], "Cost": price, "Kol": order['quantity'], 'Sum': str(sum_usd)}]
             cart_bot = [{"product_id": order['product_id'], "product_name": order['product_name'], "price": price,
-                         "quantity": order['quantity'], 'sum_usd': str(sum_usd), 'sum_rub': str(sum_rub)}]
+                         "quantity": order['quantity'], 'sum_usd': str(sum_usd), 'sum_rub': str(sum_rub), 'currency_symbol': order['currency_symbol']}]
             await state.update_data(price=price, sum_usd=str(sum_usd), sum_rub=str(sum_rub), cart_oneC=cart_oneC, cart_bot=cart_bot)
         else:
             cart_oneC.append({"Tov": order['product_id'], "Cost": price, "Kol": order['quantity'], 'Sum': str(sum_usd)})
             cart_bot.append(
                 {"product_id": order['product_id'], "product_name": order['product_name'], "price": price,
-                 "quantity": order['quantity'], 'sum_usd': str(sum_usd), 'sum_rub': str(sum_rub)})
+                 "quantity": order['quantity'], 'sum_usd': str(sum_usd), 'sum_rub': str(sum_rub), 'currency_symbol': order['currency_symbol']})
             sum_usd += Decimal(order['sum_usd'])
             sum_rub += Decimal(order['sum_rub'])
             await state.update_data(sum_usd=str(sum_usd), sum_rub=str(sum_rub), cart_oneC=cart_oneC, cart_bot=cart_bot)
@@ -123,14 +123,8 @@ async def check_client_phone_or_mail(message: Message, state: FSMContext):
 async def create_order(message: Message, state: FSMContext):
     try:
         order = await state.get_data()
-        if order['currency'] == 'RUB':
-            currency_symbol = '₽'
-        elif order['currency'] == 'USD':
-            currency_symbol = '$'
-        else:
-            currency_symbol = ''
         payment_name = (await utils.get_payment_name(order['paymentGateway']))["Наименование"]
-        await state.update_data(currency_symbol=currency_symbol, payment_name=payment_name)
+        await state.update_data(payment_name=payment_name)
         order = await state.get_data()
         logger.info(order)
         text = await texts.createOrder(order)
