@@ -75,8 +75,10 @@ async def check_price(message: Message, state: FSMContext):
 
 
 async def enter_client_name(call: CallbackQuery, state: FSMContext):
+
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
     log.info('Продолжили создание заказа')
+    await call.message.delete()
     await call.message.answer(_("Введите ФИО (полностью)"))
     await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
 
