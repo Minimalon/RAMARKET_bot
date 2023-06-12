@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 from decimal import Decimal
 
 from aiogram import Bot
@@ -166,6 +167,25 @@ async def update_quantity_product(call: CallbackQuery, callback_data: QuantityUp
     await call.answer()
 
 
+async def delete_order(call: CallbackQuery, callback_data: DeleteOrder):
+    log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+    date_order = datetime.datetime.strptime(callback_data.date, '%Y%m%d%H%M')
+    d_now = datetime.datetime.now()
+    if date_order + timedelta(days=1) > datetime.datetime(day=d_now.day, month=d_now.month, year=d_now.year, hour=10, minute=30):
+        response, r_text = await oneC.delete_order(callback_data.order_id, date_order.strftime('%Y%m%d'))
+        if response.ok:
+            await query_db.delete_history_order(callback_data.order_id)
+            await call.message.answer(_(f'<b><u>Заказ успешно удалён</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>'))
+            log.info(f'Удалили заказ {callback_data.order_id}')
+            log.info(r_text)
+        else:
+            log.error(f"Сервер не отвечает Код:{response.status}")
+            await call.message.answer(texts.error_server(response))
+    else:
+        log.error(f"Пытались удалить старый заказ {callback_data.order_id}")
+        await call.message.answer(_("{text}Заказ слишком старый для удаления".format(text=texts.error_head)))
+
+
 async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
     chat_id = call.message.chat.id
     log = logger.bind(name=call.message.chat.first_name, chat_id=chat_id)
@@ -198,7 +218,7 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
             text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
             await call.message.delete()
-            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text)
+            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, reply_markup=getKeyboard_delete_order(answer["Nomer"]))
         elif order['paymentType'] == '2':
             textQR = answer['Ref']
             qr_path = await generateQR(textQR, order['paymentType'], answer['Nomer'])
@@ -206,13 +226,13 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
             text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
             await call.message.delete()
-            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text)
+            await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, reply_markup=getKeyboard_delete_order(answer["Nomer"]))
         else:
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             await call.message.delete()
             text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
-            await bot.send_message(chat_id, _("<b><u>Заказ успешно создан</u></b>\n{text}").format(text=text))
+            await bot.send_message(chat_id, _("<b><u>Заказ успешно создан</u></b>\n{text}").format(text=text), reply_markup=getKeyboard_delete_order(answer["Nomer"]))
     else:
         await call.message.answer('{text}'.format(text=texts.error_server(response)))
         log.info(f"Сервер недоступен, его код ответа '{response.status}'")

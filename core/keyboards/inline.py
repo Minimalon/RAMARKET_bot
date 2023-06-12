@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config import _
@@ -178,4 +180,11 @@ def getKeyboard_createOrder():
     keyboard.button(text=_("Создать заказ"), callback_data='createOrder')
     keyboard.button(text=_("Главное меню"), callback_data='menu')
     keyboard.adjust(2)
+    return keyboard.as_markup()
+
+
+def getKeyboard_delete_order(order_id):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text=_("Удалить заказ"), callback_data=DeleteOrder(order_id=order_id, date=datetime.datetime.now().strftime('%Y%m%d%H%M')))
+    keyboard.adjust(1)
     return keyboard.as_markup()

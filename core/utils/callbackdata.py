@@ -1,3 +1,5 @@
+import datetime
+
 from aiogram.filters.callback_data import CallbackData
 
 
@@ -38,3 +40,8 @@ class QuantityUpdate(CallbackData, prefix='quantityInc'):
 
 class ChangeLanguage(CallbackData, prefix='select_language'):
     language: str
+
+
+class DeleteOrder(CallbackData, prefix='del_ord'):
+    order_id: str
+    date: str

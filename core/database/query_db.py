@@ -1,7 +1,7 @@
 import os.path
 
 import pandas as pd
-from sqlalchemy import select, update, text, create_engine
+from sqlalchemy import select, update, text, create_engine, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -30,6 +30,12 @@ async def update_client_info(**kwargs):
             session.add(SN)
         else:
             await session.execute(update(Clients).where(Clients.chat_id == str(kwargs["chat_id"])).values(kwargs))
+        await session.commit()
+
+
+async def delete_history_order(order_id: str):
+    async with async_session() as session:
+        await session.execute(delete(HistoryOrders).where(HistoryOrders.order_id == order_id))
         await session.commit()
 
 

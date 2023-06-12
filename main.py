@@ -66,6 +66,9 @@ async def start():
     dp.callback_query.register(show_catalog, F.data == 'add_product')
     dp.callback_query.register(createOrder.enter_client_name, F.data == 'continue_order')
 
+    # Удаление заказа
+    dp.callback_query.register(delete_order, DeleteOrder.filter())
+
     # dp.callback_query.register(createOrder.get_client_name_CALLBACK, F.data == 'currentPrice')
     # dp.callback_query.register(createOrder.get_price, F.data == 'newPrice')
 

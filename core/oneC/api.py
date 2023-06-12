@@ -40,6 +40,18 @@ class Api:
             async with session.post(f"{self.adress}/CreateDoc", data=json.dumps(data)) as response:
                 return response, await response.json(content_type=None)
 
+    async def delete_order(self, order_id, date):
+        """
+        Удаляет созданный заказ
+        :param order_id: Номер заказа
+        :param date: Дата заказа в формате %Y%m%d
+        :return:
+        """
+        data = {"Номер": order_id, "Дата": date}
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{self.adress}/DeleteDoc", data=json.dumps(data)) as response:
+                return response, await response.text()
+
     async def get_all_shops(self):
         """
         Список всех магазинов в 1С
