@@ -233,3 +233,4 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
         log.info(f"Сервер недоступен, его код ответа '{response.status}'")
 
     await bot.send_message(chat_id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
+    await state.clear()
