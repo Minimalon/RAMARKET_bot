@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta
 from decimal import Decimal
 
 from aiogram import Bot
@@ -191,11 +191,9 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
     log = logger.bind(name=call.message.chat.first_name, chat_id=chat_id)
     client_db = await query_db.get_client_info(chat_id=chat_id)
     order = await state.get_data()
+    log.info('Нажали кнопку создать заказ')
+    await call.message.edit_text(_('Идёт создание заказа'))
 
-    if not order:
-        await call.message.delete()
-        await call.message.answer(texts.error_not_found_order)
-        await bot.send_message(chat_id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     if not client_db:
         await not_reg(call)
         return
@@ -217,7 +215,6 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
-            await call.message.delete()
             await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, reply_markup=getKeyboard_delete_order(answer["Nomer"]))
         elif order['paymentType'] == '2':
             textQR = answer['Ref']
@@ -225,11 +222,9 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
-            await call.message.delete()
             await bot.send_photo(chat_id, FSInputFile(qr_path), caption=text, reply_markup=getKeyboard_delete_order(answer["Nomer"]))
         else:
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
-            await call.message.delete()
             text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
             text = '{text}'.format(text=text)
             await bot.send_message(chat_id, _("<b><u>Заказ успешно создан</u></b>\n{text}").format(text=text), reply_markup=getKeyboard_delete_order(answer["Nomer"]))

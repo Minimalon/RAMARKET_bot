@@ -32,8 +32,7 @@ def error_article_not_found(article):
 
 
 def error_server(response):
-    return __("{error_head}Сервер недоступен, его код ответа '{response}'\nПопробуйте создать заказ снова.").format(
-        error_head=error_head, response=response.status)
+    return __("{error_head}Сервер недоступен, его код ответа '{response}'\nПопробуйте создать заказ снова.").format(error_head=error_head, response=response.status)
 
 
 # endregion
