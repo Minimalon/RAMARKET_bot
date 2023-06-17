@@ -38,8 +38,13 @@ async def not_reg(call: CallbackQuery):
 async def check_shops(call: CallbackQuery, state: FSMContext):
     try:
         log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
+
         client = await query_db.get_client_info(chat_id=call.message.chat.id)
         if not client:
+            await not_reg(call)
+            return
+        client_info = await oneC.get_client_info(client.phone_number)
+        if not client_info:
             await not_reg(call)
             return
         shop = await utils.get_shops(client.phone_number)
