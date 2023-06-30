@@ -68,6 +68,7 @@ async def create_excel(**kwargs):
         engine = create_engine(f"postgresql+psycopg2://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
         df = pd.read_sql(query, engine.connect())
         df['date'] = df['date'].dt.tz_localize(None)
+        df['date'] = pd.to_datetime(df['date'], format='%d.%m.%Y %H:%M:%S')
         df = df.drop(
             columns=['chat_id', 'id', 'seller_id', 'agent_id', 'shop_id', 'paymentGateway', 'product_id', 'paymentType', 'country_code', 'city_code'])
         writer = pd.ExcelWriter(path_file, engine="xlsxwriter")
