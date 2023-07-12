@@ -82,6 +82,7 @@ async def get_shop_by_id(shop_id: str):
 
 async def create_order(bot: Bot, data):
     try:
+        log = logger.bind(name=data['name'], chat_id=data['chat_id'])
         payment_name = (await get_payment_name(data['paymentGateway']))['Наименование']
         order = {
             "TypeR": "Doc",
@@ -94,12 +95,12 @@ async def create_order(bot: Bot, data):
             "Email": data.get('client_mail', ''),
             "Itemc": data['cart_oneC']
         }
-        logger.info(order)
+        log.info(order)
         response, answer = await api.post_create_order(order)
-        logger.info(answer)
-        logger.info(response)
-        logger.info(await response.text())
-        logger.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
+        log.info(answer)
+        log.info(response)
+        log.info(await response.text())
+        log.info(f"Ответ сервера '{response.status}', order_id: '{answer['Nomer']}'")
         if response.ok:
             for cart in data['cart_bot']:
                 await query_db.create_historyOrder(order_id=answer['Nomer'], chat_id=str(data['chat_id']),

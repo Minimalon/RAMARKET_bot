@@ -34,7 +34,7 @@ async def check_article(message: Message, state: FSMContext):
             await message.answer('{text}'.format(text=texts.error_article_not_found(article)))
             return
 
-        await state.update_data(product_id=article)
+        await state.update_data(product_id=article, name=message.chat.first_name)
         log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, product_id=article)
         log.info("Ввели артикуль")
         await message.answer(_("Выберите количество товара"), reply_markup=inline.getKeyboard_quantity_product())
