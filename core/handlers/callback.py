@@ -190,6 +190,7 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
     chat_id = call.message.chat.id
     log = logger.bind(name=call.message.chat.first_name, chat_id=chat_id)
     client_db = await query_db.get_client_info(chat_id=chat_id)
+    await state.update_data(name=call.message.chat.first_name)
     order = await state.get_data()
     log.info('Нажали кнопку создать заказ')
     await call.message.edit_text(_('Идёт создание заказа'))

@@ -124,11 +124,12 @@ async def check_client_phone_or_mail(message: Message, state: FSMContext):
 
 async def create_order(message: Message, state: FSMContext):
     try:
+        log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id)
         order = await state.get_data()
         payment_name = (await utils.get_payment_name(order['paymentGateway']))["Наименование"]
         await state.update_data(payment_name=payment_name)
         order = await state.get_data()
-        logger.info(order)
+        log.info(order)
         text = await texts.createOrder(order)
         await message.answer('{text}'.format(text=text), reply_markup=inline.getKeyboard_createOrder())
     except Exception as ex:
