@@ -3,7 +3,7 @@ from decimal import Decimal
 from config import __, _
 
 # region ERRORS
-error_head = __("➖➖➖➖➖🚨ОШИБКА🚨➖➖➖➖➖\n")
+error_head = __("➖➖🚨ОШИБКА🚨➖➖\n")
 error_fakeContact = __(f'{error_head}Ты отправил <u><b>не свой</b></u> контакт')
 error_cancel = __("{error_head}Не найдено текущего заказа").format(error_head=error_head)
 error_price_double_comma = __("{error_head}Вы написали больше одной запятой\nПример как надо: <b>10.12</b>").format(

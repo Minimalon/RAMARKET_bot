@@ -1,4 +1,3 @@
-import re
 from decimal import Decimal
 
 import aiogram.exceptions
@@ -84,7 +83,7 @@ async def choise_currency_price(call: CallbackQuery, callback_data: Currency, st
         if client:
             order = await state.get_data()
             currency_price = order['currencyPrice']
-            if re.findall(',', currency_price):
+            if ',' in currency_price:
                 currency_price = currency_price.replace(",", '.')
             else:
                 currency_price = currency_price
