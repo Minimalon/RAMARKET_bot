@@ -77,7 +77,7 @@ async def get_shop_by_id(shop_id: str):
     turple = namedtuple('Shop', 'name id currency currency_price country country_code city city_code')
     for shop in all_shops:
         if shop['id'] == shop_id:
-            return turple(shop["Наименование"], shop['id'], shop['Валюта'], shop['ВалютаКурс'], shop['Страна'], shop['КодСтраны'], shop['Город'], shop['КодГород'])
+            return turple(shop["Наименование"], shop['id'], shop['Валюта'], str(shop['ВалютаКурс']), shop['Страна'], shop['КодСтраны'], shop['Город'], shop['КодГород'])
 
 
 async def create_order(bot: Bot, data):
