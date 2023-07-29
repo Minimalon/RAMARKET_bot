@@ -40,7 +40,7 @@ async def start():
     # CRON
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
     scheduler.add_job(update_google_sheets, trigger='interval', minutes=30,
-                      kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp-360316-510ea5f7eb13.json')})
+                      kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
     scheduler.start()
 
     # middleware для определения языка

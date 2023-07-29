@@ -17,4 +17,4 @@ async def update_google_sheets(path):
     ss.runPrepared()
 
 if __name__ == '__main__':
-    asyncio.run(update_google_sheets('pythonapp-360316-510ea5f7eb13.json'))
+    asyncio.run(update_google_sheets('pythonapp.json'))
