@@ -1,16 +1,13 @@
 #!/usr/bin/env python3.10
 # -*- coding: utf-8 -*-
-import asyncio
 import os
 
 import aiogram.exceptions
 from aiogram import Dispatcher, F
 from aiogram.filters import Command
 from aiogram.fsm.storage.redis import RedisStorage
-from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-import config
 from core.cron.google_stats import update_google_sheets
 from core.filters.iscontact import IsTrueContact
 from core.handlers import contact
@@ -39,8 +36,7 @@ async def start():
 
     # CRON
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
-    scheduler.add_job(update_google_sheets, trigger='interval', hours=3,
-                      kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
+    scheduler.add_job(update_google_sheets, trigger='interval', hours=3, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
     scheduler.start()
 
     # middleware для определения языка
