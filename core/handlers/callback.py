@@ -206,12 +206,27 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
     if response.ok:
         if order['paymentType'] == '3':
             s_name, f_name, patronymic = order['client_name'].split()
-            textQR = (f'ST00012|Name={answer["ORG"]}'
-                      f'|PersonalAcc={answer["BS"]}|BankName={answer["Bank"]}'
-                      f'|BIC={answer["BIC"]}|CorrespAcc={answer["KBS"]}|PayeeINN={answer["ORGINN"]}'
-                      f'|KPP={answer["ORGKPP"]}|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
-                      f'|Purpose=Оплата заказа №{answer["Nomer"]} от {answer["Date"]}'
-                      f'|Sum={round(Decimal(order["sum_rub"]) * 100)}')
+            textQR = 'ST00012'
+            if answer.get("ORG") is not None:
+                textQR += f'|Name={answer["ORG"]}'
+            if answer.get("BS") is not None:
+                textQR += f'|PersonalAcc={answer["BS"]}'
+            if answer.get("Bank") is not None:
+                textQR += f'|BankName={answer["Bank"]}'
+            if answer.get("BIC") is not None:
+                textQR += f'|BIC={answer["BIC"]}'
+            if answer.get("KBS") is not None:
+                textQR += f'|CorrespAcc={answer["KBS"]}'
+            if answer.get("ORGINN") is not None:
+                textQR += f'|PayeeINN={answer["ORGINN"]}'
+            if answer.get("ORGKPP") is not None:
+                textQR += f'|KPP={answer.get("ORGKPP")}'
+            if answer.get("Nomer") is not None and answer.get("Date"):
+                textQR += f'|Purpose=Оплата заказа №{answer["Nomer"]} от {answer["Date"]}'
+            if answer.get("ORGKPP") is not None:
+                textQR += f'|Name={answer["ORG"]}'
+            textQR += (f'|LastName={s_name}|FirstName={f_name}|MiddleName={patronymic}'
+                       f'|Sum={round(Decimal(order["sum_rub"]) * 100)}')
             qr_path = await generateQR(textQR, order['paymentType'], answer['Nomer'])
             log.info(f"Заказ под номером '{answer['Nomer']}' успешно создан")
             text = await texts.qr(answer['Nomer'], order['sum_usd'], order['sum_rub'])
@@ -232,6 +247,5 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext):
     else:
         await call.message.answer('{text}'.format(text=texts.error_server(response)))
         log.info(f"Сервер недоступен, его код ответа '{response.status}'")
-
     await bot.send_message(chat_id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     await state.clear()

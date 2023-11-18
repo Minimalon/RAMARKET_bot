@@ -63,4 +63,4 @@ class Api:
 
 
 if __name__ == '__main__':
-    asyncio.run(Api().get_payment_gateways())
+    print(asyncio.run(Api().get_client_info("905334950683")))
