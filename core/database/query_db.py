@@ -83,7 +83,7 @@ async def create_excel(**kwargs):
         df['date'] = df['date'].dt.tz_localize(None)
         df['date'] = pd.to_datetime(df['date'], format='%d.%m.%Y %H:%M:%S')
         df = df.drop(
-            columns=['chat_id', 'id', 'seller_id', 'agent_id', 'shop_id', 'paymentGateway', 'product_id', 'paymentType', 'country_code', 'city_code'])
+            columns=['chat_id', 'id', 'agent_id', 'shop_id', 'paymentGateway', 'product_id', 'paymentType', 'country_code', 'city_code'])
         writer = pd.ExcelWriter(path_file, engine="xlsxwriter")
         df.to_excel(writer, sheet_name='orders', index=False, na_rep='NaN')
 
