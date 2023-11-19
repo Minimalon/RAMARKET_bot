@@ -88,11 +88,12 @@ async def history_orders(call: CallbackQuery, bot: Bot):
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
     log.info(f"История заказов")
     path_file = await query_db.create_excel(chat_id=call.message.chat.id)
-    log.info(f"Сохранен фаил {path_file}")
     if not path_file:
+        log.info('Список заказов пуст')
         await bot.send_message(call.message.chat.id, _('Список заказов пуст'))
         await bot.send_message(call.message.chat.id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     else:
+        log.info(f"Отправление истории заказов '{path_file}'")
         await bot.send_document(call.message.chat.id, document=FSInputFile(path_file), caption=_("История заказов"))
         await bot.send_message(call.message.chat.id, "{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
         os.remove(path_file)
