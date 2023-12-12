@@ -11,7 +11,7 @@ async def update_google_sheets(path):
     for count, order in enumerate(orders, start=last_row + 1):
         order = list(order)
         order[0] = datetime.strftime(order[0], "%Y-%m-%d %H:%M")
-        ss.prepare_setValues(f"A{count}:N{count}",[order])
+        ss.prepare_setValues(f"A{count}:O{count}",[order])
         if count % 50 == 0:
             ss.runPrepared()
     ss.runPrepared()

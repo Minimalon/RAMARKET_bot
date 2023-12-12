@@ -1,8 +1,9 @@
 import asyncio
-import os.path
 import json
+import os.path
+
 import pandas as pd
-from sqlalchemy import select, update, text, create_engine, delete, func
+from sqlalchemy import select, update, text, create_engine, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -22,10 +23,11 @@ async def create_historyOrder(**kwargs):
 async def get_history_orders_for_googleSheet(id: int):
     async with async_session() as session:
         q = await session.execute(
-            select(HistoryOrders.date, HistoryOrders.agent_name, HistoryOrders.country_name, HistoryOrders.city_name, HistoryOrders.shop_name, HistoryOrders.payment_name,
-                   HistoryOrders.product_name,
-                   HistoryOrders.price, HistoryOrders.quantity, HistoryOrders.sum_usd, HistoryOrders.sum_rub, HistoryOrders.currency, HistoryOrders.client_name,
-                   HistoryOrders.client_phone)
+            select(HistoryOrders.date, HistoryOrders.agent_name, HistoryOrders.country_name,
+                   HistoryOrders.city_name, HistoryOrders.shop_name, HistoryOrders.payment_name,
+                   HistoryOrders.product_name, HistoryOrders.price, HistoryOrders.quantity,
+                   HistoryOrders.sum_usd, HistoryOrders.sum_rub, HistoryOrders.currency,
+                   HistoryOrders.currencyPrice , HistoryOrders.client_name, HistoryOrders.client_phone)
             .filter(HistoryOrders.id > id).order_by(HistoryOrders.date))
         orders = q.all()
         return orders
