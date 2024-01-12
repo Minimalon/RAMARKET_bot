@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
 from loguru import logger
 
+import config
 from config import _
 from core.database import query_db
 from core.database.query_db import *
@@ -171,8 +172,10 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
     log.button('Создать заказ')
     data = await state.get_data()
     order = Order.model_validate_json(data['order'])
-    r = await utils.create_order(order)
-    # r = {"Ref": "1234567890", "Nomer": "1234567890"}
+    if config.develope_mode:
+        r = {"Ref": "1234567890", "Nomer": "1234567890"}
+    else:
+        r = await utils.create_order(order)
     for p in order.cart:
         await query_db.create_historyOrder(order_id=r['Nomer'],
                                            order=order, product=p),

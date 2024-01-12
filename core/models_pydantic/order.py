@@ -91,13 +91,17 @@ class Order(BaseModel):
     def create_1c_order(self) -> dict:
         order = {
             "TypeR": "Doc",
-            "Sklad": self.shop.id,
-            "KursPrice": self.currency.price,
-            "SO": self.payment.id,
-            "Sotr": self.user.id,
-            "Klient": self.client_name,
-            "Telefon": self.client_phone,
-            "Email": self.client_mail,
-            "Itemc": [{"Tov": p.id, "Kol": p.quantity, "Cost": p.price, 'Sum': p.price * p.quantity} for p in self.cart]
+            "Sklad": str(self.shop.id),
+            "KursPrice": str(self.currency.price),
+            "SO": str(self.payment.id),
+            "Sotr": str(self.user.id),
+            "Klient": str(self.client_name),
+            "Telefon": str(self.client_phone),
+            "Email": str(self.client_mail),
+            "Itemc": [{"Tov": str(p.id), "Kol": str(p.quantity), "Cost": str(p.price), 'Sum': str(p.price * p.quantity)} for p in self.cart]
         }
         return order
+
+if __name__ == '__main__':
+    a = Decimal(1.123)
+    print(str(a))
