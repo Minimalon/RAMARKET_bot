@@ -107,7 +107,7 @@ async def create_excel(chat_id: str):
                      'paymentGateway', 'product_id', 'paymentType',
                      'country_code', 'city_code'])
         # Порядок отображения столбцов
-        column_order = ['date', 'order_id', 'status', 'agent_name', 'country_name', 'city_name', 'shop_name', 'shop_currency', 'seller_id', 'payment_name', 'product_name', 'price',
+        column_order = ['date', 'order_id', 'status', 'agent_name', 'country_name', 'city_name', 'shop_name', 'shop_currency', 'payment_name', 'product_name', 'price',
                         'quantity', 'sum_usd', 'sum_rub', 'sum_try', 'currency', 'currencyPrice', 'client_name', 'client_phone', 'client_mail']
         df = df[column_order]
         writer = pd.ExcelWriter(path_file, engine="xlsxwriter")

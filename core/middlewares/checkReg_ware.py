@@ -15,6 +15,7 @@ from core.utils import texts
 
 async def checkClientIN1c(phone: str):
     client_1c = await oneC.get_employeeInfo(phone)
+    print(client_1c)
     if not client_1c:
         return False
     else:
@@ -31,7 +32,7 @@ async def checkRegMessage(message: Message) -> bool:
                 if message.contact.user_id == message.from_user.id:
                     bot_log.info("Отправил свой контанкт")
                     if not await checkClientIN1c(client_phone):
-                        bot_log.error("Не зарегистрирован в 1с")
+                        bot_log.error(f"Не зарегистрирован в 1с {client_phone}")
                         await message.answer(texts.phoneNotReg(client_phone), reply_markup=getKeyboard_registration())
                         return False
 
@@ -103,4 +104,4 @@ class CheckRegistrationCallbackMiddleware(BaseMiddleware):
             return await handler(event, data)
 
 if __name__ == '__main__':
-    print(asyncio.run(checkClientIN1c('79834388399')))
+    print(asyncio.run(checkClientIN1c('905453490507')))
