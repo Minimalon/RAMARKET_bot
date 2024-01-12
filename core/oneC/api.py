@@ -61,6 +61,7 @@ class Api:
         """
         return await self._get(f"{self.adress}/GetTTAll")
 
+
     async def post_create_order(self, data: dict) -> dict:
         """
         Создает новый заказ
