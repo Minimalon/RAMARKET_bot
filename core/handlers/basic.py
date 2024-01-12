@@ -15,7 +15,7 @@ from core.utils import texts
 oneC = Api()
 
 
-async def get_start(message: Message, bot: Bot):
+async def get_start(message: Message):
     client_phone = ''.join(re.findall(r'[0-9]*', message.contact.phone_number))
     log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id, client_phone=client_phone)
     client_info = await oneC.get_client_info(client_phone)
@@ -24,7 +24,7 @@ async def get_start(message: Message, bot: Bot):
         await query_db.update_client_info(chat_id=str(message.chat.id), phone_number=client_phone,
                                           first_name=message.contact.first_name, last_name=message.contact.last_name,
                                           user_id=str(message.contact.user_id))
-        await bot.send_message(message.chat.id, _('Регистрация успешно пройдена'), reply_markup=ReplyKeyboardRemove())
+        await message.answer(_('Регистрация успешно пройдена'), reply_markup=ReplyKeyboardRemove())
         await message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
     else:
         log.error("Нету в базе 1С")

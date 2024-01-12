@@ -16,9 +16,7 @@ async def error_message(message: Message, exception, state: FSMContext):
 
 
 async def get_article(call: CallbackQuery, state: FSMContext):
-    await call.message.delete()
-    await call.message.answer(_("Введите ID товара"))
-    await call.answer()
+    await call.message.edit_text(_("Введите ID товара"))
     await state.set_state(StateEnterArticle.GET_ARTICLE)
 
 

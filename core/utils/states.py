@@ -2,6 +2,7 @@ from aiogram.fsm.state import State, StatesGroup
 
 
 class StateCreateOrder(StatesGroup):
+    SELECT_QUANTITY = State()
     GET_PRICE = State()
     GET_CLIENT_NAME = State()
     GET_CLIENT_PHONE_OR_MAIL = State()

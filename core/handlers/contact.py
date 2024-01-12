@@ -4,8 +4,8 @@ from core.handlers import basic
 from core.utils import texts
 
 
-async def get_true_contact(message: Message, bot: Bot):
-    await basic.get_start(message, bot)
+async def get_true_contact(message: Message):
+    await basic.get_start(message)
 
 
 async def get_fake_contact(message: Message):

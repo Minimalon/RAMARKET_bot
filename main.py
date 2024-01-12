@@ -4,17 +4,22 @@ import os
 
 import aiogram.exceptions
 from aiogram import Dispatcher, F
-from aiogram.filters import Command
+from aiogram.filters import Command, ExceptionTypeFilter
 from aiogram.fsm.storage.redis import RedisStorage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from pydantic import ValidationError
 
 from core.cron.google_stats import update_google_sheets
 from core.filters.iscontact import IsTrueContact
 from core.handlers import contact
+from core.handlers import errors_handlers
 from core.handlers.basic import get_start, check_registration
 from core.handlers.callback import *
 from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
+from core.loggers.make_loggers import create_loggers
+from core.middlewares.checkReg_ware import CheckRegistrationMessageMiddleware, CheckRegistrationCallbackMiddleware
 from core.middlewares.language_middleware import ACLMiddleware
+from core.middlewares.logger_ware import CallBackMiddleware, MessageMiddleware
 from core.utils.callbackdata import *
 from core.utils.commands import get_commands
 from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
@@ -22,25 +27,38 @@ from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
 
 @logger.catch()
 async def start():
-    if not os.path.exists(os.path.join(config.dir_path, 'logs')):
-        os.makedirs(os.path.join(config.dir_path, 'logs'))
-    logger.add(os.path.join(config.dir_path, 'logs', 'debug.log'),
-               format="{time} | {level} | {name}:{function}:{line} | {message} | {extra}", )
-
+    await create_loggers()
     bot = Bot(token=config.token, parse_mode='HTML')
     await bot.send_message(5263751490, 'Я Запустился!')
     await get_commands(bot)
     await init_models()
-    storage = RedisStorage.from_url(config.redisStorage)
-    dp = Dispatcher(storage=storage)
+
+    if config.develope_mode:
+        dp = Dispatcher()
+    else:
+        storage = RedisStorage.from_url(config.redisStorage)
+        dp = Dispatcher(storage=storage)
 
     # CRON
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
     scheduler.add_job(update_google_sheets, trigger='interval', hours=3, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
     scheduler.start()
 
-    # middleware для определения языка
+    # Errors handlers
+    dp.errors.register(errors_handlers.error_valueError, ExceptionTypeFilter(ValueError))
+    dp.errors.register(errors_handlers.error_validationError, ExceptionTypeFilter(ValidationError))
+    dp.errors.register(errors_handlers.error_total, ExceptionTypeFilter(Exception))
+
+    # Middlewares
+    # Определение языка
     dp.update.middleware(ACLMiddleware(config.i18n))
+    # Логирование
+    dp.callback_query.middleware(CallBackMiddleware())
+    dp.message.middleware(MessageMiddleware())
+    # Проверка регистрации
+    dp.message.middleware(CheckRegistrationMessageMiddleware())
+    dp.callback_query.middleware(CheckRegistrationCallbackMiddleware())
+
 
     # Команды
     dp.message.register(check_registration, Command(commands=['start']))
@@ -50,7 +68,7 @@ async def start():
     dp.callback_query.register(profile, F.data == 'profile')
     dp.callback_query.register(select_change_language, F.data == 'сhange_language')
     dp.callback_query.register(change_language, ChangeLanguage.filter())
-    dp.callback_query.register(create_order, F.data == 'createOrder')
+    dp.callback_query.register(choiseShop.check_shops, F.data == 'startOrder')
     dp.callback_query.register(history_orders, F.data == 'historyOrders')
 
     # Регистрация контакта
@@ -58,15 +76,16 @@ async def start():
     dp.message.register(contact.get_fake_contact, F.contact)
 
     # Создание заказа
+    dp.callback_query.register(choiseShop.choise_currency, Shop.filter())
+    dp.callback_query.register(choiseShop.choise_currency_price, Currency.filter())
     dp.callback_query.register(selectMainPaymentGateway, F.data == 'currencyContinue')
     dp.callback_query.register(CurrencyValue.get_CurrencyPrice, F.data == 'currencyNewValue')
     dp.callback_query.register(selectChildPaymentGateway, ChildPaymentGateway.filter())
-    dp.callback_query.register(select_input_method_Product, PaymentGateway.filter())
     dp.callback_query.register(show_catalog, F.data == 'catalog')
     dp.callback_query.register(enterArticle.get_article, F.data == 'enter_article')
     dp.callback_query.register(select_prev_page_catalog, F.data == 'prevPage_catalog')
-    dp.callback_query.register(show_childcategories, Category.filter())
-    dp.callback_query.register(select_quantity_product, Product.filter())
+    dp.callback_query.register(show_child_categories, Category.filter())
+    dp.callback_query.register(select_quantity_product, Tovar.filter())
     dp.callback_query.register(update_quantity_product, QuantityUpdate.filter())
     dp.callback_query.register(createOrder.get_price, QuantityProduct.filter())
     dp.callback_query.register(show_catalog, F.data == 'add_product')
@@ -84,6 +103,7 @@ async def start():
     dp.message.register(createOrder.check_client_phone_or_mail, StateCreateOrder.GET_CLIENT_PHONE_OR_MAIL)
     dp.message.register(createOrder.create_order, StateCreateOrder.CREATE_ORDER)
     dp.message.register(get_start, StateCreateOrder.ERROR)
+    dp.callback_query.register(create_order, F.data == 'createOrder')
 
     # STATES CURRENCY
     dp.message.register(CurrencyValue.check_CurrencyPrice, StateCurrency.GET_PRICE)
@@ -92,10 +112,6 @@ async def start():
     dp.message.register(enterArticle.check_article, StateEnterArticle.GET_ARTICLE)
     dp.message.register(get_start, StateEnterArticle.ERROR)
 
-    # STATES CHOISE SHOP
-    dp.callback_query.register(choiseShop.check_shops, F.data == 'startOrder')
-    dp.callback_query.register(choiseShop.choise_currency, Shop.filter())
-    dp.callback_query.register(choiseShop.choise_currency_price, Currency.filter())
 
     try:
         await dp.start_polling(bot)

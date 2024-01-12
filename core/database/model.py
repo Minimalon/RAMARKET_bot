@@ -1,4 +1,6 @@
-from sqlalchemy import String, Column, DateTime, Boolean, BigInteger
+import enum
+
+from sqlalchemy import String, Column, DateTime, Boolean, BigInteger, Enum
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
@@ -7,6 +9,12 @@ import config
 
 engine = create_async_engine(f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
 Base = declarative_base()
+
+
+class OrderStatus(enum.Enum):
+    sale = 1  # Продали
+    delete = 2  # Удалили в течении суток
+    cancel = 3  # Отменили
 
 
 class HistoryOrders(Base):
@@ -33,11 +41,13 @@ class HistoryOrders(Base):
     quantity = Column(String(50))
     sum_usd = Column(String(50))
     sum_rub = Column(String(50))
+    sum_try = Column(String(50))
     currency = Column(String(10))
     currencyPrice = Column(String(50))
     client_name = Column(String(100))
     client_phone = Column(String(20))
     client_mail = Column(String(100))
+    status = Column(Enum(OrderStatus, native_enum=False), default=OrderStatus.sale)
 
 
 class Clients(Base):

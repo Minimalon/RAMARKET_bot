@@ -1,10 +1,8 @@
-import datetime
-
 from aiogram.filters.callback_data import CallbackData
 
 
 class Currency(CallbackData, prefix='currency'):
-    currency: str
+    name: str
 
 
 class Shop(CallbackData, prefix='shop'):
@@ -17,16 +15,12 @@ class ChildPaymentGateway(CallbackData, prefix='childPaymentGateway'):
     type: str
 
 
-class PaymentGateway(CallbackData, prefix='paymentGateway'):
-    id: str
-
-
 class Category(CallbackData, prefix='category'):
     id: str
     parent_id: str
 
 
-class Product(CallbackData, prefix='product'):
+class Tovar(CallbackData, prefix='product'):
     product_id: str
 
 

@@ -3,8 +3,10 @@ from datetime import datetime
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config import _
+from core.models_pydantic.order import ProductGroup, Order
 from core.oneC import utils
 from core.oneC.api import Api
+from core.oneC.models import UserShop, Payment
 from core.utils.callbackdata import *
 
 oneC = Api()
@@ -41,18 +43,20 @@ def getKeyboard_change_language():
     return keyboard.as_markup()
 
 
-def getKeyboard_selectCurrency():
+async def getKeyboard_selectCurrency(order: Order):
     keyboard = InlineKeyboardBuilder()
-    keyboard.button(text="$", callback_data=Currency(currency='USD'))
-    keyboard.button(text="₽", callback_data=Currency(currency='RUB'))
-    keyboard.adjust(2, repeat=True)
+    keyboard.button(text='USD', callback_data=Currency(name='USD'))
+    keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
+    if order.shop.currency == 'TRY':
+        keyboard.button(text='TRY', callback_data=Currency(name='TRY'))
+    keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 
 
-def getKeyboard_selectShop(shops):
+def getKeyboard_selectShop(shops: list[UserShop]):
     keyboard = InlineKeyboardBuilder()
     for shop in shops:
-        keyboard.button(text=shop['Магазин'], callback_data=Shop(id=str(shop['idМагазин'])))
+        keyboard.button(text=shop.name, callback_data=Shop(id=shop.id))
     keyboard.adjust(2, repeat=True)
     return keyboard.as_markup()
 
@@ -67,25 +71,30 @@ def getKeyboard_selectPriceCurrency():
 async def getKeyboard_select_Main_PaymentGateway():
     keyboard = InlineKeyboardBuilder()
     for paytype in await utils.get_main_paymentWay():
-        keyboard.button(text=paytype['Наименование'],
-                        callback_data=ChildPaymentGateway(id=paytype['Id'], idParent=paytype['IdParent'],
-                                                          type=paytype['Type']))
+        keyboard.button(text=paytype.name,
+                        callback_data=ChildPaymentGateway(id=paytype.id,
+                                                          idParent=paytype.parent_id,
+                                                          type=paytype.type))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 
 
-async def getKeyboard_select_Child_PaymentGateway(Id: str, IdParent: str):
+async def getKeyboard_select_Child_PaymentGateway(pay: Payment):
     keyboard = InlineKeyboardBuilder()
-    groups = await utils.get_child_paymentWay(Id)
+    if pay is None:
+        groups = await utils.get_child_paymentWay('')
+    else:
+        groups = await utils.get_child_paymentWay(pay.id)
     if groups:
-        for paytype in await utils.get_child_paymentWay(Id):
-            keyboard.button(text=paytype['Наименование'],
-                            callback_data=ChildPaymentGateway(id=paytype['Id'], idParent=paytype['IdParent'],
-                                                              type=paytype['Type']))
+        for paytype in groups:
+            keyboard.button(text=paytype.name,
+                            callback_data=ChildPaymentGateway(id=paytype.id,
+                                                              idParent=paytype.parent_id,
+                                                              type=paytype.type))
     else:
         return getKeyboard_ProductStart()
-    if Id != '':
-        keyboard.button(text=_("<<< Назад"), callback_data=ChildPaymentGateway(id=IdParent, idParent='', type=''))
+    if pay is not None:
+        keyboard.button(text=_("<<< Назад"), callback_data=ChildPaymentGateway(id='', idParent='', type=''))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 
@@ -100,39 +109,33 @@ def getKeyboard_ProductStart():
 
 async def getKeyboard_catalog():
     keyboard = InlineKeyboardBuilder()
-    for group in await utils.get_child_groups("1002592"):
-        keyboard.button(text=group['Наименование'],
-                        callback_data=Category(parent_id=group['idGroup'], id=group['id']))
+    for pg in await utils.get_child_groups("1002592"):
+        keyboard.button(text=pg.name,
+                        callback_data=Category(parent_id=pg.group_id,
+                                               id=pg.id))
     keyboard.button(text=_("<<< Назад"), callback_data='prevPage_catalog')
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 
 
-async def getKeyboard_products_or_categories(id: str, parent_id: str):
+async def getKeyboard_products_or_categories(pg: ProductGroup):
     keyboard = InlineKeyboardBuilder()
 
-    products = await utils.get_tovar_by_group(id)
+    products = await utils.get_tovar_by_group(pg.id)
     if products:
         for product in products:
-            keyboard.button(text=product['Наименование'], callback_data=Product(product_id=product['Id']))
-        keyboard.button(text=_("<<< Назад"), callback_data=Category(id=parent_id, parent_id=id))
-        keyboard.adjust(1, repeat=True)
-        return keyboard.as_markup()
-
-    groups = await utils.get_child_groups(id)
+            keyboard.button(text=product.name, callback_data=Tovar(product_id=product.id))
+        keyboard.button(text=_("<<< Назад"), callback_data=Category(id=pg.group_id, parent_id=pg.id))
+    groups = await utils.get_child_groups(pg.id)
     if groups:
-        for group in groups:
-            text = group['Наименование']
-            keyboard.button(text=text, callback_data=Category(parent_id=group['idGroup'], id=group['id']))
-        if id != "1002592":
-            keyboard.button(text=_("<<< Назад"), callback_data=Category(id=parent_id, parent_id=id))
+        for pg in groups:
+            keyboard.button(text=pg.name, callback_data=Category(parent_id=pg.group_id, id=pg.id))
+        if pg.group_id != "1002592":
+            keyboard.button(text=_("<<< Назад"), callback_data=Category(id=pg.group_id, parent_id=pg.id))
         else:
             keyboard.button(text=_("<<< Назад"), callback_data='prevPage_catalog')
-        keyboard.adjust(1, repeat=True)
-        return keyboard.as_markup()
-
-    if not groups and not products:
-        raise ValueError
+    keyboard.adjust(1, repeat=True)
+    return keyboard.as_markup()
 
 
 def getKeyboard_product_info():
@@ -185,6 +188,6 @@ def getKeyboard_createOrder():
 
 def getKeyboard_delete_order(order_id):
     keyboard = InlineKeyboardBuilder()
-    keyboard.button(text=_("Удалить заказ"), callback_data=DeleteOrder(order_id=order_id, date=datetime.datetime.now().strftime('%Y%m%d%H%M')))
+    keyboard.button(text=_("Удалить заказ"), callback_data=DeleteOrder(order_id=order_id, date=datetime.now().strftime('%Y%m%d%H%M')))
     keyboard.adjust(1)
     return keyboard.as_markup()
