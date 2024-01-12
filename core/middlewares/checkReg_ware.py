@@ -1,3 +1,4 @@
+import asyncio
 from typing import Callable, Awaitable, Dict, Any
 
 from aiogram import BaseMiddleware
@@ -12,11 +13,9 @@ from core.oneC import utils as oneC
 from core.utils import texts
 
 
-async def checkClientIN1c(phone):
+async def checkClientIN1c(phone: str):
     client_1c = await oneC.get_employeeInfo(phone)
     if not client_1c:
-        return False
-    elif client_1c['Администратор'] == "Нет":
         return False
     else:
         return True
@@ -102,3 +101,6 @@ class CheckRegistrationCallbackMiddleware(BaseMiddleware):
     ) -> Any:
         if await checkRegCallback(event):
             return await handler(event, data)
+
+if __name__ == '__main__':
+    print(asyncio.run(checkClientIN1c('79834388399')))
