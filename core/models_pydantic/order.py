@@ -69,20 +69,26 @@ class Order(BaseModel):
             self.sum_usd = Decimal(0)
             self.sum_rub = Decimal(0)
             self.sum_try = Decimal(0)
-
-            if self.currency.name == 'RUB':
-                for product in self.cart:
-                    self.sum_rub += product.price * product.quantity
-                    self.sum_usd += (product.price * product.quantity) / self.currency.price
-            elif self.currency.name == 'USD':
-                for product in self.cart:
-                    self.sum_rub += (product.price * self.currency.price) * product.quantity
-                    self.sum_usd += product.price * product.quantity
-            elif self.currency.name == 'TRY':
-                for product in self.cart:
-                    self.sum_rub += (product.price * self.currency.price) * product.quantity
-                    self.sum_try += product.price * product.quantity
-                self.sum_usd += self.sum_rub / await get_price_valute_by_one('USD')
+            if self.shop.currency == 'TRY':
+                if self.currency.name == 'RUB':
+                    for product in self.cart:
+                        self.sum_rub += product.price * product.quantity
+                        self.sum_try += (product.price * product.quantity) / self.currency.price
+                    self.sum_usd += self.sum_rub / await get_price_valute_by_one('USD')
+                elif self.currency.name == 'TRY':
+                    for product in self.cart:
+                        self.sum_rub += (product.price * self.currency.price) * product.quantity
+                        self.sum_try += product.price * product.quantity
+                    self.sum_usd += self.sum_rub / await get_price_valute_by_one('USD')
+            else:
+                if self.shop.currency == 'RUB':
+                    for product in self.cart:
+                        self.sum_rub += product.price * product.quantity
+                        self.sum_usd += (product.price * product.quantity) / self.currency.price
+                elif self.shop.currency == 'USD':
+                    for product in self.cart:
+                        self.sum_rub += (product.price * self.currency.price) * product.quantity
+                        self.sum_usd += product.price * product.quantity
         self.sum_usd = Decimal(round(self.sum_usd, 2))
         self.sum_rub = Decimal(round(self.sum_rub, 2))
         self.sum_try = Decimal(round(self.sum_try, 2))

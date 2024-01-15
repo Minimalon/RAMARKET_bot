@@ -65,15 +65,20 @@ def cart(order: Order) -> str:
                   '      <b>Количество</b>: <code>{quantity}</code>\n'). \
             format(index=index, product_name=product.name, quantity=product.quantity,
                    price=product.price, currency_symbol=order.currency.symbol)
-    if order.currency.name == 'RUB':
-        text += _('<b>Общая сумма</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>'). \
-            format(sum_usd=order.sum_usd, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
-    elif order.currency.name == 'USD':
-        text += _('<b>Общая сумма</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>'). \
-            format(sum_usd=order.sum_usd, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
-    elif order.currency.name == 'TRY':
-        text += _('<b>Общая сумма</b>: <code>{sum_try} {currency_symbol} / {sum_rub} ₽</code>'). \
-            format(sum_try=order.sum_try, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
+    if order.shop.currency == 'TRY':
+        if order.currency.name == 'RUB':
+            text += _('<b>Общая сумма</b>: <code>{sum_rub} {currency_symbol} / {sum_try} ₺</code>'). \
+                format(sum_rub=order.sum_rub, sum_try=order.sum_try, currency_symbol=order.currency.symbol)
+        elif order.currency.name == 'TRY':
+            text += _('<b>Общая сумма</b>: <code>{sum_try} {currency_symbol} / {sum_rub} ₽</code>'). \
+                format(sum_rub=order.sum_rub, sum_try=order.sum_try, currency_symbol=order.currency.symbol)
+    else:
+        if order.currency.name == 'RUB':
+            text += _('<b>Общая сумма</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>'). \
+                format(sum_usd=order.sum_usd, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
+        elif order.currency.name == 'USD':
+            text += _('<b>Общая сумма</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>'). \
+                format(sum_usd=order.sum_usd, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
     return text
 
 

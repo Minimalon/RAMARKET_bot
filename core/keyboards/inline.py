@@ -47,7 +47,7 @@ async def getKeyboard_selectCurrency(order: Order):
     keyboard = InlineKeyboardBuilder()
     if order.shop.currency == 'TRY':
         keyboard.button(text='TRY', callback_data=Currency(name='TRY'))
-        # keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
+        keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
     else:
         keyboard.button(text='USD', callback_data=Currency(name='USD'))
         keyboard.button(text='RUB', callback_data=Currency(name='RUB'))

@@ -15,7 +15,6 @@ from core.utils import texts
 
 async def checkClientIN1c(phone: str):
     client_1c = await oneC.get_employeeInfo(phone)
-    print(client_1c)
     if not client_1c:
         return False
     else:

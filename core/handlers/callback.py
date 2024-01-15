@@ -176,9 +176,9 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
         r = {"Ref": "1234567890", "Nomer": "1234567890"}
     else:
         r = await utils.create_order(order)
-    for p in order.cart:
-        await query_db.create_historyOrder(order_id=r['Nomer'],
-                                           order=order, product=p),
+        for p in order.cart:
+            await query_db.create_historyOrder(order_id=r['Nomer'],
+                                               order=order, product=p),
 
     text = await texts.qr(r['Nomer'], order)
     if order.payment.type == '3':
