@@ -81,11 +81,11 @@ class Order(BaseModel):
                         self.sum_try += product.price * product.quantity
                     self.sum_usd += self.sum_rub / await get_price_valute_by_one('USD')
             else:
-                if self.shop.currency == 'RUB':
+                if self.currency.name == 'RUB':
                     for product in self.cart:
                         self.sum_rub += product.price * product.quantity
                         self.sum_usd += (product.price * product.quantity) / self.currency.price
-                elif self.shop.currency == 'USD':
+                elif self.currency.name == 'USD':
                     for product in self.cart:
                         self.sum_rub += (product.price * self.currency.price) * product.quantity
                         self.sum_usd += product.price * product.quantity
