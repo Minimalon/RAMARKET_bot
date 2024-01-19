@@ -108,6 +108,7 @@ class Order(BaseModel):
         }
         return order
 
+
 if __name__ == '__main__':
     a = Decimal(1.123)
     print(str(a))

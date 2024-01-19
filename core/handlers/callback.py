@@ -158,7 +158,7 @@ async def delete_order(call: CallbackQuery, callback_data: DeleteOrder, log: Bot
     date_order = datetime.strptime(callback_data.date, '%Y%m%d%H%M')
     d_now = datetime.now()
     if date_order + timedelta(days=1) > datetime(day=d_now.day, month=d_now.month, year=d_now.year, hour=10, minute=30):
-        await oneC.delete_order(callback_data.order_id, date_order.strftime('%Y%m%d'))
+        await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
         await query_db.delete_history_order(callback_data.order_id)
         await call.message.answer(_(f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>'))
         log.success(f'Удалили заказ {callback_data.order_id}')
