@@ -1,8 +1,8 @@
-import asyncio
 import json
 import os.path
 
 import pandas as pd
+from aiogram.types import Message
 from sqlalchemy import select, update, text, create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -132,17 +132,8 @@ async def create_excel(chat_id: str):
         return path_file
 
 
-async def kosyc_klyiner():
-    with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'r', encoding="utf8") as orders:
-        orders = json.loads(orders.read())
-    for count, order in enumerate(orders, start=1):
-        order_id = f'RECOVER-{count}'
-        print(count, order)
-        # await create_historyOrder()
-
-
-if __name__ == '__main__':
-    orders = asyncio.run(get_order_by_currence_name('RUB'))
+async def kosyc_klyiner(message: Message):
+    orders = await get_order_by_currence_name('RUB')
     json_orders = [{
         "TypeR": "Doc",
         "Sklad": o.shop_id,
@@ -156,4 +147,4 @@ if __name__ == '__main__':
         "Itemc": [{"Tov": o.product_id, "Kol": o.quantity, "Cost": o.price, 'Sum': o.sum_rub}]
     } for o in orders]
     with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
-        orders.write(json.dumps(json_orders) + '\n')
+        orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
