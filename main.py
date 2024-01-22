@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.10
 # -*- coding: utf-8 -*-
+import asyncio
 import os
 
 import aiogram.exceptions
