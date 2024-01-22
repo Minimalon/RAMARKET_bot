@@ -136,6 +136,7 @@ async def create_excel(chat_id: str):
 
 
 async def kosyc_klyiner(message: Message):
+    """Пересоздовали заказы, потому что в 1С не передовалась валюта заказа"""
     orders = await get_order_by_currence_name('RUB')
     for o in orders:
         json_orders = {
@@ -174,30 +175,3 @@ async def kosyc_klyiner(message: Message):
 
     # with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
     #     orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
-
-
-async def test_send():
-    print(await Api().post_create_order({
-        "TypeR": "Doc",
-        "Data": "21.01.2024 23:02:46",
-        "Order_id": "РА00-000731",
-        "Sklad": "5502669",
-        "KursPrice": "95.2007",
-        "Valuta": "RUB",
-        "SO": "000000025",
-        "Sotr": "7402658",
-        "Klient": "Мохова Алёна .",
-        "Telefon": "79251150447",
-        "Email": "",
-        "Itemc": [
-            {
-                "Tov": "0000000102",
-                "Kol": "1",
-                "Cost": "59976",
-                "Sum": "59976"
-            }
-        ]
-    }, ))
-
-if __name__ == '__main__':
-    asyncio.run(test_send())
