@@ -51,6 +51,15 @@ async def get_history_orders_for_googleSheet(id: int):
         return orders
 
 
+async def get_order_by_currence_name(currency_name: str) -> list[HistoryOrders]:
+    async with async_session() as session:
+        q = await session.scalars(
+            select(HistoryOrders)
+            .where(HistoryOrders.currency == currency_name).order_by(HistoryOrders.date))
+        orders = q.all()
+        return orders
+
+
 async def update_client_info(**kwargs):
     async with async_session() as session:
         for key, value in kwargs.items():
@@ -133,4 +142,18 @@ async def kosyc_klyiner():
 
 
 if __name__ == '__main__':
-    print(asyncio.run(get_history_orders_for_googleSheet(1)))
+    orders = asyncio.run(get_order_by_currence_name('RUB'))
+    json_orders = [{
+        "TypeR": "Doc",
+        "Sklad": o.shop_id,
+        "KursPrice": o.currencyPrice,
+        "Valuta": o.currency,
+        "SO": o.paymentGateway,
+        "Sotr": o.agent_id,
+        "Klient": o.client_name,
+        "Telefon": o.client_phone,
+        "Email": o.client_mail,
+        "Itemc": [{"Tov": o.product_id, "Kol": o.quantity, "Cost": o.price, 'Sum': o.sum_rub}]
+    } for o in orders]
+    with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'a', encoding="utf8") as orders:
+        orders.write(json.dumps(json_orders) + '\n')

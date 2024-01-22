@@ -99,6 +99,7 @@ class Order(BaseModel):
             "TypeR": "Doc",
             "Sklad": str(self.shop.id),
             "KursPrice": str(self.currency.price),
+            "Valuta": str(self.currency.name),
             "SO": str(self.payment.id),
             "Sotr": str(self.user.id),
             "Klient": str(self.client_name),

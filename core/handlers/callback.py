@@ -172,6 +172,7 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
     log.button('Создать заказ')
     data = await state.get_data()
     order = Order.model_validate_json(data['order'])
+    print(order.model_dump_json())
     if config.develope_mode:
         r = {"Ref": "1234567890", "Nomer": "1234567890"}
     else:
