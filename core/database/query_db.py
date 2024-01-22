@@ -136,6 +136,8 @@ async def kosyc_klyiner(message: Message):
     orders = await get_order_by_currence_name('RUB')
     json_orders = [{
         "TypeR": "Doc",
+        "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
+        "Order_id": o.order_id,
         "Sklad": o.shop_id,
         "KursPrice": o.currencyPrice,
         "Valuta": o.currency,
@@ -144,7 +146,7 @@ async def kosyc_klyiner(message: Message):
         "Klient": o.client_name,
         "Telefon": o.client_phone,
         "Email": o.client_mail,
-        "Itemc": [{"Tov": o.product_id, "Kol": o.quantity, "Cost": o.price, 'Sum': o.sum_rub}]
+        "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(int(_.price) * int(_.quantity))} for _ in orders if _.order_id == o.order_id]
     } for o in orders]
     with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
         orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
