@@ -1,6 +1,8 @@
+import asyncio
 import json
 import os.path
 from decimal import Decimal
+
 import pandas as pd
 from aiogram.types import Message
 from sqlalchemy import select, update, text, create_engine
@@ -9,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 
 from core.database.model import *
 from core.models_pydantic.order import Order, Product
+from core.oneC.api import Api
 
 engine = create_async_engine(
     f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
@@ -134,20 +137,67 @@ async def create_excel(chat_id: str):
 
 async def kosyc_klyiner(message: Message):
     orders = await get_order_by_currence_name('RUB')
-    json_orders = [{
-        "TypeR": "Doc",
-        "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
-        "Order_id": o.order_id,
-        "Sklad": o.shop_id,
-        "KursPrice": o.currencyPrice,
-        "Valuta": o.currency,
-        "SO": o.paymentGateway,
-        "Sotr": o.agent_id,
-        "Klient": o.client_name,
-        "Telefon": o.client_phone,
-        "Email": o.client_mail,
-        "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
-    } for o in orders]
-    with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
-        orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
+    for o in orders:
+        json_orders = {
+            "TypeR": "Doc",
+            "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
+            "Order_id": o.order_id,
+            "Sklad": o.shop_id,
+            "KursPrice": o.currencyPrice,
+            "Valuta": o.currency,
+            "SO": o.paymentGateway,
+            "Sotr": o.agent_id,
+            "Klient": o.client_name,
+            "Telefon": o.client_phone,
+            "Email": o.client_mail,
+            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
+        }
+        await Api().post_create_order(json_orders)
 
+    orders_try = await get_order_by_currence_name('TRY')
+    for o in orders_try:
+        json_orders = {
+            "TypeR": "Doc",
+            "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
+            "Order_id": o.order_id,
+            "Sklad": o.shop_id,
+            "KursPrice": o.currencyPrice,
+            "Valuta": o.currency,
+            "SO": o.paymentGateway,
+            "Sotr": o.agent_id,
+            "Klient": o.client_name,
+            "Telefon": o.client_phone,
+            "Email": o.client_mail,
+            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if _.order_id == o.order_id]
+        }
+        await Api().post_create_order(json_orders)
+
+    # with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
+    #     orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
+
+
+async def test_send():
+    print(await Api().post_create_order({
+        "TypeR": "Doc",
+        "Data": "21.01.2024 23:02:46",
+        "Order_id": "РА00-000731",
+        "Sklad": "5502669",
+        "KursPrice": "95.2007",
+        "Valuta": "RUB",
+        "SO": "000000025",
+        "Sotr": "7402658",
+        "Klient": "Мохова Алёна .",
+        "Telefon": "79251150447",
+        "Email": "",
+        "Itemc": [
+            {
+                "Tov": "0000000102",
+                "Kol": "1",
+                "Cost": "59976",
+                "Sum": "59976"
+            }
+        ]
+    }, ))
+
+if __name__ == '__main__':
+    asyncio.run(test_send())
