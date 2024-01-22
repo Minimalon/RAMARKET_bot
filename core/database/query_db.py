@@ -155,5 +155,5 @@ if __name__ == '__main__':
         "Email": o.client_mail,
         "Itemc": [{"Tov": o.product_id, "Kol": o.quantity, "Cost": o.price, 'Sum': o.sum_rub}]
     } for o in orders]
-    with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'a', encoding="utf8") as orders:
+    with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
         orders.write(json.dumps(json_orders) + '\n')
