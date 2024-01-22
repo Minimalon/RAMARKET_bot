@@ -150,3 +150,4 @@ async def kosyc_klyiner(message: Message):
     } for o in orders]
     with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
         orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
+
