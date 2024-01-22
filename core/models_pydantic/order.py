@@ -97,6 +97,8 @@ class Order(BaseModel):
     def create_1c_order(self) -> dict:
         order = {
             "TypeR": "Doc",
+            "Order_id": None,  # Если указывать номер заказа, то заказ будет не создаваться, а изменяться
+            "Data": None,
             "Sklad": str(self.shop.id),
             "KursPrice": str(self.currency.price),
             "Valuta": str(self.currency.name),
