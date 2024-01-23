@@ -1,6 +1,7 @@
-from core.cron.Spreadsheet import Spreadsheet
 import asyncio
 from datetime import datetime
+
+from core.cron.Spreadsheet import Spreadsheet
 from core.database.query_db import get_history_orders_for_googleSheet
 
 
@@ -16,5 +17,12 @@ async def update_google_sheets(path):
             ss.runPrepared()
     ss.runPrepared()
 
+
+async def get_values(path):
+    ss = Spreadsheet(path, 'sales', spreadsheetId='1dWAQdnsfXoebDNegKL6kNE77OgwOIP0Df87o4DlhF7s')
+    print(ss.get_value_in_cell('A:P'))
+
+
 if __name__ == '__main__':
-    asyncio.run(update_google_sheets('pythonapp.json'))
+    # asyncio.run(update_google_sheets('pythonapp.json'))
+    asyncio.run(get_values('pythonapp.json'))

@@ -201,7 +201,7 @@ class Spreadsheet:
                                                                 ranges=[f'{self.sheetTitle}!{cell}'],
                                                                 valueRenderOption='FORMATTED_VALUE',
                                                                 dateTimeRenderOption='FORMATTED_STRING').execute()
-        return results["valueRanges"][0]["values"][0][0]
+        return results["valueRanges"][0]["values"]
 
     def get_tehpod_names(self):
         results = self.service.spreadsheets().values().batchGet(spreadsheetId=self.spreadsheetId,
