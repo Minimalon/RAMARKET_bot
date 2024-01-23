@@ -15,6 +15,7 @@ class OrderStatus(enum.Enum):
     sale = 1  # Продали
     delete = 2  # Удалили в течении суток
     cancel = 3  # Отменили
+    change_date = 4  # Изменили дату
 
 
 class HistoryOrders(Base):

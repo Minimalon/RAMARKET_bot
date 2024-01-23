@@ -44,12 +44,12 @@ async def create_historyOrder(order_id: str, order: Order, product: Product):
 async def get_history_orders_for_googleSheet(id: int):
     async with async_session() as session:
         q = await session.execute(
-            select(HistoryOrders.date, HistoryOrders.agent_name, HistoryOrders.country_name,
+            select(HistoryOrders.date, HistoryOrders.order_id, HistoryOrders.agent_name, HistoryOrders.country_name,
                    HistoryOrders.city_name, HistoryOrders.shop_name, HistoryOrders.payment_name,
                    HistoryOrders.product_name, HistoryOrders.price, HistoryOrders.quantity,
                    HistoryOrders.sum_usd, HistoryOrders.sum_rub, HistoryOrders.currency,
                    HistoryOrders.currencyPrice, HistoryOrders.client_name, HistoryOrders.client_phone)
-            .where(HistoryOrders.id > id, HistoryOrders.status == OrderStatus.sale).order_by(HistoryOrders.date))
+            .where(HistoryOrders.id > id).order_by(HistoryOrders.date))
         orders = q.all()
         return orders
 
