@@ -37,7 +37,7 @@ class Api:
                     log.error(f"POST {url} Status={response.status}")
                     log.error(text)
                     raise ValueError(text)
-                return json.loads(text)
+                return text
 
     async def get_payment_gateways(self):
         return await self._get(f"{self.adress}/GetSO")
@@ -61,14 +61,13 @@ class Api:
         """
         return await self._get(f"{self.adress}/GetTTAll")
 
-
     async def post_create_order(self, data: dict) -> dict:
         """
         Создает новый заказ
         :param data: Тело запроса
         :return: dict
         """
-        return await self._post(f"{self.adress}/CreateDoc", data=json.dumps(data))
+        return json.loads(await self._post(f"{self.adress}/CreateDoc", data=json.dumps(data)))
 
     async def delete_order(self, order_id, date):
         """

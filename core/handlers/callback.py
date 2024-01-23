@@ -157,14 +157,18 @@ async def update_quantity_product(call: CallbackQuery, callback_data: QuantityUp
 async def delete_order(call: CallbackQuery, callback_data: DeleteOrder, log: BotLogger):
     date_order = datetime.strptime(callback_data.date, '%Y%m%d%H%M')
     d_now = datetime.now()
-    if date_order + timedelta(days=1) > datetime(day=d_now.day, month=d_now.month, year=d_now.year, hour=10, minute=30):
-        await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
-        await query_db.delete_history_order(callback_data.order_id)
-        await call.message.answer(_(f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>'))
-        log.success(f'Удалили заказ {callback_data.order_id}')
-    else:
-        log.error(f"Пытались удалить старый заказ {callback_data.order_id}")
-        await call.message.answer(_("{text}Заказ слишком старый для удаления".format(text=texts.error_head)))
+    await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
+    await query_db.delete_history_order(callback_data.order_id)
+    await call.message.answer(_(f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>'))
+    log.success(f'Удалили заказ {callback_data.order_id}')
+    # if date_order + timedelta(days=1) > datetime(day=d_now.day, month=d_now.month, year=d_now.year, hour=10, minute=30):
+    #     await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
+    #     await query_db.delete_history_order(callback_data.order_id)
+    #     await call.message.answer(_(f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>'))
+    #     log.success(f'Удалили заказ {callback_data.order_id}')
+    # else:
+    #     log.error(f"Пытались удалить старый заказ {callback_data.order_id}")
+    #     await call.message.answer(_("{text}Заказ слишком старый для удаления".format(text=texts.error_head)))
 
 
 async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: BotLogger):
