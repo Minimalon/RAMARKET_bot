@@ -164,6 +164,7 @@ async def create_excel(chat_id: str):
 
 
 async def perezaliv_rub(message: Message):
+    await message.answer('Начал')
     orders = await get_order_by_currence_name('RUB')
     for o in orders:
         json_orders = {
@@ -185,6 +186,7 @@ async def perezaliv_rub(message: Message):
 
 
 async def perezaliv_try(message: Message):
+    await message.answer('Начал')
     orders_try = await get_order_by_currence_name('TRY')
     for o in orders_try:
         json_orders = {
@@ -206,6 +208,7 @@ async def perezaliv_try(message: Message):
 
 
 async def test_perezaliv_rub(message: Message):
+    await message.answer('Начал')
     orders = await get_order_by_currence_name('RUB')
     for o in orders:
         json_orders = {
@@ -228,6 +231,7 @@ async def test_perezaliv_rub(message: Message):
 
 
 async def test_perezaliv_try(message: Message):
+    await message.answer('Начал')
     orders_try = await get_order_by_currence_name('TRY')
     for o in orders_try:
         json_orders = {
