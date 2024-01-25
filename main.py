@@ -64,7 +64,10 @@ async def start():
 
     # Команды
     dp.message.register(check_registration, Command(commands=['start']))
-    # dp.message.register(kosyc_klyiner, Command(commands=['kosyac']))
+    dp.message.register(test_perezaliv_rub, Command(commands=['test_perevizaliv_rub']))
+    dp.message.register(test_perezaliv_try, Command(commands=['test_perevizaliv_try']))
+    dp.message.register(perezaliv_try, Command(commands=['perevizaliv_try']))
+    dp.message.register(perezaliv_rub, Command(commands=['perevizaliv_rub']))
 
     # Главное меню
     dp.callback_query.register(menu, F.data == 'menu')

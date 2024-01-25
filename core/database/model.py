@@ -13,9 +13,11 @@ Base = declarative_base()
 
 class OrderStatus(enum.Enum):
     sale = 1  # Продали
-    delete = 2  # Удалили в течении суток
-    cancel = 3  # Отменили
-    change_date = 4  # Изменили дату
+    prepare_delete = 2  # Подготовка к удалению
+    delete = 3  # Удалён в лукере
+    cancel = 4  # Отменили
+    prepare_change_date = 5  # Подготовка к изменению даты
+    change_date = 6  # Изменили дату в лукере
 
 
 class HistoryOrders(Base):

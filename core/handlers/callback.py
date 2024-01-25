@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 from decimal import Decimal
 
@@ -6,8 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
 from loguru import logger
 
-import config
-from config import _
+from config import _, develope_mode
 from core.database import query_db
 from core.database.query_db import *
 from core.keyboards.inline import *
@@ -157,8 +157,9 @@ async def update_quantity_product(call: CallbackQuery, callback_data: QuantityUp
 async def delete_order(call: CallbackQuery, callback_data: DeleteOrder, log: BotLogger):
     date_order = datetime.strptime(callback_data.date, '%Y%m%d%H%M')
     d_now = datetime.now()
-    await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
-    await query_db.delete_history_order(callback_data.order_id)
+    if not config.develope_mode:
+        await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
+    await query_db.prepare_delete_history_order(callback_data.order_id, date_order)
     await call.message.answer(_(f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>'))
     log.success(f'Удалили заказ {callback_data.order_id}')
     # if date_order + timedelta(days=1) > datetime(day=d_now.day, month=d_now.month, year=d_now.year, hour=10, minute=30):
@@ -176,14 +177,14 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
     log.button('Создать заказ')
     data = await state.get_data()
     order = Order.model_validate_json(data['order'])
-    print(order.model_dump_json())
-    if config.develope_mode:
+    if develope_mode:
         r = {"Ref": "1234567890", "Nomer": "1234567890"}
+        order.payment.type = '2'
     else:
         r = await utils.create_order(order)
-        for p in order.cart:
-            await query_db.create_historyOrder(order_id=r['Nomer'],
-                                               order=order, product=p),
+    for p in order.cart:
+        await query_db.create_historyOrder(order_id=r['Nomer'],
+                                           order=order, product=p),
 
     text = await texts.qr(r['Nomer'], order)
     if order.payment.type == '3':

@@ -1,6 +1,6 @@
-import asyncio
 import json
 import os.path
+from datetime import datetime
 from decimal import Decimal
 
 import pandas as pd
@@ -49,7 +49,9 @@ async def get_history_orders_for_googleSheet(id: int):
                    HistoryOrders.product_name, HistoryOrders.price, HistoryOrders.quantity,
                    HistoryOrders.sum_usd, HistoryOrders.sum_rub, HistoryOrders.currency,
                    HistoryOrders.currencyPrice, HistoryOrders.client_name, HistoryOrders.client_phone)
-            .where(HistoryOrders.id > id).order_by(HistoryOrders.date))
+            .where(
+                HistoryOrders.id > id,
+                HistoryOrders.status.in_([OrderStatus.sale, OrderStatus.prepare_delete, OrderStatus.prepare_change_date])).order_by(HistoryOrders.date))
         orders = q.all()
         return orders
 
@@ -78,12 +80,38 @@ async def update_client_info(**kwargs):
         await session.commit()
 
 
-async def delete_history_order(order_id: str):
+async def prepare_delete_history_order(order_id: str, order_date: datetime):
     async with async_session() as session:
-        await session.execute(update(HistoryOrders).where(HistoryOrders.order_id == order_id).values(
-            status=OrderStatus.delete
-        ))
+        await session.execute(
+            update(HistoryOrders).
+            where(
+                (HistoryOrders.order_id == order_id) &
+                (func.to_char(HistoryOrders.date, 'YYYYMMDDHH24MI') == order_date.strftime('%Y%m%d%H%M'))
+            ).
+            values(
+                status=OrderStatus.prepare_delete,
+            ))
         await session.commit()
+
+
+async def delete_history_order(order_id: str, order_date: datetime):
+    async with async_session() as session:
+        await session.execute(
+            update(HistoryOrders).
+            where(
+                (HistoryOrders.order_id == order_id) &
+                (func.to_char(HistoryOrders.date, 'YYYYMMDDHH24MI') == order_date.strftime('%Y%m%d%H%M'))
+            ).
+            values(
+                status=OrderStatus.delete,
+            ))
+        await session.commit()
+
+
+async def select_prepare_delete() -> list[HistoryOrders]:
+    async with async_session() as session:
+        q = await session.execute(select(HistoryOrders).where(HistoryOrders.status == OrderStatus.prepare_delete))
+        return q.scalars().all()
 
 
 async def update_client_language(chat_id: str, language: str):
@@ -135,8 +163,7 @@ async def create_excel(chat_id: str):
         return path_file
 
 
-async def kosyc_klyiner(message: Message):
-    """Пересоздовали заказы, потому что в 1С не передовалась валюта заказа"""
+async def perezaliv_rub(message: Message):
     orders = await get_order_by_currence_name('RUB')
     for o in orders:
         json_orders = {
@@ -154,7 +181,10 @@ async def kosyc_klyiner(message: Message):
             "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
         }
         await Api().post_create_order(json_orders)
+    await message.answer('Заказы RUB созданы')
 
+
+async def perezaliv_try(message: Message):
     orders_try = await get_order_by_currence_name('TRY')
     for o in orders_try:
         json_orders = {
@@ -172,6 +202,55 @@ async def kosyc_klyiner(message: Message):
             "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if _.order_id == o.order_id]
         }
         await Api().post_create_order(json_orders)
+    await message.answer('Заказы TRY созданы')
+
+
+async def test_perezaliv_rub(message: Message):
+    orders = await get_order_by_currence_name('RUB')
+    for o in orders:
+        json_orders = {
+            "TypeR": "Doc",
+            "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
+            "Order_id": o.order_id,
+            "Sklad": o.shop_id,
+            "KursPrice": o.currencyPrice,
+            "Valuta": o.currency,
+            "SO": o.paymentGateway,
+            "Sotr": o.agent_id,
+            "Klient": o.client_name,
+            "Telefon": o.client_phone,
+            "Email": o.client_mail,
+            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
+        }
+        await Api().post_create_order(json_orders)
+        await message.answer(json.dumps(json_orders, ensure_ascii=False, indent=4))
+        return
+
+
+async def test_perezaliv_try(message: Message):
+    orders_try = await get_order_by_currence_name('TRY')
+    for o in orders_try:
+        json_orders = {
+            "TypeR": "Doc",
+            "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
+            "Order_id": o.order_id,
+            "Sklad": o.shop_id,
+            "KursPrice": o.currencyPrice,
+            "Valuta": o.currency,
+            "SO": o.paymentGateway,
+            "Sotr": o.agent_id,
+            "Klient": o.client_name,
+            "Telefon": o.client_phone,
+            "Email": o.client_mail,
+            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if _.order_id == o.order_id]
+        }
+        await Api().post_create_order(json_orders)
+        await message.answer(json.dumps(json_orders, ensure_ascii=False, indent=4))
+        return
+
+
+async def kosyc_klyiner(message: Message):
+    """Пересоздовали заказы, потому что в 1С не передовалась валюта заказа"""
 
     # with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
     #     orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')

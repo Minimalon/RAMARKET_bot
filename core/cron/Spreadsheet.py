@@ -1,4 +1,6 @@
+from datetime import datetime
 from pprint import pprint
+
 import httplib2
 from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
@@ -203,6 +205,17 @@ class Spreadsheet:
                                                                 dateTimeRenderOption='FORMATTED_STRING').execute()
         return results["valueRanges"][0]["values"]
 
+    def delete_row(self, order_id: str, order_date: datetime):
+        for count, row in enumerate(self.get_value_in_cell('A2:P'), start=1):
+            if not row:
+                continue
+            o_id, date = row[1], datetime.strptime(row[0], '%Y-%m-%d %H:%M')
+            if order_date.strftime('%Y-%m-%d %H:%M') == date.strftime('%Y-%m-%d %H:%M') and o_id == order_id:
+                self.prepare_setValues(f'A{count + 1}:P{count + 1}',[['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ]])
+                self.runPrepared()
+                return True
+        return False
+
     def get_tehpod_names(self):
         results = self.service.spreadsheets().values().batchGet(spreadsheetId=self.spreadsheetId,
                                                                 ranges=[f'{self.sheetTitle}!B1:K1'],
@@ -223,6 +236,3 @@ class Spreadsheet:
                                                                 valueRenderOption='FORMATTED_VALUE',
                                                                 dateTimeRenderOption='FORMATTED_STRING').execute()
         return results["valueRanges"][0]["values"]
-
-
-
