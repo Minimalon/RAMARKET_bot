@@ -52,7 +52,7 @@ async def get_history_orders_for_googleSheet(id: int):
                    HistoryOrders.currencyPrice, HistoryOrders.client_name, HistoryOrders.client_phone)
             .where(
                 HistoryOrders.id > id,
-                HistoryOrders.status.in_([OrderStatus.sale, OrderStatus.prepare_delete, OrderStatus.prepare_change_date])).order_by(HistoryOrders.date))
+                HistoryOrders.status.in_([OrderStatus.sale, OrderStatus.prepare_delete, OrderStatus.change_date])).order_by(HistoryOrders.date))
         orders = q.all()
         return orders
 
@@ -209,7 +209,8 @@ async def perezaliv_try(message: Message):
                 "Klient": o.client_name,
                 "Telefon": o.client_phone,
                 "Email": o.client_mail,
-                "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if _.order_id == o.order_id]
+                "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if
+                          _.order_id == o.order_id]
             }
             await Api().post_create_order(json_orders)
     await message.answer('Заказы TRY созданы')
@@ -266,6 +267,7 @@ async def kosyc_klyiner(message: Message):
 
     # with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
     #     orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
+
 
 if __name__ == '__main__':
     orders = asyncio.run(get_order_by_currence_name_and_year('RUB', 2022))

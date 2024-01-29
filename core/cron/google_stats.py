@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 import config
 from core.cron.Spreadsheet import Spreadsheet
@@ -16,6 +15,7 @@ async def update_google_sheets(path):
     orders = await get_history_orders_for_googleSheet(last_row - 1)
     for count, order in enumerate(orders, start=last_row + 1):
         order = list(order)
+        order[0] += timedelta(hours=3)
         order[0] = datetime.strftime(order[0], "%Y-%m-%d %H:%M")
         ss.prepare_setValues(f"A{count}:P{count}", [order])
         if count % 50 == 0:
@@ -26,8 +26,11 @@ async def update_google_sheets(path):
     for td in to_delete:
         if ss.delete_row(td.order_id, td.date):
             await delete_history_order(td.order_id, td.date + timedelta(hours=3))
-
-
+    #
+    # to_change_date = await select_prepare_change_date()
+    # for tchd in to_change_date:
+    #     if ss.change_date_row(tchd.order_id, tchd.date):
+    #         await delete_history_order(tchd.order_id, tchd.date + timedelta(hours=3))
 
 
 async def get_values(path):

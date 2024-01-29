@@ -211,7 +211,18 @@ class Spreadsheet:
                 continue
             o_id, date = row[1], datetime.strptime(row[0], '%Y-%m-%d %H:%M')
             if order_date.strftime('%Y-%m-%d %H:%M') == date.strftime('%Y-%m-%d %H:%M') and o_id == order_id:
-                self.prepare_setValues(f'A{count + 1}:P{count + 1}',[['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ]])
+                self.prepare_setValues(f'A{count + 1}:P{count + 1}', [['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ]])
+                self.runPrepared()
+                return True
+        return False
+
+    def change_date_row(self, order_id: str, order_date: datetime):
+        for count, row in enumerate(self.get_value_in_cell('A2:P'), start=1):
+            if not row:
+                continue
+            o_id, date = row[1], datetime.strptime(row[0], '%Y-%m-%d %H:%M')
+            if order_date.strftime('%Y-%m-%d %H:%M') == date.strftime('%Y-%m-%d %H:%M') and o_id == order_id:
+                self.prepare_setValues(f'A{count + 1}', [[order_date.strftime('%Y-%m-%d %H:%M')]])
                 self.runPrepared()
                 return True
         return False

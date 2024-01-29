@@ -16,8 +16,7 @@ class OrderStatus(enum.Enum):
     prepare_delete = 2  # Подготовка к удалению
     delete = 3  # Удалён в лукере
     cancel = 4  # Отменили
-    prepare_change_date = 5  # Подготовка к изменению даты
-    change_date = 6  # Изменили дату в лукере
+    change_date = 5  # Изменили дату в лукере и в бд
 
 
 class HistoryOrders(Base):
