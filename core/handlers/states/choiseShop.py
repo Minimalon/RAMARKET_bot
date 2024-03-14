@@ -4,15 +4,20 @@ from aiogram.types import CallbackQuery
 from config import _
 from core.database import query_db
 from core.keyboards import inline
-from core.keyboards.inline import getKeyboard_selectCurrency
+from core.keyboards.inline import getKeyboard_selectCurrency, kb_rezident
 from core.loggers.bot_logger import BotLogger
 from core.models_pydantic.order import Order, CurrencyOrder, TelegramUser
 from core.oneC import utils
 from core.oneC.utils import get_shop_by_id
-from core.utils.callbackdata import Shop, Currency
+from core.utils.callbackdata import Shop, Currency, CountryRezident
 
 
-async def check_shops(call: CallbackQuery, state: FSMContext, log: BotLogger):
+async def rezident(call: CallbackQuery, state: FSMContext, log: BotLogger):
+    await call.message.edit_text("Резидентом какой страны является покупатель?",
+                                 reply_markup=kb_rezident())
+
+async def check_shops(call: CallbackQuery, state: FSMContext, log: BotLogger, callback_data: CountryRezident):
+    log.info(f'Выбрали страну покупатела "{callback_data.rezident}"')
     client = await query_db.get_client_info(chat_id=call.message.chat.id)
     user = await utils.get_user_info(client.phone_number)
     tg_user = TelegramUser(
@@ -30,9 +35,9 @@ async def check_shops(call: CallbackQuery, state: FSMContext, log: BotLogger):
         shop = user.shops[0]
         if shop.currency == "TRY":
             shop.currencyPrice = round(shop.currencyPrice / 10, 4)
-        order = Order(user=user, shop=shop, tg_user=tg_user)
+        order = Order(user=user, shop=shop, tg_user=tg_user, rezident=callback_data.rezident)
     else:
-        order = Order(user=user, tg_user=tg_user)
+        order = Order(user=user, tg_user=tg_user, rezident=callback_data.rezident)
 
     await state.update_data(order=order.model_dump_json(by_alias=True))
     if len(user.shops) > 1:

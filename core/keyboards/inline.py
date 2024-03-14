@@ -43,6 +43,14 @@ def getKeyboard_change_language():
     return keyboard.as_markup()
 
 
+def kb_rezident():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='Россия', callback_data=CountryRezident(rezident='Россия'))
+    keyboard.button(text='Казахстан', callback_data=CountryRezident(rezident='Казахстан'))
+    keyboard.adjust(1, repeat=True)
+    return keyboard.as_markup()
+
+
 async def getKeyboard_selectCurrency(order: Order):
     keyboard = InlineKeyboardBuilder()
     if order.shop.currency == 'TRY':
@@ -190,6 +198,7 @@ def getKeyboard_createOrder():
 
 def getKeyboard_delete_order(order_id):
     keyboard = InlineKeyboardBuilder()
-    keyboard.button(text=_("Удалить заказ"), callback_data=DeleteOrder(order_id=order_id, date=datetime.now().strftime('%Y%m%d%H%M')))
+    keyboard.button(text=_("Удалить заказ"),
+                    callback_data=DeleteOrder(order_id=order_id, date=datetime.now().strftime('%Y%m%d%H%M')))
     keyboard.adjust(1)
     return keyboard.as_markup()

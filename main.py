@@ -74,7 +74,7 @@ async def start():
     dp.callback_query.register(profile, F.data == 'profile')
     dp.callback_query.register(select_change_language, F.data == 'сhange_language')
     dp.callback_query.register(change_language, ChangeLanguage.filter())
-    dp.callback_query.register(choiseShop.check_shops, F.data == 'startOrder')
+    dp.callback_query.register(choiseShop.rezident, F.data == 'startOrder')
     dp.callback_query.register(history_orders, F.data == 'historyOrders')
 
     # Регистрация контакта
@@ -82,6 +82,7 @@ async def start():
     dp.message.register(contact.get_fake_contact, F.contact)
 
     # Создание заказа
+    dp.callback_query.register(choiseShop.check_shops, CountryRezident.filter())
     dp.callback_query.register(choiseShop.choise_currency, Shop.filter())
     dp.callback_query.register(choiseShop.choise_currency_price, Currency.filter())
     dp.callback_query.register(selectMainPaymentGateway, F.data == 'currencyContinue')

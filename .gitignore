@@ -2,4 +2,4 @@ logs
 config.py
 files
 /core/cron/pythonapp.json
-
+.idea

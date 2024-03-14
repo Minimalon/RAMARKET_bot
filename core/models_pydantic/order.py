@@ -53,6 +53,7 @@ class TelegramUser(BaseModel):
 class Order(BaseModel):
     user: User
     tg_user: TelegramUser
+    rezident: str = Field(title="Страна покупателя")
     shop: UserShop | None = Field(default=None)
     currency: CurrencyOrder | None = Field(default=None)
     payment: Payment | None = Field(default=None)
@@ -98,8 +99,9 @@ class Order(BaseModel):
         order = {
             "TypeR": "Doc",
             "Order_id": None,  # Если указывать номер заказа, то заказ будет не создаваться, а изменяться
-            "Data": None,
+            "Data": None, # Если указали Order_id, нужно также указать дату заказа в формате 02.01.2024 12:28:00
             "Sklad": str(self.shop.id),
+            "rezident": self.rezident,
             "KursPrice": str(self.currency.price),
             "Valuta": str(self.currency.name),
             "SO": str(self.payment.id),

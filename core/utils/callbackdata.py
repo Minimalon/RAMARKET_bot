@@ -4,6 +4,8 @@ from aiogram.filters.callback_data import CallbackData
 class Currency(CallbackData, prefix='currency'):
     name: str
 
+class CountryRezident(CallbackData, prefix='rezident'):
+    rezident: str
 
 class Shop(CallbackData, prefix='shop'):
     id: str
