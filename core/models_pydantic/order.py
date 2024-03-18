@@ -90,6 +90,10 @@ class Order(BaseModel):
                     for product in self.cart:
                         self.sum_rub += (product.price * self.currency.price) * product.quantity
                         self.sum_usd += product.price * product.quantity
+                elif self.currency.name == 'USDV':
+                    for product in self.cart:
+                        self.sum_rub += (product.price * self.currency.price) * product.quantity
+                        self.sum_usd += product.price * product.quantity
         self.sum_usd = Decimal(round(self.sum_usd, 2))
         self.sum_rub = Decimal(round(self.sum_rub, 0))
         self.sum_try = Decimal(round(self.sum_try, 2))
