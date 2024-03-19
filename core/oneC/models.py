@@ -46,6 +46,7 @@ class UserShop(BaseModel):
         currency_symbols = {
             'RUB': '₽',
             'USD': '$',
+            'USDV': '$',
             'EUR': '€',
             'TRY': '₺',
             'AED': 'د.إ',
