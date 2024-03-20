@@ -7,6 +7,18 @@ from core.database.query_db import get_history_orders_for_googleSheet, select_pr
 
 
 async def update_google_sheets(path):
+    def update_phone_format(phone: str):
+        if phone is not None:
+            if len(phone) == 11:
+                if phone.startswith('8'):
+                    phone = '7' + phone[1:]
+                phone = f'{phone[0:4]}-{phone[4:7]}-{phone[7:9]}-{phone[9:11]}'
+            if len(phone) == 10:
+                if phone.startswith('9'):
+                    phone = '79' + phone[1:]
+                phone = f'{phone[0:4]}-{phone[4:7]}-{phone[7:9]}-{phone[9:11]}'
+        return phone
+
     if config.develope_mode:
         ss = Spreadsheet(path, 'test_sales', spreadsheetId='1dWAQdnsfXoebDNegKL6kNE77OgwOIP0Df87o4DlhF7s')
     else:
@@ -15,12 +27,7 @@ async def update_google_sheets(path):
     orders = await get_history_orders_for_googleSheet(last_row - 1)
     for count, order in enumerate(orders, start=last_row + 1):
         order = list(order)
-        phone = order[-1]
-        if len(phone) == 11:
-            if phone[0] == '8':
-                phone[0] = '7'
-            phone = f'{phone[0:4]}-{phone[4:7]}-{phone[7:9]}-{phone[9:11]}'
-        order[-1] = phone
+        order[-1] = update_phone_format(order[-1])
         order[0] += timedelta(hours=3)
         order[0] = datetime.strftime(order[0], "%Y-%m-%d %H:%M")
         ss.prepare_setValues(f"A{count}:P{count}", [order])

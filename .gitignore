@@ -3,3 +3,5 @@ config.py
 files
 /core/cron/pythonapp.json
 .idea
+.idea/misc.xml
+.idea/ramarketBot_aiogram.iml
