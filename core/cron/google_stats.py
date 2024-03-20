@@ -15,6 +15,12 @@ async def update_google_sheets(path):
     orders = await get_history_orders_for_googleSheet(last_row - 1)
     for count, order in enumerate(orders, start=last_row + 1):
         order = list(order)
+        phone = order[-1]
+        if len(phone) == 11:
+            if phone[0] == '8':
+                phone[0] = '7'
+            phone = f'{phone[0:4]}-{phone[4:7]}-{phone[7:9]}-{phone[9:11]}'
+        order[-1] = phone
         order[0] += timedelta(hours=3)
         order[0] = datetime.strftime(order[0], "%Y-%m-%d %H:%M")
         ss.prepare_setValues(f"A{count}:P{count}", [order])
