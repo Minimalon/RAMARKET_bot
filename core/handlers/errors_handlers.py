@@ -5,6 +5,7 @@ from core.utils import texts
 
 async def error_valueError(event: ErrorEvent):
     bot_log.error(event.exception)
+    bot_log.exception(event.exception)
     if event.update.message is not None:
         await event.update.message.answer(texts.error_head + str(event.exception))
     else:
