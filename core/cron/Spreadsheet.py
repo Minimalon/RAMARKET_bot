@@ -1,9 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pprint import pprint
+from typing import List, Any
 
 import httplib2
 from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
+
+from core.database.model import HistoryOrders
 
 
 class SpreadsheetError(Exception):
@@ -19,7 +22,8 @@ class SheetNotSetError(SpreadsheetError):
 
 
 class Spreadsheet:
-    def __init__(self, jsonKeyFileName, sheetTitle, debugMode=False, spreadsheetId='1Cg-M24vqlJ-kbICA9nq846MZXiBnDpZaEekk--b-R4M'):
+    def __init__(self, jsonKeyFileName, sheetTitle, debugMode=False,
+                 spreadsheetId='1Cg-M24vqlJ-kbICA9nq846MZXiBnDpZaEekk--b-R4M'):
         self.debugMode = debugMode
         self.credentials = ServiceAccountCredentials.from_json_keyfile_name(jsonKeyFileName, [
             'https://www.googleapis.com/auth/spreadsheets',
@@ -32,6 +36,7 @@ class Spreadsheet:
         self.sheetTitle = sheetTitle
         self.requests = []
         self.valueRanges = []
+        self.empty_row = [['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ]]
 
     # Creates new spreadsheet
     def create(self, title, sheetTitle, rows=1000, cols=26, locale='en_US', timeZone='Etc/GMT'):
@@ -205,24 +210,31 @@ class Spreadsheet:
                                                                 dateTimeRenderOption='FORMATTED_STRING').execute()
         return results["valueRanges"][0]["values"]
 
-    def delete_row(self, order_id: str, order_date: datetime):
+    def delete_rows(self, orders: list[HistoryOrders]) -> list[list[str | datetime]]:
+        """
+        Удаляет строки из гугл таблицы
+        :param orders: Продажи
+        :return: Возвращает [order_id: str, order_date: datetime]
+        """
+        deleted = []
         for count, row in enumerate(self.get_value_in_cell('A2:P'), start=1):
             if not row:
                 continue
-            o_id, date = row[1], datetime.strptime(row[0], '%Y-%m-%d %H:%M')
-            if order_date.strftime('%Y-%m-%d %H:%M') == date.strftime('%Y-%m-%d %H:%M') and o_id == order_id:
-                self.prepare_setValues(f'A{count + 1}:P{count + 1}', [['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ]])
+            o_id, row_date = row[1], datetime.strptime(row[0], '%Y-%m-%d %H:%M')
+            if row_date.strftime('%Y-%m-%d %H:%M') in [(_.date + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M') for _ in orders] \
+                    and o_id in [_.order_id for _ in orders]:
+                self.prepare_setValues(f'A{count + 1}:P{count + 1}', self.empty_row)
                 self.runPrepared()
-                return True
-        return False
+                deleted.append([o_id, row_date])
+        return deleted
 
-    def change_date_row(self, order_id: str, order_date: datetime):
+    def change_date_row(self, order_id: str, new_order_date: datetime, old_order_date: datetime):
         for count, row in enumerate(self.get_value_in_cell('A2:P'), start=1):
             if not row:
                 continue
             o_id, date = row[1], datetime.strptime(row[0], '%Y-%m-%d %H:%M')
-            if order_date.strftime('%Y-%m-%d %H:%M') == date.strftime('%Y-%m-%d %H:%M') and o_id == order_id:
-                self.prepare_setValues(f'A{count + 1}', [[order_date.strftime('%Y-%m-%d %H:%M')]])
+            if old_order_date.strftime('%Y-%m-%d %H:%M') == date.strftime('%Y-%m-%d %H:%M') and o_id == order_id:
+                self.prepare_setValues(f'A{count + 1}', [[new_order_date.strftime('%Y-%m-%d %H:%M')]])
                 self.runPrepared()
                 return True
         return False

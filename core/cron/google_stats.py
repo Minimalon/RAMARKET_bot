@@ -1,8 +1,10 @@
 import asyncio
-from datetime import datetime, timedelta
+import datetime
+from datetime import timedelta
 
 import config
 from core.cron.Spreadsheet import Spreadsheet
+from core.database.model import OrderStatus
 from core.database.query_db import get_history_orders_for_googleSheet, select_prepare_delete, delete_history_order
 
 
@@ -26,19 +28,38 @@ async def update_google_sheets(path):
     last_row = ss.get_last_cell_in_column('A')
     orders = await get_history_orders_for_googleSheet(last_row - 1)
     for count, order in enumerate(orders, start=last_row + 1):
-        order = list(order)
-        order[-1] = update_phone_format(order[-1])
-        order[0] += timedelta(hours=3)
-        order[0] = datetime.strftime(order[0], "%Y-%m-%d %H:%M")
-        ss.prepare_setValues(f"A{count}:P{count}", [order])
+        if order.status in [OrderStatus.sale, OrderStatus.change_date]:
+            ss.prepare_setValues(f"A{count}:P{count}",
+                                 [
+                                     [
+                                         (order.date + timedelta(hours=3)).strftime("%Y-%m-%d %H:%M"),
+                                         order.order_id,
+                                         order.agent_name,
+                                         order.country_name,
+                                         order.city_name,
+                                         order.shop_name,
+                                         order.payment_name,
+                                         order.product_name,
+                                         order.price,
+                                         order.quantity,
+                                         order.sum_usd,
+                                         order.sum_rub,
+                                         order.currency,
+                                         order.currencyPrice,
+                                         order.client_name,
+                                         update_phone_format(order.client_phone)
+                                     ],
+                                 ])
+        else:
+            ss.prepare_setValues(f"A{count}:P{count}", ss.empty_row)
         if count % 50 == 0:
             ss.runPrepared()
     ss.runPrepared()
 
     to_delete = await select_prepare_delete()
-    for td in to_delete:
-        if ss.delete_row(td.order_id, td.date):
-            await delete_history_order(td.order_id, td.date + timedelta(hours=3))
+    deleted_rows = ss.delete_rows(to_delete)
+    for order_id, row_date in deleted_rows:
+        await delete_history_order(order_id, row_date + timedelta(hours=3))
     #
     # to_change_date = await select_prepare_change_date()
     # for tchd in to_change_date:

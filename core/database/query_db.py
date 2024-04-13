@@ -1,4 +1,3 @@
-import asyncio
 import json
 import os.path
 from datetime import datetime
@@ -42,18 +41,12 @@ async def create_historyOrder(order_id: str, order: Order, product: Product):
         await session.commit()
 
 
-async def get_history_orders_for_googleSheet(id: int):
+async def get_history_orders_for_googleSheet(id: int) -> list[HistoryOrders]:
     async with async_session() as session:
-        q = await session.execute(
-            select(HistoryOrders.date, HistoryOrders.order_id, HistoryOrders.agent_name, HistoryOrders.country_name,
-                   HistoryOrders.city_name, HistoryOrders.shop_name, HistoryOrders.payment_name,
-                   HistoryOrders.product_name, HistoryOrders.price, HistoryOrders.quantity,
-                   HistoryOrders.sum_usd, HistoryOrders.sum_rub, HistoryOrders.currency,
-                   HistoryOrders.currencyPrice, HistoryOrders.client_name, HistoryOrders.client_phone)
-            .where(
-                HistoryOrders.id > id,
-                HistoryOrders.status.in_([OrderStatus.sale, OrderStatus.prepare_delete, OrderStatus.change_date])).order_by(HistoryOrders.date))
-        orders = q.all()
+        q = await session.execute(select(HistoryOrders)
+                                  .where(HistoryOrders.id > id)
+                                  .order_by(HistoryOrders.date))
+        orders = q.scalars().all()
         return orders
 
 
@@ -144,7 +137,8 @@ async def create_excel(chat_id: str):
             return False
         query = text(f'SELECT * FROM public."{HistoryOrders.__table__}" WHERE chat_id = \'{chat_id}\''
                      f' order by date DESC')
-        engine = create_engine(f"postgresql+psycopg2://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
+        engine = create_engine(
+            f"postgresql+psycopg2://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
         df = pd.read_sql(query, engine.connect())
         df['date'] = df['date'].dt.tz_localize(None)
         df['date'] = pd.to_datetime(df['date'], format='%d.%m.%Y %H:%M:%S')
@@ -153,8 +147,10 @@ async def create_excel(chat_id: str):
                      'paymentGateway', 'product_id', 'paymentType',
                      'country_code', 'city_code'])
         # Порядок отображения столбцов
-        column_order = ['date', 'order_id', 'status', 'agent_name', 'country_name', 'city_name', 'shop_name', 'shop_currency', 'payment_name', 'product_name', 'price',
-                        'quantity', 'sum_usd', 'sum_rub', 'sum_try', 'currency', 'currencyPrice', 'client_name', 'client_phone', 'client_mail']
+        column_order = ['date', 'order_id', 'status', 'agent_name', 'country_name', 'city_name', 'shop_name',
+                        'shop_currency', 'payment_name', 'product_name', 'price',
+                        'quantity', 'sum_usd', 'sum_rub', 'sum_try', 'currency', 'currencyPrice', 'client_name',
+                        'client_phone', 'client_mail']
         df = df[column_order]
         writer = pd.ExcelWriter(path_file, engine="xlsxwriter")
         df.to_excel(writer, sheet_name='orders', index=False, na_rep='NaN')
@@ -186,7 +182,9 @@ async def perezaliv_rub(message: Message):
                 "Klient": o.client_name,
                 "Telefon": o.client_phone,
                 "Email": o.client_mail,
-                "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
+                "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price,
+                           'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if
+                          _.order_id == o.order_id]
             }
             await Api().post_create_order(json_orders)
     await message.answer('Заказы RUB созданы')
@@ -209,7 +207,8 @@ async def perezaliv_try(message: Message):
                 "Klient": o.client_name,
                 "Telefon": o.client_phone,
                 "Email": o.client_mail,
-                "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if
+                "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price,
+                           'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if
                           _.order_id == o.order_id]
             }
             await Api().post_create_order(json_orders)
@@ -232,7 +231,8 @@ async def test_perezaliv_rub(message: Message):
             "Klient": o.client_name,
             "Telefon": o.client_phone,
             "Email": o.client_mail,
-            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
+            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price,
+                       'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
         }
         await Api().post_create_order(json_orders)
         await message.answer(json.dumps(json_orders, ensure_ascii=False, indent=4))
@@ -255,7 +255,9 @@ async def test_perezaliv_try(message: Message):
             "Klient": o.client_name,
             "Telefon": o.client_phone,
             "Email": o.client_mail,
-            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if _.order_id == o.order_id]
+            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price,
+                       'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders_try if
+                      _.order_id == o.order_id]
         }
         await Api().post_create_order(json_orders)
         await message.answer(json.dumps(json_orders, ensure_ascii=False, indent=4))
@@ -268,22 +270,21 @@ async def kosyc_klyiner(message: Message):
     # with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
     #     orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
 
-
-if __name__ == '__main__':
-    orders = asyncio.run(get_order_by_currence_name_and_year('RUB', 2022))
-    for o in orders:
-        json_orders = {
-            "TypeR": "Doc",
-            "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
-            "Order_id": o.order_id,
-            "Sklad": o.shop_id,
-            "KursPrice": o.currencyPrice,
-            "Valuta": o.currency,
-            "SO": o.paymentGateway,
-            "Sotr": o.agent_id,
-            "Klient": o.client_name,
-            "Telefon": o.client_phone,
-            "Email": o.client_mail,
-            "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
-        }
-        print(json_orders)
+# if __name__ == '__main__':
+#     orders = asyncio.run(get_order_by_currence_name_and_year('RUB', 2022))
+#     for o in orders:
+#         json_orders = {
+#             "TypeR": "Doc",
+#             "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
+#             "Order_id": o.order_id,
+#             "Sklad": o.shop_id,
+#             "KursPrice": o.currencyPrice,
+#             "Valuta": o.currency,
+#             "SO": o.paymentGateway,
+#             "Sotr": o.agent_id,
+#             "Klient": o.client_name,
+#             "Telefon": o.client_phone,
+#             "Email": o.client_mail,
+#             "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
+#         }
+#         print(json_orders)
