@@ -217,7 +217,7 @@ class Spreadsheet:
         :return: Возвращает [order_id: str, order_date: datetime]
         """
         deleted = []
-        for count, row in enumerate(self.get_value_in_cell('A2:P'), start=1):
+        for count, row in enumerate(self.get_value_in_cell('A2:B'), start=1):
             if not row:
                 continue
             o_id, row_date = row[1], datetime.strptime(row[0], '%Y-%m-%d %H:%M')

@@ -81,4 +81,4 @@ class Api:
 
 
 if __name__ == '__main__':
-    print(asyncio.run(Api().get_client_info("905334950683")))
+    print(asyncio.run(Api().delete_order("ФС00-000306", '20240404')))
