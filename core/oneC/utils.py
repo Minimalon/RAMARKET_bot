@@ -97,9 +97,12 @@ async def get_shop_by_id(shop_id: str) -> Shop | None:
     :return: Shop
     """
     all_shops = await api.get_all_shops()
+    count = 0
     for shop in all_shops:
         if shop['id'] == shop_id:
             return Shop.model_validate_json(json.dumps(shop))
+    if count == 0:
+        raise ValueError(f'Магазин "{shop_id}" не найден в 1С')
 
 
 async def create_order(order: Order) -> dict:

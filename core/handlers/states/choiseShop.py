@@ -53,13 +53,13 @@ async def check_shops(call: CallbackQuery, state: FSMContext, log: BotLogger, ca
 
 async def choise_currency(call: CallbackQuery, callback_data: Shop, state: FSMContext, log: BotLogger):
     shop = await get_shop_by_id(callback_data.id)
+    log.info(f'Выбран магазин "{shop.name}"')
     if shop.currency == "TRY":
         shop.currencyPrice = round(shop.currencyPrice / 10, 4)
     data = await state.get_data()
     order = Order.model_validate_json(data['order'])
     order.shop = shop
     await state.update_data(order=order.model_dump_json(by_alias=True))
-    log.info(f'Выбран магазин "{shop.name}"')
     await call.message.edit_text(_('Выберите валюту'), reply_markup=await getKeyboard_selectCurrency(order))
 
 
