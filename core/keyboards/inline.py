@@ -47,6 +47,7 @@ def kb_rezident():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text='Россия', callback_data=CountryRezident(rezident='Россия'))
     keyboard.button(text='Казахстан', callback_data=CountryRezident(rezident='Казахстан'))
+    keyboard.button(text='Турция', callback_data=CountryRezident(rezident='Турция'))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 
