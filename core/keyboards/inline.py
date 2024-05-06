@@ -58,7 +58,7 @@ async def getKeyboard_selectCurrency(order: Order):
         keyboard.button(text='TRY', callback_data=Currency(name='TRY'))
         keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
     else:
-        keyboard.button(text='USD', callback_data=Currency(name='USD'))
+        # keyboard.button(text='USD', callback_data=Currency(name='USD'))
         keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
 
     keyboard.adjust(1, repeat=True)
