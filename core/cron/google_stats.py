@@ -40,7 +40,7 @@ async def update_google_sheets(path):
                                          order.shop_name,
                                          order.payment_name,
                                          order.product_name,
-                                         order.price,
+                                         order.price.replace('.', ','),
                                          order.quantity,
                                          order.sum_usd,
                                          order.sum_rub,
