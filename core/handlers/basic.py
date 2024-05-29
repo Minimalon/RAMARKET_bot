@@ -1,13 +1,12 @@
 import re
 
-from aiogram import Bot
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from loguru import logger
 
 from config import _
 from core.database import query_db
-from core.keyboards.inline import getKeyboard_start
+from core.keyboards.inline import getKeyboard_start, kb_test
 from core.keyboards.reply import getKeyboard_registration
 from core.oneC.api import Api
 from core.utils import texts

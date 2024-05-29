@@ -47,6 +47,7 @@ async def start():
     scheduler.start()
 
     # Errors handlers
+    dp.errors.register(errors_handlers.tg_duble_error, ExceptionTypeFilter(aiogram.exceptions.TelegramBadRequest))
     dp.errors.register(errors_handlers.error_valueError, ExceptionTypeFilter(ValueError))
     dp.errors.register(errors_handlers.error_validationError, ExceptionTypeFilter(ValidationError))
     dp.errors.register(errors_handlers.error_total, ExceptionTypeFilter(Exception))
