@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 
 import aiohttp
 
@@ -13,9 +14,11 @@ class Api:
         self.log = api_log
 
     async def _get(self, url, data='None'):
-        log = self.log.bind(data=data)
+        start_time = time.time()
         async with aiohttp.ClientSession() as session:
             async with session.get(url, data=data) as response:
+                elapsed_time = time.time() - start_time
+                log = self.log.bind(data=data, timeout=round(elapsed_time, 2))
                 text = await response.text()
                 if response.ok:
                     log.success(f"GET {url}")
@@ -26,9 +29,11 @@ class Api:
                 return json.loads(text)
 
     async def _post(self, url, data):
-        log = self.log.bind(data=data)
+        start_time = time.time()
         async with aiohttp.ClientSession() as session:
             async with session.post(url, data=data) as response:
+                elapsed_time = time.time() - start_time
+                log = self.log.bind(data=data, timeout=round(elapsed_time, 2))
                 text = await response.text()
                 if response.ok:
                     log.success(f"POST {url}")
