@@ -41,10 +41,10 @@ async def start():
         dp = Dispatcher(storage=storage)
 
     # CRON
-    scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
+    # scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
     # scheduler.add_job(update_google_sheets, trigger='interval', hours=3, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
-    scheduler.add_job(update_google_sheets, trigger='interval', minutes=5, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
-    scheduler.start()
+    # scheduler.add_job(update_google_sheets, trigger='interval', minutes=5, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
+    # scheduler.start()
 
     # Errors handlers
     dp.errors.register(errors_handlers.tg_duble_error, ExceptionTypeFilter(aiogram.exceptions.TelegramBadRequest))
