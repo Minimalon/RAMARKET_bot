@@ -37,7 +37,7 @@ class Api:
                 text = await response.text()
                 if response.ok:
                     log.success(f"POST {url}")
-                    log.success(await response.text())
+                    log.success(text)
                 else:
                     log.error(f"POST {url} Status={response.status}")
                     log.error(text)
@@ -86,4 +86,6 @@ class Api:
 
 
 if __name__ == '__main__':
-    print(asyncio.run(Api().delete_order("ФС00-000306", '20240404')))
+    for range in range(100):
+        asyncio.run(Api().get_groups())
+        asyncio.sleep(0.1)
