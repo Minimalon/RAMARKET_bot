@@ -7,7 +7,13 @@ import httpx
 
 async def _get(url, data=None):
     start_time = time.time()
-    async with httpx.AsyncClient() as client:
+    timeout = httpx.Timeout(
+        connect=5.0,  # Таймаут на подключение
+        read=10.0,  # Таймаут на чтение данных
+        write=10.0,  # Таймаут на запись данных
+        pool=5.0  # Таймаут на получение соединения из пула
+    )
+    async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.get(url, params=data)
         elapsed_time = time.time() - start_time
         text = response.text
