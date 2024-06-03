@@ -55,11 +55,10 @@ async def update_google_sheets(path):
         if count % 50 == 0:
             ss.runPrepared()
     ss.runPrepared()
-    if not config.develope_mode:
-        to_delete = await select_prepare_delete()
-        deleted_rows = ss.delete_rows(to_delete)
-        for order_id, row_date in deleted_rows:
-            await delete_history_order(order_id, row_date + timedelta(hours=3))
+    to_delete = await select_prepare_delete()
+    deleted_rows = ss.delete_rows(to_delete)
+    for order_id, row_date in deleted_rows:
+        await delete_history_order(order_id, row_date)
     #
     # to_change_date = await select_prepare_change_date()
     # for tchd in to_change_date:

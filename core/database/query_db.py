@@ -95,6 +95,7 @@ async def prepare_delete_history_order(order_id: str, order_date: datetime):
 
 async def delete_history_order(order_id: str, order_date: datetime):
     async with async_session() as session:
+        print(order_date.strftime('%Y%m%d%H%M'), order_id)
         await session.execute(
             update(HistoryOrders).
             where(
