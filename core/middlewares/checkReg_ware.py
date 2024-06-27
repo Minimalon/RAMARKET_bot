@@ -99,6 +99,7 @@ class CheckRegistrationCallbackMiddleware(BaseMiddleware):
             event: CallbackQuery,
             data: dict[str, Any],
     ) -> Any:
+        await event.message.edit_text(texts.download)
         if await checkRegCallback(event):
             return await handler(event, data)
 

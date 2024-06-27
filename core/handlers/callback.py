@@ -177,7 +177,6 @@ async def delete_order(call: CallbackQuery, callback_data: DeleteOrder, log: Bot
 
 
 async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: BotLogger):
-    await call.message.edit_text(_('Идёт создание заказа'))
     log.button('Создать заказ')
     data = await state.get_data()
     order = Order.model_validate_json(data['order'])

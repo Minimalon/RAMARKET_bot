@@ -9,6 +9,7 @@ from core.loggers.bot_logger import BotLogger
 from core.models_pydantic.order import Order, CurrencyOrder, TelegramUser
 from core.oneC import utils
 from core.oneC.utils import get_shop_by_id
+from core.utils import texts
 from core.utils.callbackdata import Shop, Currency, CountryRezident
 
 

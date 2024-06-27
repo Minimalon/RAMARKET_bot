@@ -21,7 +21,8 @@ error_article_not_decimal = __("{error_head}Разрешено вводить т
 
 error_not_found_order = __("{error_head}Не найдено заказа\nПопробуйте снова создать заказ.").format(
     error_head=error_head)
-
+download = ("Происходит загрузка информации...\n"
+            "Ничего не нажимайте и не трогайте. Загрузка может длится даже несколько минут\n")
 
 def error_full_name(name):
     return __(
