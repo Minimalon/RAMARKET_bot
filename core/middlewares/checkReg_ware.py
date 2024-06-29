@@ -100,6 +100,7 @@ class CheckRegistrationCallbackMiddleware(BaseMiddleware):
             data: dict[str, Any],
     ) -> Any:
         await event.message.edit_text(texts.download)
+        await asyncio.sleep(2)
         if await checkRegCallback(event):
             return await handler(event, data)
 
