@@ -5,6 +5,7 @@ from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from loguru import logger
 
+import config
 from core.database import query_db as queryDB
 from core.handlers.basic import get_start
 from core.keyboards.reply import getKeyboard_registration
@@ -99,8 +100,9 @@ class CheckRegistrationCallbackMiddleware(BaseMiddleware):
             event: CallbackQuery,
             data: dict[str, Any],
     ) -> Any:
-        await event.message.edit_text(texts.download)
-        await asyncio.sleep(2)
+        if not config.develope_mode:
+            await event.message.edit_text(texts.download)
+            await asyncio.sleep(2)
         if await checkRegCallback(event):
             return await handler(event, data)
 
