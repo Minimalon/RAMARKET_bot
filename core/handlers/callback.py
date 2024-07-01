@@ -1,7 +1,4 @@
 import asyncio
-import json
-from datetime import timedelta
-from decimal import Decimal
 
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
@@ -162,7 +159,9 @@ async def delete_order(call: CallbackQuery, callback_data: DeleteOrder, log: Bot
     if not config.develope_mode:
         await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
     await query_db.prepare_delete_history_order(callback_data.order_id, date_order)
-    await call.message.bot.send_message(call.message.chat.id, f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>')
+    await call.message.bot.send_message(
+        chat_id=call.message.chat.id,
+        text=f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>')
     log.success(f'Удалили заказ {callback_data.order_id}')
     # if date_order + timedelta(days=1) > datetime(day=d_now.day, month=d_now.month, year=d_now.year, hour=10, minute=30):
     #     await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
