@@ -100,7 +100,7 @@ class CheckRegistrationCallbackMiddleware(BaseMiddleware):
             event: CallbackQuery,
             data: dict[str, Any],
     ) -> Any:
-        if not config.develope_mode:
+        if not config.develope_mode and 'del_ord' not in event.data:
             await event.message.edit_text(texts.download)
             await asyncio.sleep(2)
         if await checkRegCallback(event):
