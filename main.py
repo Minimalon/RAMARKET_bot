@@ -34,11 +34,8 @@ async def start():
     await get_commands(bot)
     await init_models()
 
-    if config.develope_mode:
-        dp = Dispatcher()
-    else:
-        storage = RedisStorage.from_url(config.redisStorage)
-        dp = Dispatcher(storage=storage)
+    storage = RedisStorage.from_url(config.redisStorage)
+    dp = Dispatcher(storage=storage)
 
     # CRON
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
@@ -97,7 +94,8 @@ async def start():
     dp.callback_query.register(update_quantity_product, QuantityUpdate.filter())
     dp.callback_query.register(createOrder.get_price, QuantityProduct.filter())
     dp.callback_query.register(show_catalog, F.data == 'add_product')
-    dp.callback_query.register(createOrder.enter_client_name, F.data == 'continue_order')
+    dp.callback_query.register(createOrder.select_tax, F.data == 'continue_order')
+    dp.callback_query.register(createOrder.enter_client_name, Taxes.filter())
 
     # Удаление заказа
     dp.callback_query.register(delete_order, DeleteOrder.filter())

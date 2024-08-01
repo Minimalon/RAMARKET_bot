@@ -41,3 +41,9 @@ class ChangeLanguage(CallbackData, prefix='select_language'):
 class DeleteOrder(CallbackData, prefix='del_ord'):
     order_id: str
     date: str
+
+
+class Taxes(CallbackData, prefix='sel_tax'):
+    tax: float
+
+

@@ -58,9 +58,9 @@ async def getKeyboard_selectCurrency(order: Order):
         keyboard.button(text='TRY', callback_data=Currency(name='TRY'))
         keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
     else:
-        # keyboard.button(text='USD', callback_data=Currency(name='USD'))
         keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
-
+    if order.rezident == 'Казахстан':
+        keyboard.button(text='KZT', callback_data=Currency(name='KZT'))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 
@@ -187,6 +187,24 @@ def getKeyboard_cart():
     keyboard.button(text=_("Продолжить"), callback_data='continue_order')
     keyboard.button(text=_("Добавить товар"), callback_data='add_product')
     keyboard.adjust(2)
+    return keyboard.as_markup()
+
+
+def kb_taxes():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='0 %', callback_data=Taxes(tax=0))
+    keyboard.button(text='2 %', callback_data=Taxes(tax=2))
+    keyboard.button(text='3 %', callback_data=Taxes(tax=3))
+    keyboard.button(text='5 %', callback_data=Taxes(tax=5))
+    keyboard.button(text='6 %', callback_data=Taxes(tax=6))
+    keyboard.button(text='8 %', callback_data=Taxes(tax=8))
+    keyboard.button(text='10 %', callback_data=Taxes(tax=10))
+    keyboard.button(text='15 %', callback_data=Taxes(tax=15))
+    keyboard.button(text='17 %', callback_data=Taxes(tax=17))
+    keyboard.button(text='18 %', callback_data=Taxes(tax=18))
+    keyboard.button(text='20 %', callback_data=Taxes(tax=20))
+    keyboard.button(text='23 %', callback_data=Taxes(tax=23))
+    keyboard.adjust(1)
     return keyboard.as_markup()
 
 

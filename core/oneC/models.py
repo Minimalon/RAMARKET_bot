@@ -1,3 +1,4 @@
+import enum
 import json
 from decimal import Decimal
 

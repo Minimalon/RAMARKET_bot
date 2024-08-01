@@ -80,6 +80,9 @@ def cart(order: Order) -> str:
         elif order.currency.name == 'USD':
             text += _('<b>Общая сумма</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>'). \
                 format(sum_usd=order.sum_usd, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
+    if order.currency.name == 'KZT':
+        text += _('<b>Общая сумма</b>: <code>{sum_kzt} {currency_symbol} / {sum_rub} ₽</code>'). \
+            format(sum_kzt=order.sum_kzt, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
     return text
 
 
@@ -98,11 +101,15 @@ async def createOrder(order: Order) -> str:
         '<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n'
         '<b>Название магазина</b>: <code>{shop_name}</code>\n'
         '<b>Тип оплаты</b>: <code>{payment_name}</code>\n'
+        '<b>Комиссия</b>: <code>{tax} %</code>\n'
         '<b>Валюта</b>: <code>{currency}</code>\n'
         '<b>Курс валюты</b>: <code>{currencyPrice}</code>\n'
-    ).format(client_name=order.client_name, message=message,
-             mail_or_phone=mail_or_phone, shop_name=order.shop.name,
+    ).format(client_name=order.client_name,
+             message=message,
+             mail_or_phone=mail_or_phone,
+             shop_name=order.shop.name,
              payment_name=order.payment.name,
+             tax=order.tax,
              currencyPrice=order.currency.price,
              currency=order.currency.name)
 

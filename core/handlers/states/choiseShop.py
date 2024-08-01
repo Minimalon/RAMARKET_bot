@@ -11,11 +11,13 @@ from core.oneC import utils
 from core.oneC.utils import get_shop_by_id
 from core.utils import texts
 from core.utils.callbackdata import Shop, Currency, CountryRezident
+from core.utils.currencyes_cb import get_price_valute_by_one
 
 
 async def rezident(call: CallbackQuery, state: FSMContext, log: BotLogger):
     await call.message.edit_text("Резидентом какой страны является покупатель?",
                                  reply_markup=kb_rezident())
+
 
 async def check_shops(call: CallbackQuery, state: FSMContext, log: BotLogger, callback_data: CountryRezident):
     log.info(f'Выбрали страну покупатела "{callback_data.rezident}"')
@@ -67,7 +69,18 @@ async def choise_currency(call: CallbackQuery, callback_data: Shop, state: FSMCo
 async def choise_currency_price(call: CallbackQuery, callback_data: Currency, state: FSMContext):
     data = await state.get_data()
     order = Order.model_validate_json(data['order'])
-    order.currency = CurrencyOrder(name=callback_data.name, price=order.shop.currencyPrice)
-    text = _('Фактический курс: <code>{currency_price}</code>').format(currency_price=order.currency.price)
+    if callback_data.name == 'KZT':
+        order.currency = CurrencyOrder(
+            name=callback_data.name,
+            price=await get_price_valute_by_one('KZT')
+        )
+    else:
+        order.currency = CurrencyOrder(
+            name=callback_data.name,
+            price=order.shop.currencyPrice
+        )
+    text = _('Фактический курс: <code>{currency_price}</code>').format(
+        currency_price=order.currency.price
+    )
     await state.update_data(order=order.model_dump_json(by_alias=True))
     await call.message.edit_text(text, reply_markup=inline.getKeyboard_selectPriceCurrency())

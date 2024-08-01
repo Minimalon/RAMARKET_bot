@@ -25,7 +25,7 @@ class ProductGroup(BaseModel):
 class CurrencyOrder(BaseModel):
     name: str
     price: Decimal = Field(decimal_places=4)
-    symbol: str = Field(default='$')
+    symbol: str = Field(default='')
 
     @model_validator(mode='after')
     def get_currencySymbol(self):
@@ -36,8 +36,43 @@ class CurrencyOrder(BaseModel):
             'EUR': '€',
             'TRY': '₺',
             'AED': 'د.إ',
+            'GBP': '£',
+            'JPY': '¥',
+            'CNY': '¥',
+            'INR': '₹',
+            'KZT': '₸',
+            'UAH': '₴',
+            'BYN': 'Br',
+            'BRL': 'R$',
+            'CAD': '$',
+            'CHF': 'CHF',
+            'CLP': '$',
+            'COP': '$',
+            'CRC': '₡',
+            'CUP': '₱',
+            'DOP': 'RD$',
+            'EGP': '£',
+            'GTQ': 'Q',
+            'HNL': 'L',
+            'ISK': 'kr',
+            'KGS': 'лв',
+            'MXN': '$',
+            'MYR': 'RM',
+            'NOK': 'kr',
+            'PEN': 'S/',
+            'PHP': '₱',
+            'PKR': '₨',
+            'PLN': 'zł',
+            'PYG': '₲',
+            'SEK': 'kr',
+            'SVC': '$',
+            'THB': '฿',
+            'TWD': 'NT$',
+            'UYU': '$U',
+            'VEF': 'Bs F',
+            'ZAR': 'R'
         }
-        self.symbol = currency_symbols[self.name]
+        self.symbol = currency_symbols.get(self.name, '')
         return self
 
 
@@ -62,15 +97,18 @@ class Order(BaseModel):
     sum_usd: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в долларах')
     sum_rub: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в рублях')
     sum_try: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в турецкких лирах')
+    sum_kzt: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в турецкких лирах')
     client_name: str | None = Field(default=None)
     client_phone: str | None = Field(default=None)
     client_mail: str | None = Field(default=None)
+    tax: float = Field(default=0)
 
     async def correct_order_sums(self):
         if len(self.cart) > 0:
             self.sum_usd = Decimal(0)
             self.sum_rub = Decimal(0)
             self.sum_try = Decimal(0)
+            self.sum_kzt = Decimal(0)
             if self.shop.currency == 'TRY':
                 if self.currency.name == 'RUB':
                     for product in self.cart:
@@ -95,16 +133,23 @@ class Order(BaseModel):
                     for product in self.cart:
                         self.sum_rub += (product.price * self.currency.price) * product.quantity
                         self.sum_usd += product.price * product.quantity
+            if self.currency.name == 'KZT':
+                for product in self.cart:
+                    self.sum_rub += (product.price * self.currency.price) * product.quantity
+                    self.sum_kzt += product.price * product.quantity
+                self.sum_usd += self.sum_rub / await get_price_valute_by_one('USD')
+
         self.sum_usd = Decimal(round(self.sum_usd, 2))
         self.sum_rub = Decimal(round(self.sum_rub, 0))
         self.sum_try = Decimal(round(self.sum_try, 2))
+        self.sum_kzt = Decimal(round(self.sum_kzt, 2))
         return self
 
     def create_1c_order(self) -> dict:
         order = {
             "TypeR": "Doc",
             "Order_id": None,  # Если указывать номер заказа, то заказ будет не создаваться, а изменяться
-            "Data": None, # Если указали Order_id, нужно также указать дату заказа в формате 02.01.2024 12:28:00
+            "Data": None,  # Если указали Order_id, нужно также указать дату заказа в формате 02.01.2024 12:28:00
             "Sklad": str(self.shop.id),
             "rezident": self.rezident,
             "KursPrice": str(self.currency.price),
@@ -114,7 +159,8 @@ class Order(BaseModel):
             "Klient": str(self.client_name),
             "Telefon": str(self.client_phone),
             "Email": str(self.client_mail),
-            "Itemc": [{"Tov": str(p.id), "Kol": str(p.quantity), "Cost": str(p.price), 'Sum': str(p.price * p.quantity)} for p in self.cart]
+            "Itemc": [{"Tov": str(p.id), "Kol": str(p.quantity), "Cost": str(p.price), 'Sum': str(p.price * p.quantity)}
+                      for p in self.cart]
         }
         return order
 

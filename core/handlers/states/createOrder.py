@@ -10,7 +10,7 @@ from core.keyboards.inline import getKeyboard_cart
 from core.loggers.bot_logger import BotLogger
 from core.models_pydantic.order import Order, Product
 from core.utils import texts
-from core.utils.callbackdata import QuantityProduct
+from core.utils.callbackdata import QuantityProduct, Taxes
 from core.utils.states import StateCreateOrder
 
 
@@ -45,8 +45,18 @@ async def check_price(message: Message, state: FSMContext, log: BotLogger):
     await message.answer(texts.cart(order), reply_markup=getKeyboard_cart())
 
 
-async def enter_client_name(call: CallbackQuery, state: FSMContext, log: BotLogger):
+async def select_tax(call: CallbackQuery, log: BotLogger):
     log.button('Продолжить создание заказа')
+    await call.message.edit_text("Выберите налог",
+                                 reply_markup=inline.kb_taxes())
+
+
+async def enter_client_name(call: CallbackQuery, state: FSMContext, callback_data: Taxes, log: BotLogger):
+    log.info(f'Выбрали налог "{callback_data.tax}"')
+    data = await state.get_data()
+    order = Order.model_validate_json(data['order'])
+    order.tax = callback_data.tax
+    await state.update_data(order=order.model_dump_json(by_alias=True))
     await call.message.edit_text(_("Введите ФИО (полностью)"))
     await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
 

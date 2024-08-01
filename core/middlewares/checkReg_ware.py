@@ -74,7 +74,6 @@ async def checkRegCallback(call: CallbackQuery) -> bool:
         return False
 
     if not await checkClientIN1c(client_db.phone_number):
-        # Нужно удалить из БД так, как нету в 1С или...... не надо удалять
         bot_log.error("Не зарегестрирован в 1с")
         await call.message.answer(texts.phoneNotReg(client_db.phone_number), reply_markup=getKeyboard_registration())
         return False

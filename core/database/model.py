@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import String, Column, DateTime, Boolean, BigInteger, Enum
+from sqlalchemy import String, Column, DateTime, Boolean, BigInteger, Enum, Float
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
@@ -37,6 +37,7 @@ class HistoryOrders(Base):
     paymentGateway = Column(String(50))
     paymentType = Column(String(50))
     payment_name = Column(String(250))
+    tax = Column(Float(10))
     product_id = Column(String(50))
     product_name = Column(String(250))
     price = Column(String(50))
@@ -44,6 +45,7 @@ class HistoryOrders(Base):
     sum_usd = Column(String(50))
     sum_rub = Column(String(50))
     sum_try = Column(String(50))
+    sum_kzt = Column(String(50))
     currency = Column(String(10))
     currencyPrice = Column(String(50))
     client_name = Column(String(100))
