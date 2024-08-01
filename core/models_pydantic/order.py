@@ -150,6 +150,7 @@ class Order(BaseModel):
             "TypeR": "Doc",
             "Order_id": None,  # Если указывать номер заказа, то заказ будет не создаваться, а изменяться
             "Data": None,  # Если указали Order_id, нужно также указать дату заказа в формате 02.01.2024 12:28:00
+            "Tax": str(self.tax),
             "Sklad": str(self.shop.id),
             "rezident": self.rezident,
             "KursPrice": str(self.currency.price),
