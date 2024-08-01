@@ -58,9 +58,10 @@ async def getKeyboard_selectCurrency(order: Order):
         keyboard.button(text='TRY', callback_data=Currency(name='TRY'))
         keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
     else:
-        keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
-    if order.rezident == 'Казахстан':
-        keyboard.button(text='KZT', callback_data=Currency(name='KZT'))
+        if order.rezident == 'Казахстан':
+            keyboard.button(text='KZT', callback_data=Currency(name='KZT'))
+        else:
+            keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
 

@@ -45,10 +45,16 @@ async def check_price(message: Message, state: FSMContext, log: BotLogger):
     await message.answer(texts.cart(order), reply_markup=getKeyboard_cart())
 
 
-async def select_tax(call: CallbackQuery, log: BotLogger):
+async def select_tax(call: CallbackQuery, state: FSMContext, log: BotLogger):
     log.button('Продолжить создание заказа')
-    await call.message.edit_text("Выберите налог",
-                                 reply_markup=inline.kb_taxes())
+    data = await state.get_data()
+    order = Order.model_validate_json(data['order'])
+    if order.rezident == 'Казахстан':
+        await call.message.edit_text("Выберите налог",
+                                     reply_markup=inline.kb_taxes())
+    else:
+        await call.message.edit_text(_("Введите ФИО (полностью)"))
+        await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
 
 
 async def enter_client_name(call: CallbackQuery, state: FSMContext, callback_data: Taxes, log: BotLogger):
