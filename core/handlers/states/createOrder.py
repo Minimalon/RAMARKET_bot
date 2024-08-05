@@ -62,6 +62,7 @@ async def enter_client_name(call: CallbackQuery, state: FSMContext, callback_dat
     data = await state.get_data()
     order = Order.model_validate_json(data['order'])
     order.tax = callback_data.tax
+    order = await order.correct_order_sums()
     await state.update_data(order=order.model_dump_json(by_alias=True))
     await call.message.edit_text(_("Введите ФИО (полностью)"))
     await state.set_state(StateCreateOrder.GET_CLIENT_NAME)
@@ -110,3 +111,7 @@ async def create_order(message: Message, state: FSMContext, log: BotLogger):
     order = Order.model_validate_json(data['order'])
     text = await texts.createOrder(order)
     await message.answer('{text}'.format(text=text), reply_markup=inline.getKeyboard_createOrder())
+
+
+async def recreate_order(call: CallbackQuery, state: FSMContext, log: BotLogger):
+    await create_order(call.message, state, log)

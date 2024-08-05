@@ -10,6 +10,3 @@ async def get_price_valute_by_one(valute: str = 'USD'):
         r_json = response.json()
         price_by_one = r_json['Valute'][valute]['Value'] / r_json['Valute'][valute]['Nominal']
         return round(Decimal(price_by_one), 4)
-
-if __name__ == '__main__':
-    print(asyncio.run(get_price_valute_by_one()))

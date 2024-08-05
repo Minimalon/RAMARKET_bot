@@ -2,6 +2,7 @@ from datetime import datetime
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+import config
 from config import _
 from core.models_pydantic.order import ProductGroup, Order
 from core.oneC import utils
@@ -59,7 +60,7 @@ async def getKeyboard_selectCurrency(order: Order):
         keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
     else:
         if order.rezident == 'Казахстан':
-            keyboard.button(text='KZT', callback_data=Currency(name='KZT'))
+            keyboard.button(text='USD', callback_data=Currency(name='USD'))
         else:
             keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
     keyboard.adjust(1, repeat=True)
@@ -194,17 +195,17 @@ def getKeyboard_cart():
 def kb_taxes():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text='0 %', callback_data=Taxes(tax=0))
-    keyboard.button(text='2 %', callback_data=Taxes(tax=2))
-    keyboard.button(text='3 %', callback_data=Taxes(tax=3))
-    keyboard.button(text='5 %', callback_data=Taxes(tax=5))
-    keyboard.button(text='6 %', callback_data=Taxes(tax=6))
-    keyboard.button(text='8 %', callback_data=Taxes(tax=8))
-    keyboard.button(text='10 %', callback_data=Taxes(tax=10))
-    keyboard.button(text='15 %', callback_data=Taxes(tax=15))
-    keyboard.button(text='17 %', callback_data=Taxes(tax=17))
-    keyboard.button(text='18 %', callback_data=Taxes(tax=18))
-    keyboard.button(text='20 %', callback_data=Taxes(tax=20))
-    keyboard.button(text='23 %', callback_data=Taxes(tax=23))
+    keyboard.button(text='2 %', callback_data=Taxes(tax=0.02))
+    keyboard.button(text='3 %', callback_data=Taxes(tax=0.03))
+    keyboard.button(text='5 %', callback_data=Taxes(tax=0.05))
+    keyboard.button(text='6 %', callback_data=Taxes(tax=0.06))
+    keyboard.button(text='8 %', callback_data=Taxes(tax=0.08))
+    keyboard.button(text='10 %', callback_data=Taxes(tax=0.10))
+    keyboard.button(text='15 %', callback_data=Taxes(tax=0.15))
+    keyboard.button(text='17 %', callback_data=Taxes(tax=0.17))
+    keyboard.button(text='18 %', callback_data=Taxes(tax=0.18))
+    keyboard.button(text='20 %', callback_data=Taxes(tax=0.20))
+    keyboard.button(text='23 %', callback_data=Taxes(tax=0.23))
     keyboard.adjust(1)
     return keyboard.as_markup()
 

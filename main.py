@@ -10,6 +10,7 @@ from aiogram.fsm.storage.redis import RedisStorage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pydantic import ValidationError
 
+import config
 from core.cron.google_stats import update_google_sheets
 from core.filters.iscontact import IsTrueContact
 from core.handlers import contact
@@ -30,7 +31,8 @@ from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
 async def start():
     await create_loggers()
     bot = Bot(token=config.token, parse_mode='HTML')
-    await bot.send_message(5263751490, 'Я Запустился!')
+    if not config.develope_mode:
+        await bot.send_message(5263751490, 'Я Запустился!')
     await get_commands(bot)
     await init_models()
 
@@ -126,7 +128,8 @@ async def start():
     except Exception as e:
         logger.exception(e)
     finally:
-        await bot.send_message(5263751490, 'Я Остановился!!!!')
+        if not config.develope_mode:
+            await bot.send_message(5263751490, 'Я Остановился!!!!')
         await bot.session.close()
 
 

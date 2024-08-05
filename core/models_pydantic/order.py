@@ -27,8 +27,7 @@ class CurrencyOrder(BaseModel):
     price: Decimal = Field(decimal_places=4)
     symbol: str = Field(default='')
 
-    @model_validator(mode='after')
-    def get_currencySymbol(self):
+    def get_currency_symbol(self, currency_name: str = 'USD') -> str | None:
         currency_symbols = {
             'RUB': '₽',
             'USD': '$',
@@ -72,7 +71,15 @@ class CurrencyOrder(BaseModel):
             'VEF': 'Bs F',
             'ZAR': 'R'
         }
-        self.symbol = currency_symbols.get(self.name, '')
+        return currency_symbols.get(currency_name)
+
+    @model_validator(mode='after')
+    def get_currencySymbol(self):
+        self.symbol = self.get_currency_symbol(self.name)
+        return self
+
+    async def correct_currency_price(self):
+        self.price = await get_price_valute_by_one(self.name)
         return self
 
 
@@ -95,9 +102,13 @@ class Order(BaseModel):
     payment: Payment | None = Field(default=None)
     cart: list[Product] = Field(default=[], title='Корзина')
     sum_usd: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в долларах')
-    sum_rub: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в рублях')
+    sum_rub: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в рублях')
     sum_try: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в турецкких лирах')
-    sum_kzt: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в турецкких лирах')
+    sum_kzt: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в тенге')
+    tax_sum_usd: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в долларах c комиссией')
+    tax_sum_rub: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в рублях c комиссией')
+    tax_sum_try: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в турецкких лирах c комиссией')
+    tax_sum_kzt: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в тенге c комиссией')
     client_name: str | None = Field(default=None)
     client_phone: str | None = Field(default=None)
     client_mail: str | None = Field(default=None)
@@ -109,7 +120,13 @@ class Order(BaseModel):
             self.sum_rub = Decimal(0)
             self.sum_try = Decimal(0)
             self.sum_kzt = Decimal(0)
-            if self.shop.currency == 'TRY':
+
+            if self.rezident == 'Казахстан':
+                for product in self.cart:
+                    self.sum_kzt += (product.price * self.currency.price) * product.quantity
+                    self.sum_usd += product.price * product.quantity
+                self.sum_rub += self.sum_usd * await get_price_valute_by_one('USD')
+            elif self.shop.currency == 'TRY':
                 if self.currency.name == 'RUB':
                     for product in self.cart:
                         self.sum_rub += product.price * product.quantity
@@ -133,16 +150,27 @@ class Order(BaseModel):
                     for product in self.cart:
                         self.sum_rub += (product.price * self.currency.price) * product.quantity
                         self.sum_usd += product.price * product.quantity
-            if self.currency.name == 'KZT':
-                for product in self.cart:
-                    self.sum_rub += (product.price * self.currency.price) * product.quantity
-                    self.sum_kzt += product.price * product.quantity
-                self.sum_usd += self.sum_rub / await get_price_valute_by_one('USD')
+
+        if self.tax > 0:
+            self.tax_sum_usd = Decimal(round(self.sum_usd * Decimal(self.tax + 1), 2))
+            self.tax_sum_rub = Decimal(round(self.sum_rub * Decimal(self.tax + 1), 0))
+            self.tax_sum_try = Decimal(round(self.sum_try * Decimal(self.tax + 1), 2))
+            self.tax_sum_kzt = Decimal(round(self.sum_kzt * Decimal(self.tax + 1), 0))
 
         self.sum_usd = Decimal(round(self.sum_usd, 2))
         self.sum_rub = Decimal(round(self.sum_rub, 0))
         self.sum_try = Decimal(round(self.sum_try, 2))
-        self.sum_kzt = Decimal(round(self.sum_kzt, 2))
+        self.sum_kzt = Decimal(round(self.sum_kzt, 0))
+        return self
+
+    async def convert_currency_from_usd_to_kzt(self, currency_name: str = 'KZT'):
+        new_price = await get_price_valute_by_one(currency_name)
+        for product in self.cart:
+            product.price = round((product.price * self.currency.price) / new_price, 0)
+        self.currency = CurrencyOrder(
+            name=currency_name,
+            price=new_price
+        )
         return self
 
     def create_1c_order(self) -> dict:
@@ -150,7 +178,7 @@ class Order(BaseModel):
             "TypeR": "Doc",
             "Order_id": None,  # Если указывать номер заказа, то заказ будет не создаваться, а изменяться
             "Data": None,  # Если указали Order_id, нужно также указать дату заказа в формате 02.01.2024 12:28:00
-            "Tax": str(self.tax),
+            "Tax": str(round(self.tax * 100, 0)),
             "Sklad": str(self.shop.id),
             "rezident": self.rezident,
             "KursPrice": str(self.currency.price),

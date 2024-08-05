@@ -24,6 +24,7 @@ error_not_found_order = __("{error_head}Не найдено заказа\nПоп
 download = ("Происходит загрузка информации...\n"
             "Ничего не нажимайте и не трогайте. Загрузка может длится даже несколько минут\n")
 
+
 def error_full_name(name):
     return __(
         "{error_head}ФИО состоит из 3 слов, а ваше состоит из {count} слов\n<b>Попробуйте снова.</b>").format(
@@ -36,7 +37,8 @@ def error_article_not_found(article):
 
 
 def error_server(response):
-    return __("{error_head}Сервер недоступен, его код ответа '{response}'\nПопробуйте создать заказ снова.").format(error_head=error_head, response=response.status)
+    return __("{error_head}Сервер недоступен, его код ответа '{response}'\nПопробуйте создать заказ снова.").format(
+        error_head=error_head, response=response.status)
 
 
 # endregion
@@ -59,30 +61,40 @@ def menu_new_language(language='ru'):
 
 def cart(order: Order) -> str:
     text = ''
+
+    def text_total_price(first_sum=None, first_currency=None, second_sum=None, second_currency=None):
+        text = f'<b>Общая сумма</b>: <code>'
+        if first_currency and first_sum:
+            text += f'{first_sum} {first_currency}'
+        if second_currency and second_sum:
+            text += f' / {second_sum} {second_currency}'
+        text += '</code>\n'
+        return text
+
     for index, product in enumerate(order.cart, 1):
-        text += _('ℹ️<b>Товар №{index}:</b>\n'
-                  '      <b>Название товара</b>: <code>{product_name}</code>\n'
-                  '      <b>Цена товара</b>: <code>{price} {currency_symbol}</code>\n'
-                  '      <b>Количество</b>: <code>{quantity}</code>\n'). \
-            format(index=index, product_name=product.name, quantity=product.quantity,
-                   price=product.price, currency_symbol=order.currency.symbol)
-    if order.shop.currency == 'TRY':
+        text += (f'ℹ️<b>Товар №{index}:</b>\n'
+                 f'      <b>Название товара</b>: <code>{product.name}</code>\n'
+                 f'      <b>Цена товара</b>: <code>{product.price} {order.currency.name}</code>\n'
+                 f'      <b>Количество</b>: <code>{product.quantity}</code>\n')
+    if order.rezident == 'Казахстан':
+        if order.client_name:
+            text += text_total_price(order.sum_kzt, 'KZT', order.sum_usd, 'USD')
+        else:
+            text += text_total_price(order.sum_usd, 'USD', order.sum_kzt, 'KZT')
+        if order.tax > 0:
+            text += f"<b>Общая сумма с комиссией</b>: <code>{order.tax_sum_kzt} KZT / {order.tax_sum_usd} USD</code>\n"
+    elif order.shop.currency == 'TRY':
         if order.currency.name == 'RUB':
-            text += _('<b>Общая сумма</b>: <code>{sum_rub} {currency_symbol} / {sum_try} ₺</code>'). \
-                format(sum_rub=order.sum_rub, sum_try=order.sum_try, currency_symbol=order.currency.symbol)
+            text += text_total_price(order.sum_rub, order.currency.name, order.sum_try, 'KZT')
         elif order.currency.name == 'TRY':
-            text += _('<b>Общая сумма</b>: <code>{sum_try} {currency_symbol} / {sum_rub} ₽</code>'). \
-                format(sum_rub=order.sum_rub, sum_try=order.sum_try, currency_symbol=order.currency.symbol)
+            text += text_total_price(order.sum_try, order.currency.name, order.sum_rub, 'RUB')
     else:
         if order.currency.name == 'RUB':
-            text += _('<b>Общая сумма</b>: <code>{sum_rub} {currency_symbol} / {sum_usd} $</code>'). \
-                format(sum_usd=order.sum_usd, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
+            text += text_total_price(order.sum_rub, order.currency.name, order.sum_usd, 'USD')
         elif order.currency.name == 'USD':
-            text += _('<b>Общая сумма</b>: <code>{sum_usd} {currency_symbol} / {sum_rub} ₽</code>'). \
-                format(sum_usd=order.sum_usd, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
-    if order.currency.name == 'KZT':
-        text += _('<b>Общая сумма</b>: <code>{sum_kzt} {currency_symbol} / {sum_rub} ₽</code>'). \
-            format(sum_kzt=order.sum_kzt, sum_rub=order.sum_rub, currency_symbol=order.currency.symbol)
+            text += text_total_price(order.sum_usd, order.currency.name, order.sum_rub, 'RUB')
+    # if order.currency.name == 'KZT':
+    #     text += text_total_price(order.sum_kzt, order.currency.name, order.sum_usd, 'USD')
     return text
 
 
@@ -94,25 +106,36 @@ async def createOrder(order: Order) -> str:
         mail_or_phone = order.client_mail
         message = __("Почта")
 
-    text = __(
-        'ℹ️ <b>Информация о заказе:</b>\n'
-        '➖➖➖➖➖➖➖➖➖➖➖\n'
-        '<b>ФИО клиента</b>: <code>{client_name}</code>\n'
-        '<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n'
-        '<b>Название магазина</b>: <code>{shop_name}</code>\n'
-        '<b>Тип оплаты</b>: <code>{payment_name}</code>\n'
-        '<b>Комиссия</b>: <code>{tax} %</code>\n'
-        '<b>Валюта</b>: <code>{currency}</code>\n'
-        '<b>Курс валюты</b>: <code>{currencyPrice}</code>\n'
-    ).format(client_name=order.client_name,
-             message=message,
-             mail_or_phone=mail_or_phone,
-             shop_name=order.shop.name,
-             payment_name=order.payment.name,
-             tax=order.tax,
-             currencyPrice=order.currency.price,
-             currency=order.currency.name)
-
+    # text = __(
+    #     'ℹ️ <b>Информация о заказе:</b>\n'
+    #     '➖➖➖➖➖➖➖➖➖➖➖\n'
+    #     '<b>ФИО клиента</b>: <code>{client_name}</code>\n'
+    #     '<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n'
+    #     '<b>Название магазина</b>: <code>{shop_name}</code>\n'
+    #     '<b>Тип оплаты</b>: <code>{payment_name}</code>\n'
+    #     '<b>Комиссия</b>: <code>{tax} %</code>\n'
+    #     '<b>Валюта</b>: <code>{currency}</code>\n'
+    #     '<b>Курс валюты</b>: <code>{currencyPrice}</code>\n'
+    # ).format(client_name=order.client_name,
+    #          message=message,
+    #          mail_or_phone=mail_or_phone,
+    #          shop_name=order.shop.name,
+    #          payment_name=order.payment.name,
+    #          tax=order.tax * 10,
+    #          currencyPrice=order.currency.price,
+    #          currency=order.currency.name)
+    text = '<b>Информация о заказе:</b>\n'
+    text += '➖➖➖➖➖➖➖➖➖➖➖\n'
+    text += (
+        f'<b>ФИО клиента</b>: <code>{order.client_name}</code>\n'
+        f'<b>{message} клиента</b>: <code>{mail_or_phone}</code>\n'
+        f'<b>Название магазина</b>: <code>{order.shop.name}</code>\n'
+        f'<b>Тип оплаты</b>: <code>{order.payment.name}</code>\n'
+        f'<b>Валюта</b>: <code>{order.currency.name}</code>\n'
+        f'<b>Курс валюты</b>: <code>{order.currency.price}</code>\n'
+    )
+    if order.tax > 0:
+        text += f'<b>Комиссия</b>: <code>{order.tax * 100} %</code>\n'
     text += cart(order)
     return text
 
@@ -136,3 +159,7 @@ def phoneNotReg(phone):
            __(f'Ваш сотовый "{phone}" не зарегистрирован в системе\n'
               f'Уточните вопрос и попробуйте снова.')
     return text
+
+
+if __name__ == '__main__':
+    print(100 * 0)
