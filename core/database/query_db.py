@@ -50,6 +50,7 @@ async def create_historyOrder(order_id: str, order: Order, product: Product):
                 shop_currency=str(order.shop.currency),
                 agent_id=order.user.id,
                 agent_name=order.user.name,
+                rezident=order.rezident,
             )
         )
         await session.commit()

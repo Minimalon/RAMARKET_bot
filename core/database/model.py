@@ -27,6 +27,7 @@ class HistoryOrders(Base):
     chat_id = Column(String(50))
     agent_id = Column(String(50))
     agent_name = Column(String(250))
+    rezident = Column(String(50))
     country_code = Column(String(50))
     country_name = Column(String(250))
     city_code = Column(String(50))

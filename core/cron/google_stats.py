@@ -29,7 +29,7 @@ async def update_google_sheets(path):
     orders = await get_history_orders_for_googleSheet(last_row - 1)
     for count, order in enumerate(orders, start=last_row + 1):
         if order.status in [OrderStatus.sale, OrderStatus.change_date]:
-            ss.prepare_setValues(f"A{count}:P{count}",
+            ss.prepare_setValues(f"A{count}:Q{count}",
                                  [
                                      [
                                          (order.date + timedelta(hours=3)).strftime("%Y-%m-%d %H:%M"),
@@ -47,11 +47,12 @@ async def update_google_sheets(path):
                                          order.currency,
                                          order.currencyPrice.replace('.', ','),
                                          order.client_name,
-                                         update_phone_format(order.client_phone)
+                                         update_phone_format(order.client_phone),
+                                         order.rezident,
                                      ],
                                  ])
         else:
-            ss.prepare_setValues(f"A{count}:P{count}", ss.empty_row)
+            ss.prepare_setValues(f"A{count}:Q{count}", ss.empty_row)
         if count % 50 == 0:
             ss.runPrepared()
     ss.runPrepared()
