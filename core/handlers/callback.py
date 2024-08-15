@@ -187,7 +187,8 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
                                            order=order, product=p),
 
     text = await texts.qr(r['Nomer'], order)
-    if order.payment.type == '3':
+
+    if r.get('ORG') is not None:
         bankOrder = BankOrder.model_validate_json(json.dumps(r))
         bankOrder.add_sum(str(round(Decimal(order.sum_rub * 100), 0)))
         bankOrder.add_fio(order.client_name)
@@ -195,7 +196,7 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
         qr_path = await generateQR(textQR, order.payment.type, r['Nomer'])
         await bot.send_photo(call.message.chat.id, FSInputFile(qr_path), caption=text,
                              reply_markup=getKeyboard_delete_order(r["Nomer"]))
-    elif order.payment.type == '2':
+    elif r.get('Ref') is not None:
         qr_path = await generateQR(r['Ref'], order.payment.type, r['Nomer'])
         await bot.send_photo(call.message.chat.id, FSInputFile(qr_path), caption=text,
                              reply_markup=getKeyboard_delete_order(r["Nomer"]))
