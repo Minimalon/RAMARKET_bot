@@ -85,7 +85,7 @@ def cart(order: Order) -> str:
             text += f"<b>Общая сумма с комиссией</b>: <code>{order.tax_sum_kzt} KZT / {order.tax_sum_usd} USD</code>\n"
     elif order.shop.currency == 'TRY':
         if order.currency.name == 'RUB':
-            text += text_total_price(order.sum_rub, order.currency.name, order.sum_try, 'KZT')
+            text += text_total_price(order.sum_rub, order.currency.name, order.sum_try, 'TRY')
         elif order.currency.name == 'TRY':
             text += text_total_price(order.sum_try, order.currency.name, order.sum_rub, 'RUB')
     else:
