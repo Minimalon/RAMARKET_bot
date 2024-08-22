@@ -31,7 +31,7 @@ async def create_historyOrder(order_id: str, order: Order, product: Product):
                 paymentGateway=order.payment.id,
                 paymentType=order.payment.type,
                 payment_name=order.payment.name,
-                tax=order.tax,
+                tax=order.tax if order.tax == 0 else order.tax * 100,
                 product_id=product.id,
                 product_name=product.name,
                 price=str(product.price),
