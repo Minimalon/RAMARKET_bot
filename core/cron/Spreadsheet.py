@@ -223,7 +223,7 @@ class Spreadsheet:
             o_id, row_date = row[1], datetime.strptime(row[0], '%Y-%m-%d %H:%M')
             if row_date.strftime('%Y-%m-%d %H:%M') in [(_.date + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M') for _ in orders] \
                     and o_id in [_.order_id for _ in orders]:
-                self.prepare_setValues(f'A{count + 1}:Q{count + 1}', self.empty_row)
+                self.prepare_setValues(f'A{count + 1}:R{count + 1}', self.empty_row)
                 self.runPrepared()
                 deleted.append([o_id, row_date])
         return deleted
