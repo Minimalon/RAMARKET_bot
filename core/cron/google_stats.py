@@ -49,7 +49,7 @@ async def update_google_sheets(path):
                                          order.client_name,
                                          update_phone_format(order.client_phone),
                                          order.rezident,
-                                         order.tax * 100,
+                                         order.tax,
                                      ],
                                  ])
         else:
