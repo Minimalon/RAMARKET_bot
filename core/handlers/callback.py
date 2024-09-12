@@ -1,4 +1,5 @@
 import asyncio
+import random
 
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
@@ -180,12 +181,14 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
     if develope_mode:
         r = {"Ref": "1234567890", "Nomer": "1234567890"}
         order.payment.type = '2'
+        order.order_id = str(random.randint(1000000000, 9999999999))
     else:
         r = await utils.create_order(order)
+        order.order_id = r["Nomer"]
     log.debug(order.model_dump_json())
-    for p in order.cart:
-        await query_db.create_historyOrder(order_id=r['Nomer'],
-                                           order=order, product=p),
+    for product in order.cart:
+        await query_db.create_historyOrders(order_id=order.order_id, order=order, product=product)
+    await query_db.create_document(order=order)
 
     text = await texts.qr(r['Nomer'], order)
 

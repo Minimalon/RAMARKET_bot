@@ -124,7 +124,7 @@ async def createOrder(order: Order) -> str:
     #          tax=order.tax * 10,
     #          currencyPrice=order.currency.price,
     #          currency=order.currency.name)
-    text = '<b>Информация о заказе:</b>\n'
+    text = 'ℹ️<b>Информация о заказе:</b>ℹ️\n'
     text += '➖➖➖➖➖➖➖➖➖➖➖\n'
     text += (
         f'<b>ФИО клиента</b>: <code>{order.client_name}</code>\n'

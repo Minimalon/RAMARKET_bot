@@ -7,8 +7,8 @@ from core.utils.currencyes_cb import get_price_valute_by_one
 
 
 class Product(BaseModel):
-    name: str = Field(alias='Наименование')
     id: str = Field(alias='Id')
+    name: str = Field(alias='Наименование')
     group_name: str = Field(alias='NameGroup')
     group_id: str = Field(alias='idGroup')
     price: Decimal = Field(decimal_places=2, default=0)
@@ -95,6 +95,7 @@ class TelegramUser(BaseModel):
 
 class Order(BaseModel):
     user: User
+    order_id: str = Field(default='', title='Номер заказа в 1С')
     tg_user: TelegramUser
     rezident: str = Field(title="Страна покупателя")
     shop: UserShop | None = Field(default=None)

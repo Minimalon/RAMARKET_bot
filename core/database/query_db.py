@@ -18,7 +18,56 @@ engine = create_async_engine(
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-async def create_historyOrder(order_id: str, order: Order, product: Product):
+async def create_document(order: Order):
+    async with async_session() as session:
+        document = Documents(
+            order_id=order.order_id,
+            chat_id=str(order.tg_user.chat_id),
+            agent_id=order.user.id,
+            agent_name=order.user.name,
+            rezident=order.rezident,
+            country_code=order.shop.country_code,
+            country_name=order.shop.country,
+            city_code=order.shop.city_code,
+            city_name=order.shop.city,
+            shop_id=order.shop.id,
+            shop_name=order.shop.name,
+            shop_currency=order.shop.currency,
+            payment_id=order.payment.id,
+            payment_type=order.payment.type,
+            payment_name=order.payment.name,
+            tax=order.tax if order.tax == 0 else order.tax * 100,
+            sum_usd=order.sum_usd,
+            sum_rub=order.sum_rub,
+            sum_try=order.sum_try,
+            sum_kzt=order.sum_kzt,
+            currency=order.currency.name,
+            currency_price=order.currency.price,
+            client_name=order.client_name,
+            client_phone=order.client_phone,
+            client_mail=order.client_mail,
+            status=OrderStatus.sale
+        )
+        session.add(document)
+        await session.commit()
+
+        for product in order.cart:
+            document_item = DocumentItems(
+                document_id=document.id,
+                order_id=order.order_id,
+                product_id=product.id,
+                product_name=product.name,
+                product_groupname=product.group_name,
+                product_groupid=product.group_id,
+                price=product.price,
+                quantity=product.quantity,
+            )
+            session.add(document_item)
+
+        await session.commit()
+
+
+async def create_historyOrders(order_id: str, order: Order, product: Product):
     async with async_session() as session:
         session.add(
             HistoryOrders(
