@@ -36,7 +36,7 @@ class Api:
             sock_connect=10  # Таймаут на установление соединения
         )
         start_time = time.time()
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, data=data) as response:
                 elapsed_time = time.time() - start_time
                 log = self.log.bind(data=data, timeout=round(elapsed_time, 2))
