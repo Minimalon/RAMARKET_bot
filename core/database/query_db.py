@@ -157,6 +157,20 @@ async def prepare_delete_history_order(order_id: str, order_date: datetime):
         await session.commit()
 
 
+async def delete_document(order_id: str, order_date: datetime) -> None:
+    async with async_session() as session:
+        await session.execute(
+            update(Documents).
+            where(
+                (Documents.order_id == order_id) &
+                (func.to_char(Documents.date, 'YYYYMMDDHH24MI') == order_date.strftime('%Y%m%d%H%M'))
+            ).
+            values(
+                status=OrderStatus.delete,
+            ))
+        await session.commit()
+
+
 async def delete_history_order(order_id: str, order_date: datetime):
     async with async_session() as session:
         await session.execute(

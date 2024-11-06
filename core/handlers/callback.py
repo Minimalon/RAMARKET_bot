@@ -160,6 +160,7 @@ async def delete_order(call: CallbackQuery, callback_data: DeleteOrder, log: Bot
     if not config.develope_mode:
         await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
     await query_db.prepare_delete_history_order(callback_data.order_id, date_order)
+    await query_db.delete_document(callback_data.order_id, date_order)
     await call.message.bot.send_message(
         chat_id=call.message.chat.id,
         text=f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>')
