@@ -14,8 +14,14 @@ class Api:
         self.log = api_log
 
     async def _get(self, url, data='None'):
+        timeout = aiohttp.ClientTimeout(
+            total=120,  # Общий таймаут
+            connect=80,  # Таймаут на подключение
+            sock_read=60,  # Таймаут на чтение данных
+            sock_connect=40  # Таймаут на установление соединения
+        )
         start_time = time.time()
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(url, data=data) as response:
                 elapsed_time = time.time() - start_time
                 log = self.log.bind(data=data, timeout=round(elapsed_time, 2))
@@ -30,10 +36,10 @@ class Api:
 
     async def _post(self, url, data):
         timeout = aiohttp.ClientTimeout(
-            total=60,  # Общий таймаут
-            connect=40,  # Таймаут на подключение
-            sock_read=30,  # Таймаут на чтение данных
-            sock_connect=10  # Таймаут на установление соединения
+            total=120,  # Общий таймаут
+            connect=80,  # Таймаут на подключение
+            sock_read=60,  # Таймаут на чтение данных
+            sock_connect=40  # Таймаут на установление соединения
         )
         start_time = time.time()
         async with aiohttp.ClientSession(timeout=timeout) as session:
