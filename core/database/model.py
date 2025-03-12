@@ -24,7 +24,7 @@ class Documents(Base):
     __tablename__ = 'document'
     id = Column(BigInteger, nullable=False, primary_key=True)
     date = Column(DateTime(timezone=True), server_default=func.now())
-    order_id = Column(String(250), nullable=False, unique=True)
+    order_id = Column(String(250), nullable=False)
     chat_id = Column(String(50))
     agent_id = Column(String(50))
     agent_name = Column(String(250))
