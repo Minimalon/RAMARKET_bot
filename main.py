@@ -52,14 +52,14 @@ async def start():
     dp.errors.register(errors_handlers.error_total, ExceptionTypeFilter(Exception))
 
     # Middlewares
-    # Определение языка
+    ## Определение языка
     dp.update.middleware(ACLMiddleware(config.i18n))
-    # Логирование
+    ## Логирование
     dp.callback_query.middleware(CallBackMiddleware())
     dp.message.middleware(MessageMiddleware())
-    # Проверка регистрации
-    dp.message.middleware(CheckRegistrationMessageMiddleware())
-    dp.callback_query.middleware(CheckRegistrationCallbackMiddleware())
+    ## Проверка регистрации
+    # dp.message.middleware(CheckRegistrationMessageMiddleware())
+    # dp.callback_query.middleware(CheckRegistrationCallbackMiddleware())
 
 
     # Команды
@@ -80,6 +80,16 @@ async def start():
     # Регистрация контакта
     dp.message.register(contact.get_true_contact, F.contact, IsTrueContact())
     dp.message.register(contact.get_fake_contact, F.contact)
+
+    # История заказов
+    dp.callback_query.register(select_historyOrders_days, HistoryOrderDays.filter())
+
+    # Выдача наличных
+    dp.callback_query.register(start_withdraw, F.data == 'withdraw_cash')
+    dp.callback_query.register(withdraw_select_shop, StateWithdraw.select_shop, Shop.filter())
+    dp.callback_query.register(withdraw_select_currency, StateWithdraw.select_currency, Currency.filter())
+    dp.message.register(withdraw_enter_sum, StateWithdraw.enter_sum)
+    dp.callback_query.register(withdraw_confirm, F.data == 'confirm_withdraw', StateWithdraw.show_info)
 
     # Создание заказа
     dp.callback_query.register(choiseShop.check_shops, CountryRezident.filter())

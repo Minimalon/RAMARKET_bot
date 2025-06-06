@@ -6,6 +6,7 @@ from core.database import query_db
 from core.keyboards import inline
 from core.keyboards.inline import getKeyboard_selectCurrency, kb_rezident
 from core.loggers.bot_logger import BotLogger
+from core.middlewares.checkReg_ware import checkRegMessage
 from core.models_pydantic.order import Order, CurrencyOrder, TelegramUser
 from core.oneC import utils
 from core.oneC.utils import get_shop_by_id
@@ -15,6 +16,9 @@ from core.utils.currencyes_cb import get_price_valute_by_one
 
 
 async def rezident(call: CallbackQuery, state: FSMContext, log: BotLogger):
+    if not checkRegMessage(call.message):
+        await call.message.answer("Нет регистрации")
+        return
     await call.message.edit_text("Резидентом какой страны является покупатель?",
                                  reply_markup=kb_rezident())
 

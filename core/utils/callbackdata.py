@@ -46,4 +46,5 @@ class DeleteOrder(CallbackData, prefix='del_ord'):
 class Taxes(CallbackData, prefix='sel_tax'):
     tax: float
 
-
+class HistoryOrderDays(CallbackData, prefix='historyOrderDays'):
+    days: int

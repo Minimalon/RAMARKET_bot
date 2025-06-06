@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -24,7 +25,8 @@ def getKeyboard_start(language=None):
         keyboard.button(text=_('Заказ'), callback_data='startOrder')
         keyboard.button(text=_('Личный кабинет'), callback_data='profile')
         keyboard.button(text=_('История заказов'), callback_data='historyOrders')
-        keyboard.button(text=_('Выдача наличных'), callback_data='withdraw_cash')
+        if os.name != 'posix':
+            keyboard.button(text=_('Выдача наличных'), callback_data='withdraw_cash')
     keyboard.adjust(2, 1)
     return keyboard.as_markup()
 
@@ -239,5 +241,13 @@ def kb_demo_currency(user: User):
 def kb_withdraw():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text='Выдать наличные✅', callback_data='confirm_withdraw')
+    keyboard.adjust(1, repeat=True)
+    return keyboard.as_markup()
+
+def kb_historyOrders_by_days():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='За вчерашний день', callback_data=HistoryOrderDays(days=-1))
+    keyboard.button(text='Сегодня', callback_data=HistoryOrderDays(days=1))
+    keyboard.button(text='3 дня', callback_data=HistoryOrderDays(days=3))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()

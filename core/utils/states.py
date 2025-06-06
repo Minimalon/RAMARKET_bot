@@ -17,3 +17,9 @@ class StateCurrency(StatesGroup):
 class StateEnterArticle(StatesGroup):
     GET_ARTICLE = State()
     ERROR = State()
+
+class StateWithdraw(StatesGroup):
+    select_shop = State()
+    select_currency = State()
+    show_info = State()
+    enter_sum = State()
