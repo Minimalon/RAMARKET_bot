@@ -7,7 +7,7 @@ from config import _
 from core.models_pydantic.order import ProductGroup, Order
 from core.oneC import utils
 from core.oneC.api import Api
-from core.oneC.models import UserShop, Payment
+from core.oneC.models import UserShop, Payment, User
 from core.utils.callbackdata import *
 
 oneC = Api()
@@ -19,10 +19,12 @@ def getKeyboard_start(language=None):
         keyboard.button(text=_('Заказ', locale=language), callback_data='startOrder')
         keyboard.button(text=_('Личный кабинет', locale=language), callback_data='profile')
         keyboard.button(text=_('История заказов', locale=language), callback_data='historyOrders')
+        keyboard.button(text=_('Выдача наличных', locale=language), callback_data='withdraw_cash')
     else:
         keyboard.button(text=_('Заказ'), callback_data='startOrder')
         keyboard.button(text=_('Личный кабинет'), callback_data='profile')
         keyboard.button(text=_('История заказов'), callback_data='historyOrders')
+        keyboard.button(text=_('Выдача наличных'), callback_data='withdraw_cash')
     keyboard.adjust(2, 1)
     return keyboard.as_markup()
 
@@ -58,6 +60,8 @@ async def getKeyboard_selectCurrency(order: Order):
     if order.shop.currency == 'TRY':
         keyboard.button(text='TRY', callback_data=Currency(name='TRY'))
         keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
+    elif order.shop.currency == 'EUR':
+        keyboard.button(text='EUR', callback_data=Currency(name='EUR'))
     else:
         if order.rezident == 'Казахстан':
             keyboard.button(text='USD', callback_data=Currency(name='USD'))
@@ -223,4 +227,17 @@ def getKeyboard_delete_order(order_id):
     keyboard.button(text=_("Удалить заказ"),
                     callback_data=DeleteOrder(order_id=order_id, date=datetime.now().strftime('%Y%m%d%H%M')))
     keyboard.adjust(1)
+    return keyboard.as_markup()
+
+def kb_demo_currency(user: User):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='USD', callback_data=Currency(name='USD'))
+    keyboard.button(text='RUB', callback_data=Currency(name='RUB'))
+    keyboard.adjust(1, repeat=True)
+    return keyboard.as_markup()
+
+def kb_withdraw():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text='Выдать наличные✅', callback_data='confirm_withdraw')
+    keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
