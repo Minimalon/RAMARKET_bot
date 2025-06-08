@@ -247,7 +247,7 @@ def kb_withdraw():
 def kb_historyOrders_by_days():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text='За вчерашний день', callback_data=HistoryOrderDays(days=-1))
-    keyboard.button(text='Сегодня', callback_data=HistoryOrderDays(days=1))
+    keyboard.button(text='Сегодня', callback_data=HistoryOrderDays(days=0))
     keyboard.button(text='3 дня', callback_data=HistoryOrderDays(days=3))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
