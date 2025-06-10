@@ -106,7 +106,9 @@ class Order(BaseModel):
     sum_rub: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в рублях')
     sum_try: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в турецкких лирах')
     sum_kzt: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в тенге')
+    sum_eur: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в евро')
     tax_sum_usd: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в долларах c комиссией')
+    tax_sum_eur: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа в евро c комиссией')
     tax_sum_rub: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в рублях c комиссией')
     tax_sum_try: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в турецкких лирах c комиссией')
     tax_sum_kzt: Decimal = Field(default=0, decimal_places=0, title='Сумма заказа в тенге c комиссией')
@@ -121,6 +123,7 @@ class Order(BaseModel):
             self.sum_rub = Decimal(0)
             self.sum_try = Decimal(0)
             self.sum_kzt = Decimal(0)
+            self.sum_eur = Decimal(0)
 
             if self.rezident == 'Казахстан':
                 for product in self.cart:
@@ -151,9 +154,14 @@ class Order(BaseModel):
                     for product in self.cart:
                         self.sum_rub += (product.price * self.currency.price) * product.quantity
                         self.sum_usd += product.price * product.quantity
+                elif self.currency.name == 'EUR':
+                    for product in self.cart:
+                        self.sum_rub += (product.price * self.currency.price) * product.quantity
+                        self.sum_eur += product.price * product.quantity
 
         if self.tax > 0:
             self.tax_sum_usd = Decimal(round(self.sum_usd * Decimal(self.tax + 1), 2))
+            self.tax_sum_eur = Decimal(round(self.sum_usd * Decimal(self.tax + 1), 2))
             self.tax_sum_rub = Decimal(round(self.sum_rub * Decimal(self.tax + 1), 0))
             self.tax_sum_try = Decimal(round(self.sum_try * Decimal(self.tax + 1), 2))
             self.tax_sum_kzt = Decimal(round(self.sum_kzt * Decimal(self.tax + 1), 0))
@@ -162,6 +170,7 @@ class Order(BaseModel):
         self.sum_rub = Decimal(round(self.sum_rub, 0))
         self.sum_try = Decimal(round(self.sum_try, 2))
         self.sum_kzt = Decimal(round(self.sum_kzt, 0))
+        self.sum_eur = Decimal(round(self.sum_eur, 0))
         return self
 
     async def convert_currency_from_usd_to_kzt(self, currency_name: str = 'KZT'):

@@ -93,6 +93,9 @@ def cart(order: Order) -> str:
             text += text_total_price(order.sum_rub, order.currency.name, order.sum_usd, 'USD')
         elif order.currency.name == 'USD':
             text += text_total_price(order.sum_usd, order.currency.name, order.sum_rub, 'RUB')
+        elif order.currency.name == 'EUR':
+            text += text_total_price(order.sum_eur, order.currency.name, order.sum_rub, 'RUB')
+
     # if order.currency.name == 'KZT':
     #     text += text_total_price(order.sum_kzt, order.currency.name, order.sum_usd, 'USD')
     return text
