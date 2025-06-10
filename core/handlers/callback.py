@@ -194,6 +194,7 @@ async def delete_order(call: CallbackQuery, callback_data: DeleteOrder, log: Bot
 
 async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: BotLogger):
     log.button('Создать заказ')
+    await call.message.edit_text("Загрузка...")
     if not checkRegMessage(call.message):
         await call.message.answer("Нет регистрации")
         return
