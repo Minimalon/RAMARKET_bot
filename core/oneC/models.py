@@ -49,6 +49,7 @@ class UserShop(BaseModel):
             'USD': '$',
             'USDV': '$',
             'EUR': '€',
+            'USDT': '$',
             'TRY': '₺',
             'AED': 'د.إ',
         }

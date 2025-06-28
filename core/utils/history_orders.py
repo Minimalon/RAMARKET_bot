@@ -33,6 +33,7 @@ def data_for_df(documents: list[Documents]) -> Generator[dict, None, None]:
                 'Сумма TRY': doc.sum_try,
                 'Сумма KZT': doc.sum_kzt,
                 'Сумма EUR': doc.sum_eur,
+                'Сумма USDT': doc.sum_usdt,
                 'Валюта': doc.currency,
                 'Цена валюты': doc.currency_price,
                 'Клиент': doc.client_name,
@@ -43,8 +44,8 @@ def data_for_df(documents: list[Documents]) -> Generator[dict, None, None]:
 
 async def correct_df(df: pd.DataFrame) -> pd.DataFrame:
     df['Дата'] = df['Дата'].dt.tz_localize(None)
-    df[['Сумма USD', 'Сумма RUB', 'Сумма TRY', 'Сумма KZT','Сумма EUR', 'Цена', 'Цена валюты']] = df[
-        ['Сумма USD', 'Сумма RUB', 'Сумма TRY', 'Сумма KZT','Сумма EUR', 'Цена', 'Цена валюты']].astype(float)
+    df[['Сумма USD', 'Сумма RUB', 'Сумма TRY', 'Сумма KZT','Сумма EUR','Сумма USDT', 'Цена', 'Цена валюты']] = df[
+        ['Сумма USD', 'Сумма RUB', 'Сумма TRY', 'Сумма KZT','Сумма EUR','Сумма USDT', 'Цена', 'Цена валюты']].astype(float)
     df[['Количество']] = df[['Количество']].astype(int)
     sum_kzt = ((df['Цена'] * df['Количество']) * df['Цена валюты'])
     tax = df['Коммисия'].fillna(0)
