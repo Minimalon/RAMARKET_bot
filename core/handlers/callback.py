@@ -269,12 +269,13 @@ async def withdraw_enter_sum(message: Message, state: FSMContext, log: BotLogger
     await state.set_state(StateWithdraw.show_info)
     await state.update_data(withdraw_sum=withdraw_sum)
     shop = await utils.get_shop_by_id(data['withdraw_shop'])
+    shop_balance = await api.get_balance_shop(shop.id)
     txt = (
         f'Ответственный: {user.name}\n\n'
         f'Магазин: {shop.name}\n'
         f'Валюта: {data["withdraw_currency"]}\n'
         f'Сумма: {withdraw_sum}\n\n'
-        f'Текущий баланс магазина: 123.123 {data["withdraw_currency"]}'
+        f'Текущий баланс магазина: {shop_balance.balance} {shop_balance.currency}\n'
     )
     await message.answer(txt, reply_markup=inline.kb_withdraw())
 
@@ -284,6 +285,7 @@ async def withdraw_confirm(call: CallbackQuery, state: FSMContext, log: BotLogge
     await state.clear()
     user = User.model_validate_json(data['user_info'])
     shop = await utils.get_shop_by_id(data['withdraw_shop'])
+    await api.create_rko(shop.id, data['withdraw_sum'], user.id, data['withdraw_currency'], str(shop.currencyPrice))
     txt = (
         f'Выдача наличных завершена✅\n'
         f'Ответственный: {user.name}\n\n'

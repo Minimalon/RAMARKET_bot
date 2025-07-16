@@ -129,6 +129,12 @@ class BankOrder(BaseModel):
         self.LastName = f_name
         self.MiddleName = patronymic
 
+class ShopBalance(BaseModel):
+    shop_id: str = Field(alias='Магазин')
+    shop_name: str = Field(alias='Наименование')
+    currency: str = Field(alias='Валюта')
+    balance: int = Field(alias='СостояниеРасчетов')
+
 
 if __name__ == '__main__':
     a = json.dumps(json.loads(

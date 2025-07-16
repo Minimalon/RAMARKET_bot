@@ -25,8 +25,7 @@ def getKeyboard_start(language=None):
         keyboard.button(text=_('Заказ'), callback_data='startOrder')
         keyboard.button(text=_('Личный кабинет'), callback_data='profile')
         keyboard.button(text=_('История заказов'), callback_data='historyOrders')
-        if os.name != 'posix':
-            keyboard.button(text=_('Выдача наличных'), callback_data='withdraw_cash')
+        keyboard.button(text=_('Выдача наличных'), callback_data='withdraw_cash')
     keyboard.adjust(2, 1)
     return keyboard.as_markup()
 

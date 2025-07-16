@@ -6,6 +6,7 @@ import aiohttp
 
 import config
 from core.loggers.make_loggers import api_log
+from core.oneC.models import ShopBalance
 
 
 class Api:
@@ -96,8 +97,20 @@ class Api:
         return await self._post(f"{self.adress}/DeleteDoc",
                                 data=json.dumps({"Номер": order_id, "Дата": date}))
 
+    async def get_balance_shop(self, shop_id: str) -> ShopBalance:
+        answer = await self._get(f"{self.adress}/GeDebt",
+                                 data=json.dumps({"Shop": shop_id}))
+        return ShopBalance.model_validate_json(json.dumps(answer[0]))
+
+    async def create_rko(self,Shop: str, Amount: str, User: str, Currency: str, KursPrice: str) -> dict:
+        return await self._post(f"{self.adress}/CreateRKO",
+                                data=json.dumps({"Shop": Shop, "Amount": Amount, "User": User, "Currency": Currency, "KursPrice": KursPrice}))
+
+
+async def test():
+    api = Api()
+    print(await api.get_balance_shop('5502644'))
+
 
 if __name__ == '__main__':
-    for range in range(100):
-        asyncio.run(Api().get_groups())
-        asyncio.sleep(0.1)
+    asyncio.run(test())
