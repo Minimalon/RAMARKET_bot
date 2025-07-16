@@ -269,7 +269,12 @@ async def withdraw_enter_sum(message: Message, state: FSMContext, log: BotLogger
     await state.set_state(StateWithdraw.show_info)
     await state.update_data(withdraw_sum=withdraw_sum)
     shop = await utils.get_shop_by_id(data['withdraw_shop'])
-    shop_balance = await api.get_balance_shop(shop.id)
+    try:
+        shop_balance = await api.get_balance_shop(shop.id)
+    except IndexError:
+        log.error('Нужно сперва создать остаток магазина')
+        await message.answer('Нужно сперва создать остаток магазина')
+        return
     txt = (
         f'Ответственный: {user.name}\n\n'
         f'Магазин: {shop.name}\n'
