@@ -1,4 +1,3 @@
-import enum
 import json
 from decimal import Decimal
 
@@ -63,9 +62,13 @@ class User(BaseModel):
     id: str
     name: str = Field(alias='Наименование')
     admin: bool = Field(alias='Администратор')
+    pravoRKO: bool = Field(alias='ПравоРКО')
     shops: list[UserShop] = Field(alias='Магазины')
 
-    @field_validator('admin', mode='before')
+    @field_validator(
+        'admin',
+        'pravoRKO',
+        mode='before')
     def check_admin(cls, v: str):
         if v == 'Да':
             return True
@@ -128,6 +131,7 @@ class BankOrder(BaseModel):
         self.FirstName = s_name
         self.LastName = f_name
         self.MiddleName = patronymic
+
 
 class ShopBalance(BaseModel):
     shop_id: str = Field(alias='Магазин')

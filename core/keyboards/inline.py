@@ -14,18 +14,20 @@ from core.utils.callbackdata import *
 oneC = Api()
 
 
-def getKeyboard_start(language=None):
+def getKeyboard_start(language=None, pravoRKO: bool = False):
     keyboard = InlineKeyboardBuilder()
     if language:
         keyboard.button(text=_('Заказ', locale=language), callback_data='startOrder')
         keyboard.button(text=_('Личный кабинет', locale=language), callback_data='profile')
         keyboard.button(text=_('История заказов', locale=language), callback_data='historyOrders')
-        keyboard.button(text=_('Выдача наличных', locale=language), callback_data='withdraw_cash')
+        if pravoRKO:
+            keyboard.button(text=_('Выдача наличных', locale=language), callback_data='withdraw_cash')
     else:
         keyboard.button(text=_('Заказ'), callback_data='startOrder')
         keyboard.button(text=_('Личный кабинет'), callback_data='profile')
         keyboard.button(text=_('История заказов'), callback_data='historyOrders')
-        keyboard.button(text=_('Выдача наличных'), callback_data='withdraw_cash')
+        if pravoRKO:
+            keyboard.button(text=_('Выдача наличных'), callback_data='withdraw_cash')
     keyboard.adjust(2, 1)
     return keyboard.as_markup()
 

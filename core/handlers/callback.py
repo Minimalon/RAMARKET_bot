@@ -39,12 +39,13 @@ async def menu(call: CallbackQuery, state: FSMContext):
     await state.clear()
     log.info("Меню")
     client_db = await query_db.get_client_info(chat_id=call.message.chat.id)
+    oneC_user = await utils.get_user_info(phone=client_db.phone_number)
     if not client_db:
         await not_reg(call)
         return
     client_info = await oneC.get_client_info(client_db.phone_number)
     if client_info:
-        await call.message.edit_text("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
+        await call.message.edit_text("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start(pravoRKO=oneC_user.pravoRKO))
     else:
         await not_reg(call)
         return
@@ -55,13 +56,14 @@ async def menu_not_edit_text(call: CallbackQuery, state: FSMContext):
     await state.clear()
     log.info("Меню")
     client_db = await query_db.get_client_info(chat_id=call.message.chat.id)
+    oneC_user = await utils.get_user_info(phone=client_db.phone_number)
     if not client_db:
         await not_reg(call)
         return
     client_info = await oneC.get_client_info(client_db.phone_number)
     if client_info:
 
-        await call.message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
+        await call.message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start(pravoRKO=oneC_user.pravoRKO))
     else:
         await not_reg(call)
         return
@@ -87,9 +89,11 @@ async def change_language(call: CallbackQuery, callback_data: ChangeLanguage):
     language = callback_data.language
     log = logger.bind(name=call.message.chat.first_name, chat_id=call.message.chat.id)
     log.info(f"Изменили язык интерфейса на '{language}'")
+    db_user = await query_db.get_client_info(chat_id=call.message.chat.id)
+    oneC_user = await oneC.get_user_info(db_user.phone_number)
     await update_client_language(str(call.message.chat.id), language)
     await call.message.edit_text("{menu}".format(menu=texts.menu_new_language(language)),
-                                 reply_markup=getKeyboard_start(language))
+                                 reply_markup=getKeyboard_start(language, oneC_user.pravoRKO))
 
 
 async def history_orders(call: CallbackQuery):
@@ -230,7 +234,9 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
         await call.message.edit_text(_("{text}").format(text=text),
                                      reply_markup=getKeyboard_delete_order(r["Nomer"]))
     log.success(f"Заказ под номером '{r['Nomer']}' успешно создан")
-    await call.message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start())
+    db_user = await query_db.get_client_info(chat_id=call.message.chat.id)
+    oneC_user = await utils.get_user_info(phone=db_user.phone_number)
+    await call.message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start(pravoRKO=oneC_user.pravoRKO))
     await state.clear()
 
 async def start_withdraw(call: CallbackQuery, state: FSMContext, log: BotLogger):
