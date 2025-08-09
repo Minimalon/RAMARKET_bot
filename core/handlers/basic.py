@@ -39,9 +39,9 @@ async def check_registration(message: Message, state: FSMContext):
     log = logger.bind(name=message.chat.first_name, chat_id=message.chat.id)
     log.info("/start")
     client_info = await query_db.get_client_info(chat_id=message.chat.id)
-    oneC_user = await utils.get_user_info(phone=client_info.phone_number)
     await state.clear()
     if client_info:
+        oneC_user = await utils.get_user_info(phone=client_info.phone_number)
         await message.answer("{menu}".format(menu=texts.menu), reply_markup=getKeyboard_start(pravoRKO=oneC_user.pravoRKO))
     else:
         log.error("Нету в базе 1С")
