@@ -31,8 +31,8 @@ from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
 async def start():
     await create_loggers()
     bot = Bot(token=config.token, parse_mode='HTML')
-    if not config.develope_mode:
-        await bot.send_message(5263751490, 'Я Запустился!')
+    # if not config.develope_mode:
+    #     await bot.send_message(5263751490, 'Я Запустился!')
     await get_commands(bot)
     await init_models()
 
@@ -138,8 +138,8 @@ async def start():
     except Exception as e:
         logger.exception(e)
     finally:
-        if not config.develope_mode:
-            await bot.send_message(5263751490, 'Я Остановился!!!!')
+        # if not config.develope_mode:
+        #     await bot.send_message(5263751490, 'Я Остановился!!!!')
         await bot.session.close()
 
 
