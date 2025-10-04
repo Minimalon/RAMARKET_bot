@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker, joinedload
 from core.database.model import *
 from core.models_pydantic.order import Order, Product
 from core.oneC.api import Api
+from core.oneC.models import ShopBalance
 
 engine = create_async_engine(
     f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
@@ -395,27 +396,9 @@ async def get_documents_by_shops(shops: list[str], start_date: str = None, end_d
         result = await session.execute(query)
         return result.scalars().unique().all()
 
-async def kosyc_klyiner(message: Message):
-    """Пересоздовали заказы, потому что в 1С не передовалась валюта заказа"""
-
-    # with open(os.path.join(config.dir_path, 'core', 'database', 'orders.json'), 'w', encoding="utf8") as orders:
-    #     orders.write(json.dumps(json_orders, ensure_ascii=False, indent=4) + '\n')
-
-# if __name__ == '__main__':
-#     orders = asyncio.run(get_order_by_currence_name_and_year('RUB', 2022))
-#     for o in orders:
-#         json_orders = {
-#             "TypeR": "Doc",
-#             "Data": o.date.strftime('%d.%m.%Y %H:%M:%S'),
-#             "Order_id": o.order_id,
-#             "Sklad": o.shop_id,
-#             "KursPrice": o.currencyPrice,
-#             "Valuta": o.currency,
-#             "SO": o.paymentGateway,
-#             "Sotr": o.agent_id,
-#             "Klient": o.client_name,
-#             "Telefon": o.client_phone,
-#             "Email": o.client_mail,
-#             "Itemc": [{"Tov": _.product_id, "Kol": _.quantity, "Cost": _.price, 'Sum': str(Decimal(_.price) * Decimal(_.quantity))} for _ in orders if _.order_id == o.order_id]
-#         }
-#         print(json_orders)
+async def add_shops_history(shops_balance: list[ShopBalance]) -> None:
+    async with async_session() as session:
+        for shop in shops_balance:
+            shop_balance = ShopsHistoryBalance(**shop.dict())
+            session.add(shop_balance)
+        await session.commit()

@@ -71,6 +71,14 @@ class DocumentItems(Base):
 
     document = relationship("Documents", back_populates="items", uselist=False, foreign_keys=[document_id])
 
+class ShopsHistoryBalance(Base):
+    __tablename__ = 'shopsHistoryBalance'
+    id = Column(BigInteger, nullable=False, primary_key=True)
+    date = Column(DateTime(timezone=True), server_default=func.now())
+    shop_id = Column(String(50))
+    shop_name = Column(String(50))
+    currency = Column(String(10))
+    balance = Column(Numeric(20, 4))
 
 class HistoryOrders(Base):
     __tablename__ = 'historyOrders'

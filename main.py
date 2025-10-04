@@ -11,6 +11,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pydantic import ValidationError
 
 import config
+from core.cron.balance_shops_history import balance_shops_history
 from core.cron.google_stats import update_google_sheets
 from core.filters.iscontact import IsTrueContact
 from core.handlers import contact
@@ -43,6 +44,7 @@ async def start():
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
     # scheduler.add_job(update_google_sheets, trigger='interval', hours=3, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
     scheduler.add_job(update_google_sheets, trigger='interval', minutes=5, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
+    scheduler.add_job(balance_shops_history, trigger='cron', hour=0, minute=1)
     scheduler.start()
 
     # Errors handlers

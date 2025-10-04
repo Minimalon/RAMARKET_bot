@@ -106,10 +106,14 @@ class Api:
         return await self._post(f"{self.adress}/CreateRKO",
                                 data=json.dumps({"Shop": Shop, "Amount": Amount, "User": User, "Currency": Currency, "KursPrice": KursPrice}))
 
+    async def get_balance_shops(self) -> list[ShopBalance]:
+        answer = await self._get(f"{self.adress}/GeDebtAll")
+        return [ShopBalance.model_validate_json(json.dumps(item)) for item in answer]
+
+oneC_api = Api()
 
 async def test():
-    api = Api()
-    print(await api.get_balance_shop('5502644'))
+    print(await oneC_api.get_balance_shops())
 
 
 if __name__ == '__main__':

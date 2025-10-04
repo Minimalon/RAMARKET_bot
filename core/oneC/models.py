@@ -137,7 +137,7 @@ class ShopBalance(BaseModel):
     shop_id: str = Field(alias='Магазин')
     shop_name: str = Field(alias='Наименование')
     currency: str = Field(alias='Валюта')
-    balance: int = Field(alias='СостояниеРасчетов')
+    balance: float = Field(alias='СостояниеРасчетов')
 
 
 if __name__ == '__main__':
