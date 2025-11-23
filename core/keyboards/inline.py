@@ -22,12 +22,14 @@ def getKeyboard_start(language=None, pravoRKO: bool = False):
         keyboard.button(text=_('История заказов', locale=language), callback_data='historyOrders')
         if pravoRKO:
             keyboard.button(text=_('Выдача наличных', locale=language), callback_data='withdraw_cash')
+        keyboard.button(text=_('Быстрая продажа', locale=language), callback_data='fastOrder')
     else:
         keyboard.button(text=_('Заказ'), callback_data='startOrder')
         keyboard.button(text=_('Личный кабинет'), callback_data='profile')
         keyboard.button(text=_('История заказов'), callback_data='historyOrders')
         if pravoRKO:
             keyboard.button(text=_('Выдача наличных'), callback_data='withdraw_cash')
+        keyboard.button(text=_('Быстрая продажа'), callback_data='fastOrder')
     keyboard.adjust(2, 1)
     return keyboard.as_markup()
 
@@ -73,6 +75,7 @@ async def getKeyboard_selectCurrency(order: Order):
     keyboard.button(text='USDT', callback_data=Currency(name='USDT'))
     keyboard.adjust(1, repeat=True)
     return keyboard.as_markup()
+
 
 
 def getKeyboard_selectShop(shops: list[UserShop]):

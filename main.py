@@ -18,14 +18,14 @@ from core.handlers import contact
 from core.handlers import errors_handlers
 from core.handlers.basic import get_start, check_registration
 from core.handlers.callback import *
-from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop
+from core.handlers.states import enterArticle, CurrencyValue, createOrder, choiseShop, fastOrder
 from core.loggers.make_loggers import create_loggers
 from core.middlewares.checkReg_ware import CheckRegistrationMessageMiddleware, CheckRegistrationCallbackMiddleware
 from core.middlewares.language_middleware import ACLMiddleware
 from core.middlewares.logger_ware import CallBackMiddleware, MessageMiddleware
 from core.utils.callbackdata import *
 from core.utils.commands import get_commands
-from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle
+from core.utils.states import StateCreateOrder, StateCurrency, StateEnterArticle, FastOrderState
 
 
 @logger.catch()
@@ -93,6 +93,13 @@ async def start():
     dp.message.register(withdraw_enter_sum, StateWithdraw.enter_sum)
     dp.callback_query.register(withdraw_confirm, F.data == 'confirm_withdraw', StateWithdraw.show_info)
 
+    # Быстрая продажа
+    dp.callback_query.register(fastOrder.rezident, F.data == 'fastOrder')
+    dp.callback_query.register(fastOrder.check_shops, FastOrderState.rezident, CountryRezident.filter())
+    dp.callback_query.register(fastOrder.choise_currency, FastOrderState.shop, Shop.filter())
+    dp.callback_query.register(fastOrder.choise_currency_price, FastOrderState.currency, Currency.filter())
+    dp.message.register(fastOrder.create_order, FastOrderState.sum)
+
     # Создание заказа
     dp.callback_query.register(choiseShop.check_shops, CountryRezident.filter())
     dp.callback_query.register(choiseShop.choise_currency, Shop.filter())
@@ -131,6 +138,7 @@ async def start():
     # STATES ARTICLE
     dp.message.register(enterArticle.check_article, StateEnterArticle.GET_ARTICLE)
     dp.message.register(get_start, StateEnterArticle.ERROR)
+
 
 
     try:

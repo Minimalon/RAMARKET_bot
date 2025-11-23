@@ -23,3 +23,9 @@ class StateWithdraw(StatesGroup):
     select_currency = State()
     show_info = State()
     enter_sum = State()
+
+class FastOrderState(StatesGroup):
+    rezident = State()
+    shop = State()
+    currency = State()
+    sum = State()

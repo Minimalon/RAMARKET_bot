@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker, joinedload
 
 from core.database.model import *
-from core.models_pydantic.order import Order, Product
+from core.models_pydantic.order import Order, Product, FastOrderModel
 from core.oneC.api import Api
 from core.oneC.models import ShopBalance
 
@@ -401,4 +401,20 @@ async def add_shops_history(shops_balance: list[ShopBalance]) -> None:
         for shop in shops_balance:
             shop_balance = ShopsHistoryBalance(**shop.dict())
             session.add(shop_balance)
+        await session.commit()
+
+async def create_fast_order(fast_order: FastOrderModel) -> None:
+    async with async_session() as session:
+        fast_order_db = FastOrder(
+            chat_id=str(fast_order.tg_user.chat_id),
+            rezident=fast_order.rezident,
+            agent_id=fast_order.user.id,
+            agent_name=fast_order.user.name,
+            shop_id=fast_order.shop.id,
+            shop_name=fast_order.shop.name,
+            currency=fast_order.currency.name,
+            currency_price=Decimal(fast_order.currency.price),
+            sum=fast_order.sum
+        )
+        session.add(fast_order_db)
         await session.commit()

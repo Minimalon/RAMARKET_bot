@@ -218,6 +218,21 @@ class Order(BaseModel):
         }
         return order
 
+class FastOrderModel(BaseModel):
+    user: User
+    tg_user: TelegramUser
+    rezident: str = Field(title="None")
+    shop: UserShop | None = Field(default=None)
+    currency: CurrencyOrder | None = Field(default=None)
+    sum: Decimal = Field(default=0, decimal_places=2, title='Сумма заказа')
+
+    def create_order_text(self) -> str:
+        return (
+            f'Быстрая продажа создана ✅\n\n'
+            f'Магазин: {self.shop.name}\n'
+            f'Валюта: {self.currency.name}\n'
+            f'Сумма: {self.sum}\n'
+        )
 
 if __name__ == '__main__':
     a = Decimal(1.123)

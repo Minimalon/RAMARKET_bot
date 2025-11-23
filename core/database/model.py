@@ -129,6 +129,22 @@ class Clients(Base):
     admin = Column(Boolean, default=False)
     language = Column(String(3), default='ru')
 
+class FastOrder(Base):
+    __tablename__ = 'fastOrder'
+    id = Column(BigInteger, nullable=False, primary_key=True)
+    date = Column(DateTime(timezone=True), server_default=func.now())
+    chat_id = Column(String(50))
+    rezident = Column(String(50))
+    agent_id = Column(String(50))
+    agent_name = Column(String(250))
+    shop_id = Column(String(50))
+    shop_name = Column(String(250))
+    currency = Column(String(10))
+    currency_price = Column(Numeric(10, 4))
+    sum = Column(Numeric(10, 2))
+
+
+
 
 async def init_models():
     async with engine.begin() as conn:
