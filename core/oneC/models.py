@@ -23,6 +23,7 @@ class Shop(BaseModel):
     country_code: str = Field(alias='КодСтраны')
     dogovor: str = Field(alias='Договор')
     dogovorID: str = Field(alias='ДоговорID')
+    RefQR: str = ''
 
 
 class UserShop(BaseModel):
@@ -40,6 +41,7 @@ class UserShop(BaseModel):
     city_code: str = Field(alias='КодГород')
     country: str = Field(alias='Страна')
     country_code: str = Field(alias='КодСтраны')
+    RefQR: str = ''
 
     @model_validator(mode='after')
     def get_currencySymbol(self):

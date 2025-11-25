@@ -1,5 +1,5 @@
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, FSInputFile, BufferedInputFile
 
 from config import _
 from core.database import query_db
@@ -14,6 +14,7 @@ from core.oneC.utils import get_shop_by_id
 from core.utils import texts
 from core.utils.callbackdata import Shop, Currency, CountryRezident
 from core.utils.currencyes_cb import get_price_valute_by_one
+from core.utils.qr import generateQR, IOgenerateQR_bytes
 from core.utils.states import FastOrderState
 
 async def rezident(call: CallbackQuery, state: FSMContext, log: BotLogger):
@@ -62,6 +63,9 @@ async def check_shops(call: CallbackQuery, state: FSMContext, log: BotLogger, ca
 async def choise_currency(call: CallbackQuery, callback_data: Shop, state: FSMContext, log: BotLogger):
     shop = await get_shop_by_id(callback_data.id)
     log.info(f'Выбран магазин "{shop.name}"')
+    if not shop.RefQR:
+        await call.message.edit_text(texts.error_head + "За магазином не закреплён QR")
+        return
     if shop.currency == "TRY":
         shop.currencyPrice = round(shop.currencyPrice / 10, 4)
     data = await state.get_data()
@@ -98,8 +102,10 @@ async def create_order(message: Message, state: FSMContext, log: BotLogger):
         return
     data = await state.get_data()
     order = FastOrderModel.model_validate_json(data['FastOrder'])
+    log.debug(order.model_dump_json())
     order.sum = float(sum_order)
     await create_fast_order(order)
-    await message.answer(order.create_order_text())
+    qr_image_bytes = await IOgenerateQR_bytes(order.shop.RefQR)
+    await message.bot.send_photo(message.chat.id, photo=BufferedInputFile(qr_image_bytes, filename=f"qr_{order.shop.id}.png"), caption=order.create_order_text())
     log.success('Быстрая продажа созданна')
     await state.clear()
