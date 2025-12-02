@@ -213,6 +213,7 @@ def kb_taxes():
     keyboard.button(text='8 %', callback_data=Taxes(tax=0.08))
     keyboard.button(text='10 %', callback_data=Taxes(tax=0.10))
     keyboard.button(text='15 %', callback_data=Taxes(tax=0.15))
+    keyboard.button(text='16 %', callback_data=Taxes(tax=0.15))
     keyboard.button(text='17 %', callback_data=Taxes(tax=0.17))
     keyboard.button(text='18 %', callback_data=Taxes(tax=0.18))
     keyboard.button(text='20 %', callback_data=Taxes(tax=0.20))
