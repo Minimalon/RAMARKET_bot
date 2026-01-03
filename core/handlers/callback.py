@@ -180,8 +180,7 @@ async def delete_order(call: CallbackQuery, callback_data: DeleteOrder, log: Bot
     date_order = datetime.strptime(callback_data.date, '%Y%m%d%H%M')
     if not config.develope_mode:
         await oneC.delete_order(callback_data.order_id, date_order.strftime('%d.%m.%Y %H:%M:%S'))
-    await query_db.prepare_delete_history_order(callback_data.order_id, date_order)
-    await query_db.delete_document(callback_data.order_id, date_order)
+    await query_db.delete_document(callback_data.document_id)
     await call.message.bot.send_message(
         chat_id=call.message.chat.id,
         text=f'<b><u>Заказ удалён❌</u></b>\n<b>Номер заказа</b>: <code>{callback_data.order_id}</code>')
@@ -214,7 +213,7 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
     log.debug(order.model_dump_json())
     for product in order.cart:
         await query_db.create_historyOrders(order_id=order.order_id, order=order, product=product)
-    await query_db.create_document(order=order)
+    document = await query_db.create_document(order=order)
 
     text = await texts.qr(r['Nomer'], order)
 
@@ -225,14 +224,14 @@ async def create_order(call: CallbackQuery, bot: Bot, state: FSMContext, log: Bo
         textQR = bankOrder.create_order()
         qr_path = await generateQR(textQR, order.payment.type, r['Nomer'])
         await bot.send_photo(call.message.chat.id, FSInputFile(qr_path), caption=text,
-                             reply_markup=getKeyboard_delete_order(r["Nomer"]))
+                             reply_markup=getKeyboard_delete_order(document, r['Nomer']))
     elif r.get('Ref') is not None:
         qr_path = await generateQR(r['Ref'], order.payment.type, r['Nomer'])
         await bot.send_photo(call.message.chat.id, FSInputFile(qr_path), caption=text,
-                             reply_markup=getKeyboard_delete_order(r["Nomer"]))
+                             reply_markup=getKeyboard_delete_order(document, r['Nomer']))
     else:
         await call.message.edit_text(_("{text}").format(text=text),
-                                     reply_markup=getKeyboard_delete_order(r["Nomer"]))
+                                     reply_markup=getKeyboard_delete_order(document, r['Nomer']))
     log.success(f"Заказ под номером '{r['Nomer']}' успешно создан")
     db_user = await query_db.get_client_info(chat_id=call.message.chat.id)
     oneC_user = await utils.get_user_info(phone=db_user.phone_number)

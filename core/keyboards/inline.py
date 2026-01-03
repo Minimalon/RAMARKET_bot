@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import config
 from config import _
+from core.database.model import Documents
 from core.models_pydantic.order import ProductGroup, Order
 from core.oneC import utils
 from core.oneC.api import Api
@@ -232,10 +233,10 @@ def getKeyboard_createOrder():
     return keyboard.as_markup()
 
 
-def getKeyboard_delete_order(order_id):
+def getKeyboard_delete_order(document: Documents, order_id: str):
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text=_("Удалить заказ"),
-                    callback_data=DeleteOrder(order_id=order_id, date=datetime.now().strftime('%Y%m%d%H%M')))
+                    callback_data=DeleteOrder(order_id=order_id, document_id=document.id, date=datetime.now().strftime('%Y%m%d%H%M')))
     keyboard.adjust(1)
     return keyboard.as_markup()
 

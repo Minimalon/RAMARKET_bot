@@ -39,6 +39,7 @@ class ChangeLanguage(CallbackData, prefix='select_language'):
 
 
 class DeleteOrder(CallbackData, prefix='del_ord'):
+    document_id: int
     order_id: str
     date: str
 
