@@ -419,25 +419,3 @@ async def create_fast_order(fast_order: FastOrderModel) -> None:
         )
         session.add(fast_order_db)
         await session.commit()
-async def delete_document_tmp(order_id: str) -> None:
-    async with async_session() as session:
-        await session.execute(
-            update(Documents).
-            where(
-                (Documents.order_id == order_id) &
-                (extract('year', Documents.date) == 2025)
-            ).
-            values(
-                status=OrderStatus.delete,
-            ))
-        await session.commit()
-
-async def process_orders():
-    with open(config.dir_path + '\\delete.txt', 'r', encoding='utf-8') as f:
-        for line in f.readlines():
-            line = line.strip()  # Убираем символы переноса строки
-            await delete_document_tmp(line)
-            print(line)
-
-if __name__ == '__main__':
-    asyncio.run(process_orders())
