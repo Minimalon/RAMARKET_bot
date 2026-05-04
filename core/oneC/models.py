@@ -45,6 +45,8 @@ class UserShop(BaseModel):
 
     @model_validator(mode='after')
     def get_currencySymbol(self):
+        if not self.currency:
+            raise ValueError(f"Ошибка в 1С. Не указана валюта магазина '{self.name}'")
         currency_symbols = {
             'RUB': '₽',
             'USD': '$',
