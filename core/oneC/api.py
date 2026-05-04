@@ -32,6 +32,11 @@ class Api:
                 else:
                     log.error(f"GET {url} Status={response.status}")
                     log.error(text)
+                    text = (
+                        f"Ошибка на стороне 1С:\n"
+                        f"Метод: GET {url.split('/')[-1]}\n"
+                        f" {text}"
+                    )
                     raise ValueError(text)
                 return json.loads(text)
 
@@ -54,7 +59,12 @@ class Api:
                 else:
                     log.error(f"POST {url} Status={response.status}")
                     log.error(text)
-                    raise ValueError(text)
+                    text = (
+                        f"Ошибка на стороне 1С:\n"
+                        f"Метод: POST {url.split('/')[-1]}\n"
+                        f" {text}"
+                    )
+                    raise ValueError(text)  # raise ValueError("text)
                 return text
 
     async def get_payment_gateways(self):
@@ -65,6 +75,9 @@ class Api:
 
     async def get_client_info(self, phone) -> dict:
         return await self._get(f"{self.adress}/GetUP", phone)
+
+    async def get_all_client(self) -> dict:
+        return await self._get(f"{self.adress}/GetUPAll")
 
     async def get_tovar_by_groupID(self, groupID):
         return await self._get(f"{self.adress}/GetTovarByGroup/{groupID}")
