@@ -41,6 +41,8 @@ class UserShop(BaseModel):
     city_code: str = Field(alias='КодГород')
     country: str = Field(alias='Страна')
     country_code: str = Field(alias='КодСтраны')
+    rodytelShop: str = Field(alias='РодительяМагазина')
+    idrodytelShop: str = Field(alias='КодРодителяМагазина')
     RefQR: str = ''
 
     @model_validator(mode='after')
