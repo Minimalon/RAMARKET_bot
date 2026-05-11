@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker, joinedload
 from core.database.model import *
 from core.models_pydantic.order import Order, Product, FastOrderModel
 from core.oneC.api import Api
-from core.oneC.models import ShopBalance
+from core.oneC.models import ShopBalance, RodytelBalance
 
 engine = create_async_engine(
     f"postgresql+asyncpg://{config.db_user}:{config.db_password}@{config.ip}:{config.port}/{config.database}")
@@ -404,12 +404,13 @@ async def add_shops_history(shops_balance: list[ShopBalance]) -> None:
             session.add(shop_balance)
         await session.commit()
 
-async def add_rodytel_history(rodytel_balances: list[ShopBalance]) -> None:
+async def add_rodytel_history(rodytel_balances: list[RodytelBalance]) -> None:
     async with async_session() as session:
         for rodytel in rodytel_balances:
-            rodytel_balance = ShopsHistoryBalance(**rodytel.dict())
+            rodytel_balance = RodytelHistoryBalance(**rodytel.dict())
             session.add(rodytel_balance)
         await session.commit()
+
 
 async def create_fast_order(fast_order: FastOrderModel) -> None:
     async with async_session() as session:

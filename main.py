@@ -11,6 +11,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pydantic import ValidationError
 
 import config
+from core.cron.balance_rodytel import balance_rodytel_history
 from core.cron.balance_shops_history import balance_shops_history
 from core.cron.google_stats import update_google_sheets
 from core.filters.iscontact import IsTrueContact

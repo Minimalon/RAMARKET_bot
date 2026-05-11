@@ -6,7 +6,7 @@ import aiohttp
 
 import config
 from core.loggers.make_loggers import api_log
-from core.oneC.models import ShopBalance
+from core.oneC.models import ShopBalance, RodytelBalance
 
 
 class Api:
@@ -125,7 +125,7 @@ class Api:
 
     async def get_balance_rodytels(self) -> list[RodytelBalance]:
         answer = await self._get(f"{self.adress}/GeDebtPAll")
-        return [ShopBaRodytelBalancelance.model_validate_json(json.dumps(item)) for item in answer]
+        return [RodytelBalance.model_validate_json(json.dumps(item)) for item in answer]
 
 oneC_api = Api()
 
