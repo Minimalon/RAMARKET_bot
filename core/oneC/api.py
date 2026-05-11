@@ -123,6 +123,10 @@ class Api:
         answer = await self._get(f"{self.adress}/GeDebtAll")
         return [ShopBalance.model_validate_json(json.dumps(item)) for item in answer]
 
+    async def get_balance_rodytels(self) -> list[RodytelBalance]:
+        answer = await self._get(f"{self.adress}/GeDebtPAll")
+        return [ShopBaRodytelBalancelance.model_validate_json(json.dumps(item)) for item in answer]
+
 oneC_api = Api()
 
 async def test():

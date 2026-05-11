@@ -80,6 +80,15 @@ class ShopsHistoryBalance(Base):
     currency = Column(String(10))
     balance = Column(Numeric(20, 4))
 
+class RodytelHistoryBalance(Base):
+    __tablename__ = 'rodytelHistoryBalance'
+    id = Column(BigInteger, nullable=False, primary_key=True)
+    date = Column(DateTime(timezone=True), server_default=func.now())
+    shop_id = Column(String(50))
+    shop_name = Column(String(50))
+    currency = Column(String(10))
+    balance = Column(Numeric(20, 4))
+
 class HistoryOrders(Base):
     __tablename__ = 'historyOrders'
     id = Column(BigInteger, nullable=False, primary_key=True)

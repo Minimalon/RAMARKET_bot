@@ -404,6 +404,13 @@ async def add_shops_history(shops_balance: list[ShopBalance]) -> None:
             session.add(shop_balance)
         await session.commit()
 
+async def add_rodytel_history(rodytel_balances: list[ShopBalance]) -> None:
+    async with async_session() as session:
+        for rodytel in rodytel_balances:
+            rodytel_balance = ShopsHistoryBalance(**rodytel.dict())
+            session.add(rodytel_balance)
+        await session.commit()
+
 async def create_fast_order(fast_order: FastOrderModel) -> None:
     async with async_session() as session:
         fast_order_db = FastOrder(

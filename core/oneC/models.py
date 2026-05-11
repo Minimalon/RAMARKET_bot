@@ -146,6 +146,12 @@ class ShopBalance(BaseModel):
     balance: float = Field(alias='СостояниеРасчетов')
 
 
+class RodytelBalance(BaseModel):
+    shop_id: str = Field(alias='Магазин')
+    shop_name: str = Field(alias='Наименование')
+    currency: str = Field(alias='Валюта')
+    balance: float = Field(alias='СостояниеРасчетов')
+
 if __name__ == '__main__':
     a = json.dumps(json.loads(
         r"""{"ORG": "Общество с ограниченной ответственностью \"РА ФИНАНС\"",

@@ -45,6 +45,7 @@ async def start():
     # scheduler.add_job(update_google_sheets, trigger='interval', hours=3, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
     scheduler.add_job(update_google_sheets, trigger='interval', minutes=5, kwargs={'path': os.path.join(config.dir_path, 'core', 'cron', 'pythonapp.json')})
     scheduler.add_job(balance_shops_history, trigger='cron', hour=0, minute=1)
+    scheduler.add_job(balance_rodytel_history, trigger='cron', hour=0, minute=1)
     scheduler.start()
 
     # Errors handlers
